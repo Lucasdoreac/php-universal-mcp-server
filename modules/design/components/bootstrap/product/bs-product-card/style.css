@@ -1,0 +1,99 @@
+/* Bootstrap Product Card Styles */
+
+/* Container */
+.product-card {
+  transition: all 0.3s ease;
+  border: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color, rgba(0,0,0,.125));
+}
+
+.product-card:hover {
+  border-color: var(--bs-primary, #0d6efd);
+  box-shadow: 0 5px 15px rgba(0,0,0,.1);
+}
+
+/* Image */
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+  padding-top: 100%; /* 1:1 Aspect Ratio */
+  background-color: #f8f9fa;
+}
+
+.product-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Badges */
+.product-badge {
+  top: 10px;
+  z-index: 2;
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+}
+
+.discount-badge {
+  left: 10px;
+}
+
+.new-badge {
+  right: 10px;
+}
+
+.featured-badge {
+  left: 10px;
+  top: 40px;
+}
+
+/* Quick actions */
+.product-actions {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.product-card:hover .product-actions {
+  opacity: 1;
+}
+
+/* Hover effects */
+.product-title a {
+  color: var(--bs-card-title-color, inherit);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.product-title a:hover {
+  color: var(--bs-primary, #0d6efd);
+}
+
+/* Rating stars */
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Price */
+.current-price {
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+  .product-actions {
+    opacity: 1; /* Always visible on mobile */
+  }
+}

@@ -1,0 +1,156 @@
+<!-- Bootstrap Modal Component -->
+<div class="modal fade {{options.customClasses.container}}" 
+     id="{{#if options.id}}{{options.id}}{{else}}bs-modal-{{random 1000}}{{/if}}" 
+     tabindex="-1" 
+     aria-labelledby="{{#if options.id}}{{options.id}}-label{{else}}bs-modal-{{random 1000}}-label{{/if}}" 
+     aria-hidden="true"
+     {{#if options.staticBackdrop}}data-bs-backdrop="static" data-bs-keyboard="false"{{else}}data-bs-backdrop="true"{{/if}}
+     {{#if options.fullscreen}}data-bs-fullscreen="md-down"{{/if}}
+     {{#if options.scrollable}}data-bs-scroll="true"{{/if}}>
+  <div class="modal-dialog modal-{{options.size}} {{#if options.centered}}modal-dialog-centered{{/if}} {{#if options.scrollable}}modal-dialog-scrollable{{/if}}">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header {{options.customClasses.header}}" 
+           style="{{#if options.headerStyle.bgColor}}background-color: {{options.headerStyle.bgColor}};{{/if}}
+                  {{#if options.headerStyle.textColor}}color: {{options.headerStyle.textColor}};{{/if}}
+                  {{#if options.headerStyle.borderColor}}border-color: {{options.headerStyle.borderColor}};{{/if}}">
+        <h5 class="modal-title" id="{{#if options.id}}{{options.id}}-label{{else}}bs-modal-{{random 1000}}-label{{/if}}">
+          {{options.title}}
+        </h5>
+        {{#if options.showClose}}
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        {{/if}}
+      </div>
+      
+      <!-- Body -->
+      <div class="modal-body {{options.customClasses.body}}">
+        {{#if content}}
+          {{{content}}}
+        {{else}}
+          <p>Conteúdo do modal. Substitua este texto pelo seu conteúdo personalizado.</p>
+        {{/if}}
+      </div>
+      
+      <!-- Footer -->
+      <div class="modal-footer {{options.customClasses.footer}}"
+           style="{{#if options.footerStyle.bgColor}}background-color: {{options.footerStyle.bgColor}};{{/if}}
+                  {{#if options.footerStyle.textColor}}color: {{options.footerStyle.textColor}};{{/if}}
+                  {{#if options.footerStyle.borderColor}}border-color: {{options.footerStyle.borderColor}};{{/if}}">
+        {{#each options.buttons}}
+          <button type="button" 
+                 class="btn btn-{{this.type}} {{this.customClass}}" 
+                 {{#if this.id}}id="{{this.id}}"{{/if}}
+                 {{#if this.dismiss}}data-bs-dismiss="modal"{{/if}}
+                 onclick="handleModalButtonClick('{{#if this.id}}{{this.id}}{{else}}button-{{@index}}{{/if}}', '{{../options.id}}')">
+            {{this.text}}
+          </button>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Inicialização do modal com animação personalizada
+  document.addEventListener('DOMContentLoaded', function() {
+    var modalId = '{{#if options.id}}{{options.id}}{{else}}bs-modal-{{random 1000}}{{/if}}';
+    var modalElement = document.getElementById(modalId);
+    
+    if (modalElement) {
+      modalElement.style.transition = 'all {{options.animationDuration}}ms';
+      var modal = new bootstrap.Modal(modalElement);
+      
+      // Registrar eventos personalizados
+      modalElement.addEventListener('show.bs.modal', function() {
+        const event = new CustomEvent('modal-show', { 
+          detail: { modalId: modalId }
+        });
+        document.dispatchEvent(event);
+      });
+      
+      modalElement.addEventListener('shown.bs.modal', function() {
+        const event = new CustomEvent('modal-shown', { 
+          detail: { modalId: modalId }
+        });
+        document.dispatchEvent(event);
+      });
+      
+      modalElement.addEventListener('hide.bs.modal', function() {
+        const event = new CustomEvent('modal-hide', { 
+          detail: { modalId: modalId }
+        });
+        document.dispatchEvent(event);
+      });
+      
+      modalElement.addEventListener('hidden.bs.modal', function() {
+        const event = new CustomEvent('modal-hidden', { 
+          detail: { modalId: modalId }
+        });
+        document.dispatchEvent(event);
+      });
+    }
+  });
+  
+  // Manipulador de eventos para botões do modal
+  function handleModalButtonClick(buttonId, modalId) {
+    const event = new CustomEvent('modal-button-click', { 
+      detail: {
+        buttonId: buttonId,
+        modalId: modalId
+      }
+    });
+    document.dispatchEvent(event);
+  }
+  
+  // Funções de utilidade para controlar o modal programaticamente
+  window.BSModalHelpers = window.BSModalHelpers || {};
+  window.BSModalHelpers['{{options.id}}'] = {
+    show: function() {
+      var modalElement = document.getElementById('{{options.id}}');
+      if (modalElement) {
+        var modal = bootstrap.Modal.getInstance(modalElement);
+        if (!modal) {
+          modal = new bootstrap.Modal(modalElement);
+        }
+        modal.show();
+      }
+    },
+    hide: function() {
+      var modalElement = document.getElementById('{{options.id}}');
+      if (modalElement) {
+        var modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
+      }
+    },
+    toggle: function() {
+      var modalElement = document.getElementById('{{options.id}}');
+      if (modalElement) {
+        var modal = bootstrap.Modal.getInstance(modalElement);
+        if (!modal) {
+          modal = new bootstrap.Modal(modalElement);
+        }
+        modal.toggle();
+      }
+    },
+    updateContent: function(newContent) {
+      var modalElement = document.getElementById('{{options.id}}');
+      if (modalElement) {
+        var bodyElement = modalElement.querySelector('.modal-body');
+        if (bodyElement) {
+          bodyElement.innerHTML = newContent;
+        }
+      }
+    },
+    updateTitle: function(newTitle) {
+      var modalElement = document.getElementById('{{options.id}}');
+      if (modalElement) {
+        var titleElement = modalElement.querySelector('.modal-title');
+        if (titleElement) {
+          titleElement.innerHTML = newTitle;
+        }
+      }
+    }
+  };
+</script>

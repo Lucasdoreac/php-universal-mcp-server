@@ -1,0 +1,48 @@
+{
+  "id": "modern-header",
+  "name": "Modern Header",
+  "description": "Um cabeçalho moderno e responsivo com busca e menu para dispositivos móveis",
+  "version": "1.0.0",
+  "category": "header",
+  "options": [
+    {
+      "type": "toggle",
+      "id": "enableSearch",
+      "name": "Habilitar Busca",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "isSticky",
+      "name": "Cabeçalho Fixo ao Rolar",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "headerBackground",
+      "name": "Cor de Fundo",
+      "default": "#ffffff",
+      "cssVar": "--header-background"
+    },
+    {
+      "type": "select",
+      "id": "logoAlignment",
+      "name": "Alinhamento do Logo",
+      "default": "left",
+      "options": [
+        { "value": "left", "label": "Esquerda" },
+        { "value": "center", "label": "Centro" }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "headerHeight",
+      "name": "Altura do Cabeçalho",
+      "default": 80,
+      "min": 60,
+      "max": 120,
+      "unit": "px",
+      "cssVar": "--header-height"
+    }
+  ]
+}

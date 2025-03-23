@@ -1,0 +1,37 @@
+<!-- Modern Header Component -->
+<header class="site-header">
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <a href="/">
+          <img src="{{ site.logo }}" alt="{{ site.name }}" onerror="this.src='{{ assets.images.defaultLogo }}'">
+        </a>
+      </div>
+      
+      <nav class="main-nav">
+        <ul>
+          {% for item in navigation.main %}
+          <li><a href="{{ item.url }}" {% if item.isActive %}class="active"{% endif %}>{{ item.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+      
+      <div class="header-actions">
+        <a href="/account/" class="account-link"><i class="icon-user"></i></a>
+        <a href="/cart/" class="cart-link">
+          <i class="icon-cart"></i>
+          <span class="cart-count">{{ cart.count }}</span>
+        </a>
+        <button class="search-toggle"><i class="icon-search"></i></button>
+        <button class="mobile-menu-toggle"><i class="icon-menu"></i></button>
+      </div>
+    </div>
+    
+    <div class="search-container">
+      <form action="/search/" method="get" class="search-form">
+        <input type="text" name="q" placeholder="{{ texts.searchPlaceholder | default: 'O que você está procurando?' }}">
+        <button type="submit"><i class="icon-search"></i></button>
+      </form>
+    </div>
+  </div>
+</header>

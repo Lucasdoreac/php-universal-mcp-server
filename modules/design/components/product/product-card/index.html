@@ -1,0 +1,74 @@
+<!-- Product Card Component -->
+<div class="product-card {% if options.style %}product-card--{{ options.style }}{% endif %}">
+  <div class="product-image">
+    {% if product.discount %}
+    <span class="discount-badge">{{ product.discount }}% OFF</span>
+    {% endif %}
+    
+    {% if product.is_new and options.showNewBadge %}
+    <span class="new-badge">{{ options.newBadgeText | default: 'Novo' }}</span>
+    {% endif %}
+    
+    <a href="{{ product.url }}">
+      <img src="{{ product.images[0] }}" alt="{{ product.name }}">
+    </a>
+    
+    {% if options.showActions %}
+    <div class="product-actions">
+      {% if options.enableQuickView %}
+      <button class="quick-view" data-product-id="{{ product.id }}" title="{{ options.quickViewText | default: 'Visualização Rápida' }}">
+        <i class="icon-eye"></i>
+      </button>
+      {% endif %}
+      
+      <button class="add-to-cart" data-product-id="{{ product.id }}" title="{{ options.addToCartText | default: 'Adicionar ao Carrinho' }}">
+        <i class="icon-cart"></i>
+      </button>
+      
+      {% if options.enableWishlist %}
+      <button class="add-to-wishlist" data-product-id="{{ product.id }}" title="{{ options.wishlistText | default: 'Adicionar à Lista de Desejos' }}">
+        <i class="icon-heart"></i>
+      </button>
+      {% endif %}
+      
+      {% if options.enableCompare %}
+      <button class="add-to-compare" data-product-id="{{ product.id }}" title="{{ options.compareText | default: 'Comparar' }}">
+        <i class="icon-compare"></i>
+      </button>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  
+  <div class="product-info">
+    <h3 class="product-name">
+      <a href="{{ product.url }}">{{ product.name }}</a>
+    </h3>
+    
+    {% if product.rating and options.showRatings %}
+    <div class="product-rating">
+      <div class="stars" style="--rating: {{ product.rating }}"></div>
+      <span class="rating-count">({{ product.reviews_count }})</span>
+    </div>
+    {% endif %}
+    
+    <div class="product-price">
+      {% if product.compare_at_price %}
+      <span class="regular-price">{{ product.compare_at_price | currency }}</span>
+      {% endif %}
+      <span class="current-price">{{ product.price | currency }}</span>
+    </div>
+    
+    {% if options.showDescription and product.short_description %}
+    <div class="product-description">
+      {{ product.short_description | truncate: options.descriptionLength | default: 100 }}
+    </div>
+    {% endif %}
+    
+    {% if options.showAddToCartButton %}
+    <button class="btn btn-primary add-to-cart-btn" data-product-id="{{ product.id }}">
+      {{ options.addToCartText | default: 'Adicionar ao Carrinho' }}
+    </button>
+    {% endif %}
+  </div>
+</div>

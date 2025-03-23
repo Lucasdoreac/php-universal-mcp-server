@@ -1,0 +1,89 @@
+{
+  "id": "product-card",
+  "name": "Cartão de Produto",
+  "description": "Componente para exibição de produtos em listas e grades",
+  "version": "1.0.0",
+  "category": "product",
+  "options": [
+    {
+      "type": "select",
+      "id": "style",
+      "name": "Estilo do Cartão",
+      "default": "default",
+      "options": [
+        { "value": "default", "label": "Padrão" },
+        { "value": "minimal", "label": "Minimalista" },
+        { "value": "bordered", "label": "Borda Destacada" },
+        { "value": "shadow", "label": "Com Sombra" }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "showActions",
+      "name": "Mostrar Botões de Ação",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "enableQuickView",
+      "name": "Habilitar Visualização Rápida",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "enableWishlist",
+      "name": "Habilitar Lista de Desejos",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "enableCompare",
+      "name": "Habilitar Comparação",
+      "default": false
+    },
+    {
+      "type": "toggle",
+      "id": "showRatings",
+      "name": "Mostrar Avaliações",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "showNewBadge",
+      "name": "Mostrar Badge de Novo",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newBadgeText",
+      "name": "Texto do Badge de Novo",
+      "default": "Novo"
+    },
+    {
+      "type": "toggle",
+      "id": "showDescription",
+      "name": "Mostrar Descrição",
+      "default": false
+    },
+    {
+      "type": "number",
+      "id": "descriptionLength",
+      "name": "Tamanho da Descrição",
+      "default": 100,
+      "min": 50,
+      "max": 200
+    },
+    {
+      "type": "toggle",
+      "id": "showAddToCartButton",
+      "name": "Mostrar Botão de Compra",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "addToCartText",
+      "name": "Texto do Botão de Compra",
+      "default": "Adicionar ao Carrinho"
+    }
+  ]
+}

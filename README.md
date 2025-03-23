@@ -1,7 +1,7 @@
 # PHP Universal MCP Server
 
 [![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)](#)
-[![Versão](https://img.shields.io/badge/versão-0.9.6-blue)](#)
+[![Versão](https://img.shields.io/badge/versão-1.5.0-blue)](#)
 [![Licença](https://img.shields.io/badge/licença-MIT-green)](#)
 
 ## Descrição
@@ -12,8 +12,9 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 
 - **Gerenciamento Universal**: Interface unificada para diversas plataformas (Hostinger, WooCommerce, Shopify)
 - **Controle Completo**: Gerencie hospedagem, domínios, design, produtos e pedidos
+- **Visualização Avançada**: Dashboards e interfaces interativas via artifacts do Claude
 - **Templates**: Sistema completo de design com suporte a Bootstrap 5
-- **Analytics**: Dashboard de métricas e relatórios avançados para acompanhamento de desempenho
+- **Analytics**: Relatórios detalhados com visualização gráfica diretamente no Claude
 - **Segurança**: Autenticação robusta e armazenamento seguro de credenciais
 - **Automação**: Simplifique tarefas complexas com comandos simples
 - **Extensibilidade**: Arquitetura modular para fácil adição de novos provedores
@@ -28,7 +29,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 ### Módulos
 
 - **E-commerce Manager**: API unificada para gerenciar produtos, pedidos e clientes
-- **Analytics System**: Sistema completo de relatórios e métricas de desempenho
+- **Analytics System**: Sistema completo de relatórios e métricas com visualização via Claude
 - **Design System**: Motor de templates com suporte ao Bootstrap 5
 - **Hosting Manager**: Gerenciamento de recursos de hospedagem, domínios e SSL
 - **Security Module**: Sistema de autenticação e gestão segura de credenciais
@@ -36,12 +37,12 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 ### Provedores
 
 - **Hostinger**: Gerenciamento completo de hospedagem web e domínios
-- **WooCommerce**: Gerenciamento de lojas WooCommerce (em desenvolvimento)
 - **Shopify**: Gerenciamento completo de lojas Shopify
+- **WooCommerce**: Gerenciamento de lojas WooCommerce (em desenvolvimento)
 
 ### Integrações
 
-- **Claude Desktop**: Interface natural para comandos via chat
+- **Claude Desktop**: Interface natural para comandos via chat com visualizações avançadas
 
 ## Instalação
 
@@ -145,32 +146,33 @@ const dashboard = await analytics.generateDashboard({
 });
 ```
 
-## Sistema de Analytics
+## Sistema de Analytics via Claude Artifacts
 
-O sistema de analytics fornece insights completos sobre o desempenho da sua loja:
+O sistema de analytics fornece visualizações ricas diretamente no Claude Desktop:
 
-- **Dashboard Completo**: Visualização intuitiva de todas as métricas importantes
-- **Relatórios de Vendas**: Análise detalhada de receitas, pedidos e margens
-- **Desempenho de Produtos**: Identificação dos produtos mais vendidos e categoria
-- **Comportamento de Clientes**: Segmentação de clientes e padrões de compra
-- **Gestão de Estoque**: Alertas de estoque baixo e análise de valor de inventário
+- **Dashboards Interativos**: Componentes React renderizados como artifacts do Claude
+- **Relatórios de Vendas**: Visualização gráfica de receitas, pedidos e tendências
+- **Desempenho de Produtos**: Gráficos para análise de produtos mais vendidos
+- **Comportamento de Clientes**: Visualização de segmentação e padrões de compra
+- **Gestão de Estoque**: Representação visual de níveis de estoque e alertas
 
-## Componentes Bootstrap
+## Componentes Bootstrap via Artifacts
 
-O sistema inclui componentes pré-configurados do Bootstrap 5:
+O sistema apresenta componentes diretamente no Claude via artifacts:
 
-- **bs-modal**: Modal personalizado para diferentes usos
-- **bs-accordion**: Accordions expansíveis para agrupar conteúdo
-- **bs-gallery**: Galeria de imagens responsiva
+- **bs-modal**: Modal para visualização detalhada de produtos e pedidos
+- **bs-accordion**: Informações expansíveis para categorias e FAQs
+- **bs-gallery**: Visualização de imagens de produtos e templates
+- **bs-dashboard**: Visualização completa de métricas e KPIs
 
 ## Templates Bootstrap
 
-Templates prontos para uso:
+Templates visualizados diretamente no Claude via artifacts:
 
 - **bs-blog**: Template completo para blogs
 - **bs-landing**: Template para páginas de destino
 - **bs-portfolio**: Template para portfólios profissionais
-- **bs-dashboard**: Template para dashboard administrativo
+- **bs-dashboard**: Template para visualização de métricas
 
 ## Contribuição
 
@@ -199,10 +201,10 @@ A documentação completa está disponível em:
 - [x] Integração com Bootstrap 5
 - [x] Implementação do provedor Hostinger
 - [x] Implementação do provedor Shopify
-- [x] Sistema de analytics e relatórios
+- [x] Sistema de analytics e relatórios via artifacts do Claude
 - [ ] Implementação do provedor WooCommerce 
 - [ ] Sistema de plugins de terceiros
-- [ ] Painel de controle web
+- [ ] Visualizações interativas mais avançadas via Claude artifacts
 
 ## Licença
 

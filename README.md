@@ -1,167 +1,184 @@
 # PHP Universal MCP Server
 
-Um servidor MCP (Model Context Protocol) universal para desenvolvimento PHP em qualquer provedor de hospedagem ou nuvem.
+[![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)](#)
+[![Versão](https://img.shields.io/badge/versão-0.9.5-blue)](#)
+[![Licença](https://img.shields.io/badge/licença-MIT-green)](#)
 
 ## Descrição
 
-O PHP Universal MCP Server é uma ferramenta avançada que permite gerenciar múltiplos sites e e-commerces através do Claude Desktop usando o Model Context Protocol (MCP). Ele oferece uma interface unificada para interagir com diferentes plataformas como Hostinger, WooCommerce, Shopify, entre outras.
+O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múltiplos sites e e-commerces através do Claude Desktop usando o Model Context Protocol (MCP). Esta solução unificada facilita o controle de hospedagem, design, produtos e administração de diversos sites sem a necessidade de conhecer os detalhes técnicos de cada plataforma.
 
-## Componentes Principais
+## Recursos
 
-1. **MCP Protocol Layer** - Implementação do protocolo MCP sobre JSON-RPC 2.0
-2. **PHP Runtime Engine** - Ambiente seguro para execução de código PHP
-3. **E-commerce Manager** - API unificada para gerenciar produtos, pedidos e clientes
-4. **Multi-provider Integration** - Adaptadores para diferentes plataformas
-5. **Site Design System** - Motor de templates para sites e e-commerce
-6. **Hosting Manager** - Gerenciamento de recursos de hospedagem
-7. **Claude Desktop Integration** - Interface natural para comandos via chat
+- **Gerenciamento Universal**: Interface unificada para diversas plataformas (Hostinger, WooCommerce, Shopify)
+- **Controle Completo**: Gerencie hospedagem, domínios, design, produtos e pedidos
+- **Templates**: Sistema completo de design com suporte a Bootstrap 5
+- **Segurança**: Autenticação robusta e armazenamento seguro de credenciais
+- **Automação**: Simplifique tarefas complexas com comandos simples
+- **Extensibilidade**: Arquitetura modular para fácil adição de novos provedores
+
+## Componentes
+
+### Core
+
+- **MCP Protocol Layer**: Implementação completa do protocolo MCP sobre JSON-RPC 2.0
+- **PHP Runtime Engine**: Ambiente seguro para execução de código PHP
+
+### Módulos
+
+- **E-commerce Manager**: API unificada para gerenciar produtos, pedidos e clientes
+- **Design System**: Motor de templates com suporte ao Bootstrap 5
+- **Hosting Manager**: Gerenciamento de recursos de hospedagem, domínios e SSL
+- **Security Module**: Sistema de autenticação e gestão segura de credenciais
+
+### Provedores
+
+- **Hostinger**: Gerenciamento completo de hospedagem web e domínios
+- **WooCommerce**: Gerenciamento de lojas WooCommerce (em desenvolvimento)
+- **Shopify**: Gerenciamento de lojas Shopify (em desenvolvimento)
+
+### Integrações
+
+- **Claude Desktop**: Interface natural para comandos via chat
 
 ## Instalação
 
+### Requisitos
+
+- Node.js 14.x ou superior
+- Claude Desktop 1.3.x ou superior
+- Acesso às APIs dos provedores desejados
+
+### Instalação Rápida
+
 ```bash
-# Clonar o repositório
+# Via NPM
+npm install -g php-universal-mcp-server
+
+# Ou diretamente via repositório
 git clone https://github.com/Lucasdoreac/php-universal-mcp-server.git
 cd php-universal-mcp-server
-
-# Instalar dependências
 npm install
-
-# Iniciar o servidor
-npm start
 ```
 
-## Configuração
+### Configuração
 
-Crie um arquivo `config.json` na raiz do projeto com suas configurações:
+1. Configure as credenciais dos provedores:
 
-```json
-{
-  "server": {
-    "tcpPort": 7654,
-    "httpPort": 8080
-  },
-  "bootstrap": {
-    "enabled": true,
-    "version": "5.3.0"
-  },
-  "providers": {
-    "hostinger": {
-      "apiKey": "sua-api-key",
-      "apiUrl": "https://api.hostinger.com/v1"
-    },
-    "woocommerce": {
-      "url": "https://sua-loja.com",
-      "consumerKey": "ck_xxx",
-      "consumerSecret": "cs_xxx"
+```bash
+# Configuração interativa
+php-mcp-server configure
+
+# Ou manualmente editando o arquivo
+vi config/providers/hostinger.js
+```
+
+2. Inicie o servidor:
+
+```bash
+php-mcp-server start
+```
+
+3. Conecte-se ao Claude Desktop:
+
+```
+No Claude Desktop, digite: conectar servidor mcp localhost:7654
+```
+
+## Uso Básico
+
+### Comandos no Claude Desktop
+
+```
+# Criar um novo site
+criar site hostinger meusite.com
+
+# Listar sites
+listar sites
+
+# Configurar domínio
+configurar domínio site-123 meusite.com
+
+# Configurar SSL
+configurar ssl site-123
+
+# Adicionar produto
+adicionar produto site-123 "Produto Teste" 99.90
+```
+
+### Uso Programático
+
+```javascript
+const MCPServer = require('php-universal-mcp-server');
+
+// Inicializar o servidor
+const server = new MCPServer({
+  port: 7654,
+  providers: {
+    hostinger: {
+      apiKey: 'sua-api-key'
     }
   }
-}
-```
-
-## Uso
-
-### Através do Claude Desktop
-
-1. Inicie o servidor MCP
-2. No Claude Desktop, conecte-se ao MCP Server
-3. Use comandos como:
-   - `criar site hostinger meu-site`
-   - `listar produtos loja1`
-   - `adicionar produto loja1 "Nome do produto" 99.90`
-
-### Através da API
-
-```javascript
-const client = require('./client');
-
-// Listar todos os sites
-client.call('sites.list')
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
-
-// Adicionar produto
-client.call('products.create', {
-  siteId: 'loja1',
-  productData: {
-    name: 'Produto de Teste',
-    price: 99.90,
-    description: 'Descrição do produto'
-  }
-})
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
-```
-
-## Recursos de Design System
-
-O sistema inclui um Design System completo com suporte a Bootstrap 5, permitindo criar e personalizar facilmente sites e lojas com os seguintes recursos:
-
-### Componentes Bootstrap
-
-- `bs-navbar`: Barra de navegação responsiva
-- `bs-footer`: Rodapé customizável
-- `bs-carousel`: Carousel de imagens
-- `bs-modal`: Janelas modais
-- `bs-accordion`: Componente acordeão
-- `bs-gallery`: Galeria de imagens
-- `bs-product-card`: Cartão de produto
-
-### Templates Bootstrap
-
-- `bs-ecommerce`: Template para lojas online
-- `bs-blog`: Template para blogs
-- `bs-landing`: Template para landing pages
-- `bs-portfolio`: Template para portfólios
-
-### Exemplo de Uso de Componentes
-
-```javascript
-const { DesignSystem, ComponentManager } = require('./modules/design/index');
-
-// Inicializar o Design System com suporte a Bootstrap
-const designSystem = new DesignSystem({
-  enableBootstrap: true
 });
 
-// Renderizar um navbar Bootstrap
-const componentManager = new ComponentManager();
-const html = await componentManager.renderComponent('bootstrap/navbar/bs-navbar', {
-  options: {
-    theme: 'light',
-    fixed: true,
-    logo: '/assets/logo.png'
-  }
-});
+// Iniciar o servidor
+server.start();
+
+// Utilizar os módulos diretamente
+const { hostingManager } = server.modules;
+const sites = await hostingManager.listSites();
 ```
 
-### Exemplo de Uso de Templates
+## Componentes Bootstrap
 
-```javascript
-const { DesignSystem } = require('./modules/design/index');
+O sistema inclui componentes pré-configurados do Bootstrap 5:
 
-// Inicializar o Design System
-const designSystem = new DesignSystem({
-  enableBootstrap: true
-});
+- **bs-modal**: Modal personalizado para diferentes usos
+- **bs-accordion**: Accordions expansíveis para agrupar conteúdo
+- **bs-gallery**: Galeria de imagens responsiva
 
-// Criar um renderizador de templates
-const templateRenderer = designSystem.createBootstrapRenderer();
+## Templates Bootstrap
 
-// Renderizar um template de e-commerce
-const html = await templateRenderer.render('bs-ecommerce', {
-  colorScheme: 'primary',
-  layout: 'standard'
-}, {
-  siteInfo: { title: 'Minha Loja' },
-  products: [...],
-  categories: [...]
-});
-```
+Templates prontos para uso:
+
+- **bs-blog**: Template completo para blogs
+- **bs-landing**: Template para páginas de destino
+- **bs-portfolio**: Template para portfólios profissionais
 
 ## Contribuição
 
-Contribuições são bem-vindas! Por favor, leia o [guia de contribuição](CONTRIBUTING.md) para mais detalhes.
+Contribuições são bem-vindas! Para contribuir:
+
+1. Faça um fork do repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
+
+## Documentação
+
+A documentação completa está disponível em:
+
+- [Documentação Geral](./docs/README.md)
+- [Guia de Início Rápido](./docs/quick-start.md)
+- [Referência da API](./docs/api-reference.md)
+- [Provedores](./docs/providers/README.md)
+- [Templates e Componentes](./docs/design/README.md)
+
+## Roadmap
+
+- [x] Implementação do protocolo MCP
+- [x] Integração com Bootstrap 5
+- [x] Implementação do provedor Hostinger
+- [ ] Implementação do provedor WooCommerce
+- [ ] Implementação do provedor Shopify
+- [ ] Sistema de plugins de terceiros
+- [ ] Painel de controle web
 
 ## Licença
 
-Este projeto está licenciado sob a [MIT License](LICENSE).
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## Suporte
+
+Para suporte, abra uma issue no GitHub ou entre em contato pelo email suporte@php-universal-mcp.com.

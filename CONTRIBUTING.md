@@ -1,49 +1,58 @@
 # Contribuindo para o PHP Universal MCP Server
 
-Obrigado pelo seu interesse em contribuir para o PHP Universal MCP Server! Este documento fornece diretrizes e fluxos de trabalho para contribuir efetivamente para o projeto.
+Obrigado pelo interesse em contribuir para o PHP Universal MCP Server! Este documento fornece diretrizes e informações para ajudar você a contribuir com o projeto de forma eficaz.
 
-## Fluxo de Trabalho de Desenvolvimento
+## Índice
 
-Seguimos um fluxo de trabalho baseado em componentes e desenvolvimento na branch principal:
+- [Código de Conduta](#código-de-conduta)
+- [Como Começar](#como-começar)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Fluxo de Desenvolvimento](#fluxo-de-desenvolvimento)
+- [Estilo de Código](#estilo-de-código)
+- [Testes](#testes)
+- [Documentação](#documentação)
+- [Processo de Submissão](#processo-de-submissão)
+- [Comunicação](#comunicação)
 
-1. **Branch `main`**: Contém o código estável e funcional do projeto.
-2. **Desenvolvimento direto**: Para componentes principais, o desenvolvimento é feito diretamente na branch `main`.
-3. **Branches de feature**: Para funcionalidades experimentais ou que possam quebrar a estabilidade, recomendamos criar branches de feature.
+## Código de Conduta
 
-### Fluxo para Novos Componentes Principais
+Este projeto adota um Código de Conduta que todos os colaboradores devem seguir. Solicitamos que todos participem de maneira respeitosa e profissional.
 
-Para os próximos componentes principais (Site Design System, Hosting Manager, Claude Integration), o desenvolvimento será feito diretamente na branch `main`, mantendo o repositório simples e organizado.
+## Como Começar
 
-## Padrão de Commits
+### Preparando seu Ambiente
 
-Utilizamos o padrão Conventional Commits para facilitar a geração automática de changelogs e versionamento semântico:
+1. Fork o repositório no GitHub
+2. Clone seu fork localmente
+   ```bash
+   git clone https://github.com/seu-usuario/php-universal-mcp-server.git
+   cd php-universal-mcp-server
+   ```
+3. Adicione o repositório upstream
+   ```bash
+   git remote add upstream https://github.com/Lucasdoreac/php-universal-mcp-server.git
+   ```
+4. Instale as dependências
+   ```bash
+   npm install
+   ```
 
-- `feat:` - Nova funcionalidade
-- `fix:` - Correção de bug
-- `docs:` - Alterações na documentação
-- `style:` - Formatação, ponto e vírgula faltando, etc; sem alteração de código
-- `refactor:` - Refatoração de código
-- `test:` - Adicionando ou corrigindo testes
-- `chore:` - Alterações no processo de build, ferramentas, etc.
+### Executando o Projeto
 
-Exemplo:
+```bash
+# Executar em modo de desenvolvimento
+npm run dev
+
+# Executar testes
+npm test
+
+# Verificar estilo de código
+npm run lint
 ```
-feat(ecommerce): adiciona suporte a operações CRUD para produtos
-```
-
-## Pull Requests
-
-Para contribuições externas:
-
-1. Faça um fork do repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/minha-feature`)
-3. Commit suas alterações (`git commit -am 'feat: adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/minha-feature`)
-5. Abra um Pull Request
 
 ## Estrutura do Projeto
 
-O projeto segue uma arquitetura modular:
+A estrutura principal do projeto é a seguinte:
 
 ```
 php-universal-mcp-server/
@@ -52,39 +61,100 @@ php-universal-mcp-server/
 │   └── php-runtime/         # Motor de execução PHP
 ├── modules/                 # Módulos funcionais
 │   ├── ecommerce/           # Gerenciamento de e-commerce
-│   ├── design/              # Sistema de design e templates (em desenvolvimento)
-│   └── hosting/             # Gerenciamento de hospedagem (em desenvolvimento)
+│   ├── design/              # Sistema de design e templates
+│   ├── hosting/             # Gerenciamento de hospedagem
+│   └── security/            # Autenticação e segurança
 ├── providers/               # Adaptadores de provedores
+│   ├── hostinger/           # Integração com Hostinger
+│   ├── woocommerce/         # Integração com WooCommerce
+│   └── shopify/             # Integração com Shopify
 ├── integrations/            # Integrações externas
-│   └── claude/              # Integração com Claude Desktop (em desenvolvimento)
+│   └── claude/              # Integração com Claude Desktop
 ├── utils/                   # Utilitários e ferramentas
 ├── config/                  # Configurações
 ├── docs/                    # Documentação
-└── examples/                # Exemplos de uso
+└── tests/                   # Testes automatizados
 ```
+
+## Fluxo de Desenvolvimento
+
+1. Verifique as issues existentes ou crie uma nova descrevendo a feature/bug
+2. Faça um fork do repositório e crie um branch para sua feature
+   ```bash
+   git checkout -b feature/sua-feature
+   ```
+3. Desenvolva sua feature e adicione testes apropriados
+4. Certifique-se de que todos os testes passam
+   ```bash
+   npm test
+   ```
+5. Certifique-se de que seu código segue o estilo de código do projeto
+   ```bash
+   npm run lint
+   ```
+6. Commit suas mudanças seguindo as convenções de commit
+   ```bash
+   git commit -m "feat: adiciona nova funcionalidade"
+   ```
+7. Push para seu fork
+   ```bash
+   git push origin feature/sua-feature
+   ```
+8. Abra um Pull Request para o branch principal do repositório
+
+## Estilo de Código
+
+Seguimos um estilo consistente de código para garantir legibilidade e manutenibilidade:
+
+- **JavaScript**: Usamos ESLint com a configuração Airbnb
+- **Convenções de Nomeação**:
+  - CamelCase para variáveis e funções
+  - PascalCase para classes
+  - UPPER_CASE para constantes
+- **Commits**: Seguimos o padrão [Conventional Commits](https://www.conventionalcommits.org/)
 
 ## Testes
 
-Incentivamos a escrita de testes para novos componentes e funcionalidades:
+Todos os novos recursos e correções de bugs devem incluir testes apropriados:
 
-- Testes unitários devem ser colocados no diretório `tests/` dentro de cada componente
-- Execute `npm test` para executar todos os testes
+- **Testes Unitários**: Para testar funções e classes individualmente
+- **Testes de Integração**: Para testar interações entre componentes
+- **Cobertura de Código**: Mantemos uma alta cobertura de código para garantir qualidade
+
+```bash
+# Executar todos os testes
+npm test
+
+# Executar testes específicos
+npm test -- --grep "nome do teste"
+
+# Verificar cobertura de código
+npm run coverage
+```
 
 ## Documentação
 
-A documentação é uma parte crucial deste projeto:
+Boa documentação é essencial para o projeto:
 
-- Atualize o README.md quando adicionar ou modificar funcionalidades
-- Adicione ou atualize a documentação no diretório `docs/`
-- Inclua exemplos no diretório `examples/`
-- Documente novas APIs e métodos com JSDoc
+- **JSDoc**: Todas as funções e classes devem ter comentários JSDoc
+- **README**: Cada diretório principal deve ter um arquivo README explicativo
+- **Exemplos**: Adicione exemplos práticos quando possível
+- **Markdown**: Use Markdown para documentação de arquivos
 
-## Segurança
+## Processo de Submissão
 
-Se você descobrir algum problema de segurança, por favor não abra uma issue pública. Envie um email para o mantenedor principal do projeto.
+1. Certifique-se de que seu código passa em todos os testes
+2. Atualize a documentação conforme necessário
+3. Submeta um Pull Request claro e descritivo
+4. Responda a quaisquer comentários ou solicitações de mudança
+5. Após aprovação, seu código será mesclado
 
-## Próximos Componentes
+## Comunicação
 
-- **Site Design System** - Responsável por gerenciar temas e aparência dos sites
-- **Hosting Manager** - Gerenciamento de recursos de hospedagem (domínios, DNS, SSL) 
-- **Claude Desktop Integration** - Interface otimizada para interação via chat
+- **Issues**: Use para reportar bugs, solicitar features ou discutir implementações
+- **Pull Requests**: Use para submeter código e receber feedback
+- **Discussões**: Use para perguntas gerais e ideias
+
+## Agradecimentos
+
+Agradecemos a todos os contribuidores que ajudam a melhorar este projeto! Seu tempo e esforço são valiosos para nós.

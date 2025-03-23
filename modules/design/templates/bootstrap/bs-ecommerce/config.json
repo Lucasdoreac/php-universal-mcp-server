@@ -1,0 +1,151 @@
+{
+  "id": "bs-ecommerce",
+  "name": "Bootstrap E-commerce",
+  "description": "Um template moderno e responsivo para lojas virtuais usando Bootstrap 5",
+  "version": "1.0.0",
+  "category": "bootstrap",
+  "author": "PHP Universal MCP Team",
+  "supports": ["woocommerce", "shopify", "hostinger"],
+  "thumbnail": "preview.png",
+  "pages": [
+    {
+      "name": "Home",
+      "file": "index.html",
+      "isDefault": true
+    },
+    {
+      "name": "Produtos",
+      "file": "products.html"
+    },
+    {
+      "name": "Produto",
+      "file": "product.html"
+    },
+    {
+      "name": "Carrinho",
+      "file": "cart.html"
+    },
+    {
+      "name": "Checkout",
+      "file": "checkout.html"
+    },
+    {
+      "name": "Sobre",
+      "file": "about.html"
+    },
+    {
+      "name": "Contato",
+      "file": "contact.html"
+    }
+  ],
+  "bootstrapVersion": "5.3.0",
+  "customizations": [
+    {
+      "type": "color",
+      "id": "primary",
+      "name": "Cor Primária",
+      "default": "#0d6efd"
+    },
+    {
+      "type": "color",
+      "id": "secondary",
+      "name": "Cor Secundária",
+      "default": "#6c757d"
+    },
+    {
+      "type": "color",
+      "id": "success",
+      "name": "Cor de Sucesso",
+      "default": "#198754"
+    },
+    {
+      "type": "color",
+      "id": "info",
+      "name": "Cor de Informação",
+      "default": "#0dcaf0"
+    },
+    {
+      "type": "color",
+      "id": "warning",
+      "name": "Cor de Aviso",
+      "default": "#ffc107"
+    },
+    {
+      "type": "color",
+      "id": "danger",
+      "name": "Cor de Perigo",
+      "default": "#dc3545"
+    },
+    {
+      "type": "color",
+      "id": "light",
+      "name": "Cor Clara",
+      "default": "#f8f9fa"
+    },
+    {
+      "type": "color",
+      "id": "dark",
+      "name": "Cor Escura",
+      "default": "#212529"
+    },
+    {
+      "type": "font",
+      "id": "headingFont",
+      "name": "Fonte de Títulos",
+      "default": "'Montserrat', sans-serif",
+      "options": ["'Montserrat', sans-serif", "'Roboto', sans-serif", "'Open Sans', sans-serif", "'Raleway', sans-serif"]
+    },
+    {
+      "type": "font",
+      "id": "bodyFont",
+      "name": "Fonte de Texto",
+      "default": "'Roboto', sans-serif",
+      "options": ["'Roboto', sans-serif", "'Open Sans', sans-serif", "'Lato', sans-serif", "'Nunito', sans-serif"]
+    },
+    {
+      "type": "select",
+      "id": "navbarStyle",
+      "name": "Estilo da Barra de Navegação",
+      "default": "navbar-light bg-light",
+      "options": [
+        { "value": "navbar-light bg-light", "label": "Light" },
+        { "value": "navbar-dark bg-dark", "label": "Dark" },
+        { "value": "navbar-dark bg-primary", "label": "Primary" },
+        { "value": "navbar-light bg-white", "label": "White" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "productLayout",
+      "name": "Layout de Produtos",
+      "default": "grid",
+      "options": [
+        { "value": "grid", "label": "Grade" },
+        { "value": "list", "label": "Lista" }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "showRatings",
+      "name": "Exibir Avaliações",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "enableQuickView",
+      "name": "Habilitar Visualização Rápida",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "footerStyle",
+      "name": "Estilo do Rodapé",
+      "default": "bg-light text-dark",
+      "options": [
+        { "value": "bg-light text-dark", "label": "Light" },
+        { "value": "bg-dark text-light", "label": "Dark" },
+        { "value": "bg-primary text-white", "label": "Primary" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{siteInfo.title}}</title>
+  <meta name="description" content="{{siteInfo.description}}">
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  
+  <!-- AOS Animation Library -->
+  {{#if options.animationsEnabled}}
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  {{/if}}
+  
+  <!-- Custom Styles -->
+  <style>
+    /* Base styles */
+    :root {
+      {{#if (eq options.colorScheme "primary")}}
+      --bs-primary: #0d6efd;
+      --bs-primary-rgb: 13, 110, 253;
+      {{else if (eq options.colorScheme "dark")}}
+      --bs-primary: #212529;
+      --bs-primary-rgb: 33, 37, 41;
+      {{else if (eq options.colorScheme "gradient")}}
+      --bs-primary: #6610f2;
+      --bs-primary-rgb: 102, 16, 242;
+      {{/if}}
+    }
+    
+    body {
+      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      overflow-x: hidden;
+    }
+    
+    /* Rounded corners */
+    {{#if options.roundedCorners}}
+    .rounded-custom {
+      border-radius: 10px;
+    }
+    .btn {
+      border-radius: 6px;
+    }
+    .card {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    {{else}}
+    .rounded-custom {
+      border-radius: 0;
+    }
+    .btn {
+      border-radius: 0;
+    }
+    .card {
+      border-radius: 0;
+    }
+    {{/if}}
+    
+    /* Navbar Styles */
+    {{#if options.navbarFixed}}
+    .navbar {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1030;
+      transition: background-color 0.3s ease;
+    }
+    {{/if}}
+    
+    {{#if (eq options.navbarStyle "transparent")}}
+    .navbar {
+      background-color: transparent;
+      box-shadow: none;
+    }
+    .navbar.scrolled {
+      background-color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    {{else if (eq options.navbarStyle "dark")}}
+    .navbar {
+      background-color: #212529;
+    }
+    {{else if (eq options.navbarStyle "colored")}}
+    .navbar {
+      background-color: var(--bs-primary);
+    }
+    {{else}}
+    .navbar {
+      background-color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    {{/if}}
+    
+    /* Hero section */
+    .hero-section {
+      position: relative;
+      padding: 6rem 0;
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      {{#if (eq options.heroStyle "image-background")}}
+      background-image: url('{{hero.backgroundImage}}');
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      {{else if (eq options.heroStyle "video-background")}}
+      background-color: #000;
+      color: #fff;
+      {{else if (eq options.heroStyle "gradient")}}
+      background: linear-gradient(45deg, #0d6efd, #6610f2);
+      color: #fff;
+      {{else if (eq options.heroStyle "pattern")}}
+      background-color: #f8f9fa;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23adb5bd' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+      {{else if (eq options.heroStyle "animated-shape")}}
+      background-color: #f8f9fa;
+      overflow: hidden;
+      {{/if}}
+    }
+    
+    {{#if (eq options.heroStyle "image-background")}}
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+    {{/if}}
+    
+    .hero-section .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    {{#if (eq options.heroStyle "video-background")}}
+    .hero-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.6;
+    }
+    {{/if}}
+    
+    {{#if (eq options.heroStyle "animated-shape")}}
+    .shape {
+      position: absolute;
+      opacity: 0.2;
+      border-radius: 50%;
+      background: var(--bs-primary);
+    }
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      top: -100px;
+      right: -100px;
+      animation: float 8s ease-in-out infinite;
+    }
+    .shape-2 {
+      width: 200px;
+      height: 200px;
+      bottom: -50px;
+      left: -50px;
+      animation: float 10s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.05); }
+    }
+    {{/if}}
+    
+    /* Features section */
+    .feature-icon {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+      color: var(--bs-primary);
+    }
+    
+    /* Testimonials section */
+    .testimonial-card {
+      border: none;
+      background-color: #f8f9fa;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .testimonial-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #fff;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Pricing section */
+    .pricing-card {
+      border: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .pricing-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .pricing-card.highlighted {
+      border: 2px solid var(--bs-primary);
+      transform: scale(1.05);
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Team section */
+    .team-member-img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+    
+    /* CTA section */
+    .cta-section {
+      position: relative;
+      background-color: var(--bs-primary);
+      color: white;
+      padding: 5rem 0;
+    }
+    
+    .cta-section.with-bg {
+      background-image: url('{{cta.backgroundImage}}');
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .cta-section.with-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Footer styles */
+    .footer {
+      {{#if (eq options.footerStyle "simple")}}
+      padding: 2rem 0;
+      {{else}}
+      padding: 4rem 0 2rem 0;
+      {{/if}}
+      background-color: #212529;
+      color: rgba(255, 255, 255, 0.75);
+    }
+    
+    .footer a {
+      color: rgba(255, 255, 255, 0.75);
+      text-decoration: none;
+    }
+    
+    .footer a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    
+    .footer-title {
+      color: #fff;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .social-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      margin-right: 0.5rem;
+      transition: background-color 0.3s ease;
+    }
+    
+    .social-links a:hover {
+      background-color: var(--bs-primary);
+      text-decoration: none;
+    }
+    
+    /* Custom user CSS */
+    {{{options.customCss}}}
+  </style>
+</head>
+<body>
+  <!-- Navbar Component -->
+  {{#if (eq options.navbarStyle "dark")}}
+  {{> bootstrap/navbar/bs-navbar navbarOptions=(object theme="dark" fixed=options.navbarFixed logo=siteInfo.logo)}}
+  {{else if (eq options.navbarStyle "colored")}}
+  {{> bootstrap/navbar/bs-navbar navbarOptions=(object theme="dark" fixed=options.navbarFixed logo=siteInfo.logo bgClass="bg-primary")}}
+  {{else if (eq options.navbarStyle "transparent")}}
+  {{> bootstrap/navbar/bs-navbar navbarOptions=(object theme="light" fixed=options.navbarFixed logo=siteInfo.logo transparency=true)}}
+  {{else}}
+  {{> bootstrap/navbar/bs-navbar navbarOptions=(object theme="light" fixed=options.navbarFixed logo=siteInfo.logo)}}
+  {{/if}}
+
+  <!-- Hero Section -->
+  {{#if options.sections.hero}}
+  <section class="hero-section">
+    {{#if (eq options.heroStyle "video-background")}}
+    <video class="hero-video" autoplay muted loop>
+      <source src="{{hero.backgroundVideo}}" type="video/mp4">
+    </video>
+    {{/if}}
+    
+    {{#if (eq options.heroStyle "animated-shape")}}
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    {{/if}}
+    
+    <div class="container">
+      <div class="row {{#if (eq options.layout 'split')}}align-items-center{{/if}}">
+        <div class="{{#if (eq options.layout 'split')}}col-lg-6{{else}}col-lg-8 {{#if (eq options.layout 'centered')}}mx-auto text-center{{/if}}{{/if}}">
+          <h1 class="display-4 fw-bold mb-4" data-aos="fade-up" data-aos-delay="100">{{hero.heading}}</h1>
+          <p class="lead mb-5" data-aos="fade-up" data-aos-delay="200">{{hero.subheading}}</p>
+          
+          <div class="d-flex {{#if (eq options.layout 'centered')}}justify-content-center{{/if}} gap-3" data-aos="fade-up" data-aos-delay="300">
+            {{#if hero.primaryButtonText}}
+            <a href="{{hero.primaryButtonUrl}}" class="btn btn-primary btn-lg px-4">
+              {{#if options.useIcons}}<i class="bi bi-arrow-right-circle me-2"></i>{{/if}}
+              {{hero.primaryButtonText}}
+            </a>
+            {{/if}}
+            
+            {{#if hero.secondaryButtonText}}
+            <a href="{{hero.secondaryButtonUrl}}" class="btn btn-outline-light btn-lg px-4">
+              {{hero.secondaryButtonText}}
+            </a>
+            {{/if}}
+          </div>
+        </div>
+        
+        {{#if (eq options.layout 'split')}}
+        <div class="col-lg-6 d-flex justify-content-center">
+          <img src="{{#if hero.heroImage}}{{hero.heroImage}}{{else}}https://placehold.co/600x400{{/if}}" alt="Hero Image" class="img-fluid rounded-custom" data-aos="fade-left" data-aos-delay="300">
+        </div>
+        {{/if}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Features Section -->
+  {{#if options.sections.features}}
+  <section class="py-5 py-md-7 bg-light">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-6">
+          <h2 class="h1 mb-3" data-aos="fade-up">Nossos Recursos</h2>
+          <p class="lead" data-aos="fade-up" data-aos-delay="100">Descubra o que torna nossa solução única.</p>
+        </div>
+      </div>
+      
+      <div class="row g-4">
+        {{#each features}}
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{multiply @index 100}}">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+              {{#if this.icon}}
+              <div class="feature-icon mx-auto">
+                <i class="bi bi-{{this.icon}}"></i>
+              </div>
+              {{else if this.image}}
+              <img src="{{this.image}}" alt="{{this.title}}" class="mb-4" style="max-height: 100px; max-width: 100%;">
+              {{/if}}
+              
+              <h3 class="h4 mb-3">{{this.title}}</h3>
+              <p class="mb-0">{{this.description}}</p>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- About Section -->
+  {{#if options.sections.about}}
+  <section class="py-5 py-md-7">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right">
+          <img src="{{about.image}}" alt="{{about.title}}" class="img-fluid rounded-custom shadow">
+        </div>
+        <div class="col-lg-6 ps-lg-5" data-aos="fade-left">
+          <h2 class="h1 mb-4">{{about.title}}</h2>
+          <div class="mb-4">
+            {{{about.content}}}
+          </div>
+          
+          {{#if about.buttonText}}
+          <a href="{{about.buttonUrl}}" class="btn btn-primary">
+            {{#if options.useIcons}}<i class="bi bi-info-circle me-2"></i>{{/if}}
+            {{about.buttonText}}
+          </a>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Testimonials Section -->
+  {{#if options.sections.testimonials}}
+  <section class="py-5 py-md-7 bg-light">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-6">
+          <h2 class="h1 mb-3" data-aos="fade-up">O Que Nossos Clientes Dizem</h2>
+          <p class="lead" data-aos="fade-up" data-aos-delay="100">Veja os depoimentos de quem já utiliza nossa solução.</p>
+        </div>
+      </div>
+      
+      <div class="row g-4">
+        {{#each testimonials}}
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{multiply @index 100}}">
+          <div class="card testimonial-card h-100 p-4">
+            <div class="card-body">
+              <!-- Rating -->
+              {{#if this.rating}}
+              <div class="mb-3">
+                {{#times this.rating}}
+                <i class="bi bi-star-fill text-warning"></i>
+                {{/times}}
+                {{#times (subtract 5 this.rating)}}
+                <i class="bi bi-star text-warning"></i>
+                {{/times}}
+              </div>
+              {{/if}}
+              
+              <!-- Content -->
+              <p class="mb-4">"{{this.content}}"</p>
+              
+              <!-- Author -->
+              <div class="d-flex align-items-center">
+                {{#if this.avatar}}
+                <img src="{{this.avatar}}" alt="{{this.author}}" class="testimonial-avatar me-3">
+                {{else}}
+                <div class="testimonial-avatar me-3 bg-primary d-flex align-items-center justify-content-center text-white">
+                  {{initials this.author}}
+                </div>
+                {{/if}}
+                <div>
+                  <h5 class="mb-0">{{this.author}}</h5>
+                  <small class="text-muted">{{this.role}}{{#if this.company}}, {{this.company}}{{/if}}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Pricing Section -->
+  {{#if options.sections.pricing}}
+  <section class="py-5 py-md-7">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-6">
+          <h2 class="h1 mb-3" data-aos="fade-up">Planos e Preços</h2>
+          <p class="lead" data-aos="fade-up" data-aos-delay="100">Escolha o plano ideal para suas necessidades.</p>
+        </div>
+      </div>
+      
+      <div class="row g-4 justify-content-center">
+        {{#each pricing}}
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{multiply @index 100}}">
+          <div class="card pricing-card h-100 p-4 {{#if this.highlighted}}highlighted shadow-lg{{else}}shadow-sm{{/if}}">
+            {{#if this.highlighted}}
+            <div class="position-absolute top-0 start-50 translate-middle badge bg-primary px-3 py-2">
+              Mais Popular
+            </div>
+            {{/if}}
+            
+            <div class="card-body text-center">
+              <h3 class="my-3">{{this.name}}</h3>
+              <div class="price-value my-4">
+                <h4 class="display-5 fw-bold mb-1">{{this.price}}</h4>
+                <span class="text-muted">{{this.period}}</span>
+              </div>
+              
+              <p>{{this.description}}</p>
+              
+              <ul class="list-unstyled my-4 text-start">
+                {{#each this.features}}
+                <li class="mb-2">
+                  <i class="bi bi-check2-circle text-primary me-2"></i>
+                  {{this}}
+                </li>
+                {{/each}}
+              </ul>
+              
+              <a href="{{this.buttonUrl}}" class="btn {{#if this.highlighted}}btn-primary{{else}}btn-outline-primary{{/if}} w-100">
+                {{this.buttonText}}
+              </a>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- FAQ Section -->
+  {{#if options.sections.faq}}
+  <section class="py-5 py-md-7 bg-light">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-6">
+          <h2 class="h1 mb-3" data-aos="fade-up">Perguntas Frequentes</h2>
+          <p class="lead" data-aos="fade-up" data-aos-delay="100">Encontre respostas para as dúvidas mais comuns.</p>
+        </div>
+      </div>
+      
+      <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200">
+          <div class="accordion" id="faqAccordion">
+            {{#each faq}}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{@index}}">
+                <button class="accordion-button {{#if @index}}collapsed{{/if}}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{@index}}" aria-expanded="{{#if @index}}false{{else}}true{{/if}}" aria-controls="collapse{{@index}}">
+                  {{this.question}}
+                </button>
+              </h2>
+              <div id="collapse{{@index}}" class="accordion-collapse collapse {{#unless @index}}show{{/unless}}" aria-labelledby="heading{{@index}}" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  {{{this.answer}}}
+                </div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Team Section -->
+  {{#if options.sections.team}}
+  <section class="py-5 py-md-7">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-6">
+          <h2 class="h1 mb-3" data-aos="fade-up">Nossa Equipe</h2>
+          <p class="lead" data-aos="fade-up" data-aos-delay="100">Conheça os profissionais por trás do nosso sucesso.</p>
+        </div>
+      </div>
+      
+      <div class="row g-4">
+        {{#each team}}
+        <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{multiply @index 100}}">
+          <div class="card h-100 border-0 shadow-sm">
+            <img src="{{this.photo}}" alt="{{this.name}}" class="team-member-img">
+            <div class="card-body text-center">
+              <h3 class="h4 mb-1">{{this.name}}</h3>
+              <p class="text-muted mb-3">{{this.role}}</p>
+              
+              {{#if this.bio}}
+              <p class="small mb-3">{{this.bio}}</p>
+              {{/if}}
+              
+              {{#if this.socialLinks}}
+              <div class="d-flex justify-content-center">
+                {{#if this.socialLinks.linkedin}}
+                <a href="{{this.socialLinks.linkedin}}" class="me-2" target="_blank"><i class="bi bi-linkedin"></i></a>
+                {{/if}}
+                
+                {{#if this.socialLinks.twitter}}
+                <a href="{{this.socialLinks.twitter}}" class="me-2" target="_blank"><i class="bi bi-twitter"></i></a>
+                {{/if}}
+                
+                {{#if this.socialLinks.github}}
+                <a href="{{this.socialLinks.github}}" class="me-2" target="_blank"><i class="bi bi-github"></i></a>
+                {{/if}}
+                
+                {{#if this.socialLinks.facebook}}
+                <a href="{{this.socialLinks.facebook}}" class="me-2" target="_blank"><i class="bi bi-facebook"></i></a>
+                {{/if}}
+                
+                {{#if this.socialLinks.instagram}}
+                <a href="{{this.socialLinks.instagram}}" target="_blank"><i class="bi bi-instagram"></i></a>
+                {{/if}}
+              </div>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Middle CTA Section -->
+  {{#if (eq options.ctaPosition "middle")}}
+  {{#if options.sections.cta}}
+  <section class="cta-section {{#if cta.backgroundImage}}with-bg{{/if}}">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 text-center cta-content">
+          <h2 class="display-5 fw-bold mb-4" data-aos="fade-up">{{cta.title}}</h2>
+          <p class="lead mb-5" data-aos="fade-up" data-aos-delay="100">{{cta.subtitle}}</p>
+          
+          {{#if cta.buttonText}}
+          <a href="{{cta.buttonUrl}}" class="btn btn-light btn-lg px-5" data-aos="fade-up" data-aos-delay="200">
+            {{#if options.useIcons}}<i class="bi bi-arrow-right-circle me-2"></i>{{/if}}
+            {{cta.buttonText}}
+          </a>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+  {{/if}}
+
+  <!-- Contact Section -->
+  {{#if options.sections.contact}}
+  <section class="py-5 py-md-7 {{#if options.sections.cta}}{{#if (eq options.ctaPosition 'middle')}}bg-light{{/if}}{{/if}}">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-6">
+          <h2 class="h1 mb-3" data-aos="fade-up">{{contact.title}}</h2>
+          <p class="lead" data-aos="fade-up" data-aos-delay="100">{{contact.subtitle}}</p>
+        </div>
+      </div>
+      
+      <div class="row g-5">
+        <div class="col-lg-6" data-aos="fade-right">
+          <form>
+            <div class="mb-3">
+              <label for="name" class="form-label">Nome</label>
+              <input type="text" class="form-control" id="name" placeholder="Seu nome">
+            </div>
+            
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" placeholder="seu@email.com">
+            </div>
+            
+            <div class="mb-3">
+              <label for="subject" class="form-label">Assunto</label>
+              <input type="text" class="form-control" id="subject" placeholder="Assunto da mensagem">
+            </div>
+            
+            <div class="mb-3">
+              <label for="message" class="form-label">Mensagem</label>
+              <textarea class="form-control" id="message" rows="5" placeholder="Digite sua mensagem aqui..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+              {{#if options.useIcons}}<i class="bi bi-send me-2"></i>{{/if}}
+              Enviar Mensagem
+            </button>
+          </form>
+        </div>
+        
+        <div class="col-lg-6" data-aos="fade-left">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+              <h3 class="h4 mb-4">Informações de Contato</h3>
+              
+              <div class="d-flex mb-4">
+                <div class="me-3">
+                  <i class="bi bi-envelope fs-3 text-primary"></i>
+                </div>
+                <div>
+                  <h4 class="h6 mb-1">Email</h4>
+                  <p class="mb-0">
+                    <a href="mailto:{{contact.email}}" class="text-decoration-none">{{contact.email}}</a>
+                  </p>
+                </div>
+              </div>
+              
+              <div class="d-flex mb-4">
+                <div class="me-3">
+                  <i class="bi bi-telephone fs-3 text-primary"></i>
+                </div>
+                <div>
+                  <h4 class="h6 mb-1">Telefone</h4>
+                  <p class="mb-0">
+                    <a href="tel:{{contact.phone}}" class="text-decoration-none">{{contact.phone}}</a>
+                  </p>
+                </div>
+              </div>
+              
+              <div class="d-flex mb-4">
+                <div class="me-3">
+                  <i class="bi bi-geo-alt fs-3 text-primary"></i>
+                </div>
+                <div>
+                  <h4 class="h6 mb-1">Endereço</h4>
+                  <p class="mb-0">{{contact.address}}</p>
+                </div>
+              </div>
+              
+              {{#if contact.mapEmbed}}
+              <div class="mt-4 ratio ratio-16x9">
+                {{{contact.mapEmbed}}}
+              </div>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Newsletter Section -->
+  {{#if options.sections.newsletter}}
+  <section class="py-5 bg-light">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+          <h3 class="mb-3" data-aos="fade-up">Inscreva-se na nossa Newsletter</h3>
+          <p class="mb-4" data-aos="fade-up" data-aos-delay="100">Receba as últimas novidades e ofertas exclusivas.</p>
+          
+          <form class="row g-2 justify-content-center" data-aos="fade-up" data-aos-delay="200">
+            <div class="col-8">
+              <input type="email" class="form-control" placeholder="Seu email">
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary">Inscrever</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Bottom CTA Section -->
+  {{#if (eq options.ctaPosition "bottom")}}
+  {{#if options.sections.cta}}
+  <section class="cta-section {{#if cta.backgroundImage}}with-bg{{/if}}">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 text-center cta-content">
+          <h2 class="display-5 fw-bold mb-4" data-aos="fade-up">{{cta.title}}</h2>
+          <p class="lead mb-5" data-aos="fade-up" data-aos-delay="100">{{cta.subtitle}}</p>
+          
+          {{#if cta.buttonText}}
+          <a href="{{cta.buttonUrl}}" class="btn btn-light btn-lg px-5" data-aos="fade-up" data-aos-delay="200">
+            {{#if options.useIcons}}<i class="bi bi-arrow-right-circle me-2"></i>{{/if}}
+            {{cta.buttonText}}
+          </a>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+  {{/if}}
+
+  <!-- Floating CTA -->
+  {{#if (eq options.ctaPosition "floating")}}
+  {{#if options.sections.cta}}
+  <div class="position-fixed bottom-0 end-0 m-4 z-index-1030 d-none d-md-block" data-aos="fade-up">
+    <a href="{{cta.buttonUrl}}" class="btn btn-primary btn-lg shadow-lg rounded-pill px-4">
+      {{#if options.useIcons}}<i class="bi bi-arrow-right-circle me-2"></i>{{/if}}
+      {{cta.buttonText}}
+    </a>
+  </div>
+  {{/if}}
+  {{/if}}
+
+  <!-- Footer Component -->
+  {{#if (eq options.footerStyle "simple")}}
+  <footer class="footer py-4">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+          <p class="mb-0">{{footer.copyright}}</p>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          {{#if options.socialLinks}}
+          <div class="social-links">
+            {{#if footer.socialLinks.facebook}}
+            <a href="{{footer.socialLinks.facebook}}" target="_blank"><i class="bi bi-facebook"></i></a>
+            {{/if}}
+            
+            {{#if footer.socialLinks.twitter}}
+            <a href="{{footer.socialLinks.twitter}}" target="_blank"><i class="bi bi-twitter"></i></a>
+            {{/if}}
+            
+            {{#if footer.socialLinks.instagram}}
+            <a href="{{footer.socialLinks.instagram}}" target="_blank"><i class="bi bi-instagram"></i></a>
+            {{/if}}
+            
+            {{#if footer.socialLinks.linkedin}}
+            <a href="{{footer.socialLinks.linkedin}}" target="_blank"><i class="bi bi-linkedin"></i></a>
+            {{/if}}
+            
+            {{#if footer.socialLinks.youtube}}
+            <a href="{{footer.socialLinks.youtube}}" target="_blank"><i class="bi bi-youtube"></i></a>
+            {{/if}}
+          </div>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </footer>
+  {{else}}
+  {{> bootstrap/footer/bs-footer footerOptions=(object style=options.footerStyle copyright=footer.copyright columns=footer.columns socialLinks=footer.socialLinks privacyPolicyUrl=footer.privacyPolicyUrl termsUrl=footer.termsUrl showSocialLinks=options.socialLinks showPrivacyPolicy=options.privacyPolicy)}}
+  {{/if}}
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- AOS Animation Library -->
+  {{#if options.animationsEnabled}}
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      AOS.init({
+        duration: 800,
+        easing: 'ease-in-out',
+        once: true
+      });
+    });
+  </script>
+  {{/if}}
+  
+  <!-- Navbar Scroll Effect Script -->
+  {{#if (eq options.navbarStyle "transparent")}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var navbar = document.querySelector('.navbar');
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+    });
+  </script>
+  {{/if}}
+</body>
+</html>

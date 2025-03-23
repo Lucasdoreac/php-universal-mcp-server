@@ -1,0 +1,133 @@
+{
+  "name": "Bootstrap Accordion",
+  "description": "Componente accordion flexível para FAQs, categorias e conteúdo expansível",
+  "version": "1.0.0",
+  "category": "bootstrap",
+  "tags": ["accordion", "expansível", "FAQ", "bootstrap", "categorias"],
+  "author": "PHP Universal MCP Team",
+  "dependencies": ["bootstrap"],
+  "options": {
+    "id": {
+      "type": "string",
+      "description": "ID do accordion para referência em JavaScript",
+      "default": "bs-accordion"
+    },
+    "alwaysOpen": {
+      "type": "boolean",
+      "description": "Permite múltiplos itens abertos simultaneamente",
+      "default": false
+    },
+    "flush": {
+      "type": "boolean",
+      "description": "Estilo flush (sem bordas externas e arredondamento)",
+      "default": false
+    },
+    "iconPosition": {
+      "type": "string",
+      "description": "Posição do ícone de expansão",
+      "enum": ["start", "end"],
+      "default": "end"
+    },
+    "expandFirstItem": {
+      "type": "boolean", 
+      "description": "Expandir o primeiro item automaticamente",
+      "default": false
+    },
+    "theme": {
+      "type": "object",
+      "description": "Personalização de cores e estilos",
+      "properties": {
+        "headerBg": {
+          "type": "string",
+          "description": "Cor de fundo do cabeçalho",
+          "default": "inherit"
+        },
+        "headerColor": {
+          "type": "string",
+          "description": "Cor do texto do cabeçalho",
+          "default": "inherit"
+        },
+        "bodyBg": {
+          "type": "string",
+          "description": "Cor de fundo do corpo",
+          "default": "inherit"
+        },
+        "borderColor": {
+          "type": "string",
+          "description": "Cor da borda",
+          "default": "inherit"
+        },
+        "iconColor": {
+          "type": "string",
+          "description": "Cor do ícone de expansão",
+          "default": "inherit"
+        }
+      }
+    },
+    "animationDuration": {
+      "type": "number",
+      "description": "Duração da animação em milissegundos",
+      "default": 300
+    },
+    "useIcons": {
+      "type": "boolean",
+      "description": "Usar ícones personalizados para itens",
+      "default": false
+    },
+    "iconCollapsed": {
+      "type": "string",
+      "description": "Ícone Bootstrap para estado colapsado",
+      "default": "plus"
+    },
+    "iconExpanded": {
+      "type": "string",
+      "description": "Ícone Bootstrap para estado expandido",
+      "default": "dash"
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "description": "Itens do accordion",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { 
+              "type": "string",
+              "description": "ID único do item (opcional)"
+            },
+            "title": { 
+              "type": "string",
+              "description": "Título do item" 
+            },
+            "content": { 
+              "type": "string",
+              "description": "Conteúdo do item (suporta HTML)" 
+            },
+            "icon": { 
+              "type": "string",
+              "description": "Ícone Bootstrap opcional" 
+            },
+            "badge": {
+              "type": "object",
+              "description": "Badge opcional para o título",
+              "properties": {
+                "text": { "type": "string" },
+                "class": { "type": "string" }
+              }
+            },
+            "isOpen": {
+              "type": "boolean",
+              "description": "Se o item deve começar expandido",
+              "default": false
+            }
+          },
+          "required": ["title", "content"]
+        }
+      }
+    },
+    "required": ["items"]
+  }
+}

@@ -22,9 +22,13 @@ class CustomerManager {
           lastName
           email
           phone
-          displayName
+          acceptsMarketing
           createdAt
           updatedAt
+          state
+          verifiedEmail
+          tags
+          taxExempt
           defaultAddress {
             id
             address1
@@ -34,6 +38,10 @@ class CustomerManager {
             country
             zip
             phone
+            firstName
+            lastName
+            company
+            name
           }
           addresses {
             id
@@ -44,20 +52,23 @@ class CustomerManager {
             country
             zip
             phone
-            default
+            firstName
+            lastName
+            company
+            name
           }
-          orders(first: 5) {
+          orders(first: 10) {
             edges {
               node {
                 id
                 name
-                processedAt
-                financialStatus
-                fulfillmentStatus
+                createdAt
                 totalPrice {
                   amount
                   currencyCode
                 }
+                financialStatus
+                fulfillmentStatus
               }
             }
           }
@@ -68,13 +79,10 @@ class CustomerManager {
                 namespace
                 key
                 value
+                type
               }
             }
           }
-          tags
-          taxExempt
-          validEmailAddress
-          verifiedEmail
         }
       }
     `;
@@ -93,7 +101,6 @@ class CustomerManager {
               lastName
               email
               phone
-              displayName
               createdAt
               updatedAt
               ordersCount
@@ -107,9 +114,8 @@ class CustomerManager {
                 city
                 province
                 country
+                zip
               }
-              tags
-              verifiedEmail
             }
           }
         }
@@ -184,6 +190,10 @@ class CustomerManager {
       queryParts.push(`last_name:${options.last_name}`);
     }
     
+    if (options.phone) {
+      queryParts.push(`phone:${options.phone}`);
+    }
+    
     if (options.created_at_min) {
       queryParts.push(`created_at:>=${options.created_at_min}`);
     }
@@ -192,12 +202,20 @@ class CustomerManager {
       queryParts.push(`created_at:<=${options.created_at_max}`);
     }
     
+    if (options.updated_at_min) {
+      queryParts.push(`updated_at:>=${options.updated_at_min}`);
+    }
+    
+    if (options.updated_at_max) {
+      queryParts.push(`updated_at:<=${options.updated_at_max}`);
+    }
+    
     if (options.tag) {
       queryParts.push(`tag:${options.tag}`);
     }
     
-    if (options.phone) {
-      queryParts.push(`phone:${options.phone}`);
+    if (options.accepts_marketing) {
+      queryParts.push(`accepts_marketing:${options.accepts_marketing}`);
     }
     
     return queryParts.join(' ');
@@ -227,14 +245,13 @@ class CustomerManager {
   }
 
   /**
-   * Busca clientes por email
-   * @param {string} email Email do cliente
-   * @returns {Promise<Array>} Clientes encontrados
+   * Busca clientes
+   * @param {Object} query Parâmetros de busca
+   * @returns {Promise<Array>} Lista de clientes
    */
-  async search(email) {
+  async search(query = {}) {
     try {
-      // Busca por email usando a API REST
-      const response = await this.api.get(`${this.endpoint}/search.json`, { query: email });
+      const response = await this.api.get(`${this.endpoint}/search.json`, query);
       return response.customers || [];
     } catch (error) {
       throw error;
@@ -305,88 +322,13 @@ class CustomerManager {
    */
   async getOrders(customerId, options = {}) {
     try {
-      // Usa a API de pedidos para filtrar por cliente
-      const params = {
+      const query = {
         ...options,
         customer_id: customerId
       };
       
-      const response = await this.api.get('orders.json', params);
+      const response = await this.api.get('orders.json', query);
       return response.orders || [];
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém endereços de um cliente
-   * @param {number} customerId ID do cliente
-   * @returns {Promise<Array>} Lista de endereços
-   */
-  async getAddresses(customerId) {
-    try {
-      const response = await this.api.get(`${this.endpoint}/${customerId}/addresses.json`);
-      return response.addresses || [];
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Adiciona um endereço a um cliente
-   * @param {number} customerId ID do cliente
-   * @param {Object} addressData Dados do endereço
-   * @returns {Promise<Object>} Endereço adicionado
-   */
-  async addAddress(customerId, addressData) {
-    try {
-      const response = await this.api.post(`${this.endpoint}/${customerId}/addresses.json`, { address: addressData });
-      return response.address;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Atualiza um endereço existente
-   * @param {number} customerId ID do cliente
-   * @param {number} addressId ID do endereço
-   * @param {Object} addressData Dados do endereço
-   * @returns {Promise<Object>} Endereço atualizado
-   */
-  async updateAddress(customerId, addressId, addressData) {
-    try {
-      const response = await this.api.put(`${this.endpoint}/${customerId}/addresses/${addressId}.json`, { address: addressData });
-      return response.address;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Remove um endereço
-   * @param {number} customerId ID do cliente
-   * @param {number} addressId ID do endereço
-   * @returns {Promise<Object>} Resultado da operação
-   */
-  async deleteAddress(customerId, addressId) {
-    try {
-      return await this.api.delete(`${this.endpoint}/${customerId}/addresses/${addressId}.json`);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Define um endereço como padrão
-   * @param {number} customerId ID do cliente
-   * @param {number} addressId ID do endereço
-   * @returns {Promise<Object>} Resultado da operação
-   */
-  async setDefaultAddress(customerId, addressId) {
-    try {
-      const response = await this.api.put(`${this.endpoint}/${customerId}/addresses/${addressId}/default.json`);
-      return response.address;
     } catch (error) {
       throw error;
     }
@@ -422,24 +364,87 @@ class CustomerManager {
   }
 
   /**
-   * Envia convite para um cliente
+   * Obtém endereços de um cliente
    * @param {number} customerId ID do cliente
-   * @param {Object} options Opções do convite
-   * @returns {Promise<Object>} Resultado do envio
+   * @returns {Promise<Array>} Lista de endereços
    */
-  async sendInvite(customerId, options = {}) {
+  async getAddresses(customerId) {
     try {
-      const data = { customer_invite: {} };
-      
-      if (options.customMessage) {
-        data.customer_invite.custom_message = options.customMessage;
-      }
-      
-      if (options.subject) {
-        data.customer_invite.subject = options.subject;
-      }
-      
-      const response = await this.api.post(`${this.endpoint}/${customerId}/send_invite.json`, data);
+      const response = await this.api.get(`${this.endpoint}/${customerId}/addresses.json`);
+      return response.addresses || [];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Adiciona um endereço a um cliente
+   * @param {number} customerId ID do cliente
+   * @param {Object} addressData Dados do endereço
+   * @returns {Promise<Object>} Endereço adicionado
+   */
+  async addAddress(customerId, addressData) {
+    try {
+      const response = await this.api.post(`${this.endpoint}/${customerId}/addresses.json`, { address: addressData });
+      return response.customer_address;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Atualiza um endereço de um cliente
+   * @param {number} customerId ID do cliente
+   * @param {number} addressId ID do endereço
+   * @param {Object} addressData Dados do endereço
+   * @returns {Promise<Object>} Endereço atualizado
+   */
+  async updateAddress(customerId, addressId, addressData) {
+    try {
+      const response = await this.api.put(`${this.endpoint}/${customerId}/addresses/${addressId}.json`, { address: addressData });
+      return response.customer_address;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Remove um endereço de um cliente
+   * @param {number} customerId ID do cliente
+   * @param {number} addressId ID do endereço
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  async deleteAddress(customerId, addressId) {
+    try {
+      return await this.api.delete(`${this.endpoint}/${customerId}/addresses/${addressId}.json`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Define um endereço como padrão
+   * @param {number} customerId ID do cliente
+   * @param {number} addressId ID do endereço
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  async setDefaultAddress(customerId, addressId) {
+    try {
+      const response = await this.api.put(`${this.endpoint}/${customerId}/addresses/${addressId}/default.json`);
+      return response.customer_address;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Envia um convite de ativação de conta
+   * @param {number} customerId ID do cliente
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  async sendInvite(customerId) {
+    try {
+      const response = await this.api.post(`${this.endpoint}/${customerId}/send_invite.json`);
       return response.customer_invite;
     } catch (error) {
       throw error;
@@ -447,14 +452,48 @@ class CustomerManager {
   }
 
   /**
-   * Gera um token de redefinição de senha
+   * Obtém as estatísticas do cliente
    * @param {number} customerId ID do cliente
-   * @returns {Promise<Object>} Resultado da operação
+   * @returns {Promise<Object>} Estatísticas do cliente
    */
-  async generateAccountActivationUrl(customerId) {
+  async getStats(customerId) {
     try {
-      const response = await this.api.post(`${this.endpoint}/${customerId}/account_activation_url.json`);
-      return response;
+      // Obtém o cliente
+      const customer = await this.get(customerId);
+      
+      // Obtém pedidos
+      const orders = await this.getOrders(customerId);
+      
+      // Calcula estatísticas
+      const totalOrders = orders.length;
+      const totalSpent = orders.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0);
+      const avgOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
+      
+      // Obtém primeiro e último pedido
+      const sortedOrders = [...orders].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      const firstOrder = sortedOrders[0] || null;
+      const lastOrder = sortedOrders[sortedOrders.length - 1] || null;
+      
+      return {
+        customer_id: customerId,
+        email: customer.email,
+        name: `${customer.first_name || ''} ${customer.last_name || ''}`.trim(),
+        orders_count: totalOrders,
+        total_spent: totalSpent.toFixed(2),
+        avg_order_value: avgOrderValue.toFixed(2),
+        first_order: firstOrder ? {
+          id: firstOrder.id,
+          date: firstOrder.created_at,
+          total: firstOrder.total_price
+        } : null,
+        last_order: lastOrder ? {
+          id: lastOrder.id,
+          date: lastOrder.created_at,
+          total: lastOrder.total_price
+        } : null,
+        days_since_last_order: lastOrder ? 
+          Math.floor((new Date() - new Date(lastOrder.created_at)) / (1000 * 60 * 60 * 24)) : null
+      };
     } catch (error) {
       throw error;
     }

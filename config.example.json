@@ -1,0 +1,52 @@
+{
+  "server": {
+    "tcpPort": 7654,
+    "httpPort": 8080,
+    "debug": false
+  },
+  "bootstrap": {
+    "enabled": true,
+    "version": "5.3.0"
+  },
+  "ecommerce": {
+    "providers": {
+      "woocommerce": {
+        "url": "https://sua-loja.com",
+        "consumerKey": "ck_xxx",
+        "consumerSecret": "cs_xxx"
+      },
+      "shopify": {
+        "shopName": "sua-loja",
+        "apiKey": "xxx",
+        "password": "xxx"
+      }
+    },
+    "defaultProvider": "woocommerce"
+  },
+  "hosting": {
+    "providers": {
+      "hostinger": {
+        "apiKey": "sua-api-key",
+        "apiUrl": "https://api.hostinger.com/v1"
+      }
+    },
+    "defaultProvider": "hostinger"
+  },
+  "design": {
+    "defaultTemplates": {
+      "ecommerce": "bs-ecommerce",
+      "blog": "bs-blog",
+      "landing": "bs-landing",
+      "portfolio": "bs-portfolio"
+    },
+    "templateOptions": {
+      "colorScheme": "primary",
+      "navbarFixed": true,
+      "useIcons": true
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 3600
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "id": "bs-navbar",
+  "name": "Bootstrap Navbar",
+  "description": "Uma barra de navegação responsiva usando Bootstrap 5",
+  "version": "1.0.0",
+  "category": "navbar",
+  "options": [
+    {
+      "type": "select",
+      "id": "variant",
+      "name": "Variante de Cor",
+      "default": "navbar-light bg-light",
+      "options": [
+        { "value": "navbar-light bg-light", "label": "Light" },
+        { "value": "navbar-dark bg-dark", "label": "Dark" },
+        { "value": "navbar-dark bg-primary", "label": "Primary" },
+        { "value": "navbar-light bg-white", "label": "White" },
+        { "value": "navbar-dark bg-transparent", "label": "Transparent Dark" },
+        { "value": "navbar-light bg-transparent", "label": "Transparent Light" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "bgColor",
+      "name": "Cor de Fundo Personalizada",
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "fixed",
+      "name": "Posição Fixa",
+      "default": "",
+      "options": [
+        { "value": "", "label": "Padrão" },
+        { "value": "fixed-top", "label": "Fixo no Topo" },
+        { "value": "sticky-top", "label": "Grudento (Sticky)" },
+        { "value": "fixed-bottom", "label": "Fixo na Base" }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "containerFluid",
+      "name": "Container Fluido",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "menuAlignment",
+      "name": "Alinhamento do Menu",
+      "default": "me-auto",
+      "options": [
+        { "value": "me-auto", "label": "Esquerda" },
+        { "value": "mx-auto", "label": "Centro" },
+        { "value": "ms-auto", "label": "Direita" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "homeUrl",
+      "name": "URL da Home",
+      "default": "/"
+    },
+    {
+      "type": "toggle",
+      "id": "enableSearch",
+      "name": "Habilitar Busca",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "searchPlaceholder",
+      "name": "Placeholder da Busca",
+      "default": "Buscar..."
+    },
+    {
+      "type": "text",
+      "id": "searchButtonText",
+      "name": "Texto do Botão de Busca",
+      "default": "Buscar"
+    },
+    {
+      "type": "text",
+      "id": "searchButtonClass",
+      "name": "Classe do Botão de Busca",
+      "default": "btn-outline-primary"
+    },
+    {
+      "type": "toggle",
+      "id": "enableActions",
+      "name": "Habilitar Ícones de Ação",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "enableAccount",
+      "name": "Mostrar Ícone de Conta",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "enableCart",
+      "name": "Mostrar Ícone de Carrinho",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "enableWishlist",
+      "name": "Mostrar Ícone de Lista de Desejos",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "actionIconSize",
+      "name": "Tamanho dos Ícones",
+      "default": "",
+      "options": [
+        { "value": "", "label": "Normal" },
+        { "value": "-sm", "label": "Pequeno" },
+        { "value": "-lg", "label": "Grande" }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "enableCta",
+      "name": "Habilitar Botão CTA",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "ctaText",
+      "name": "Texto do Botão CTA",
+      "default": "Entre em Contato"
+    },
+    {
+      "type": "text",
+      "id": "ctaUrl",
+      "name": "URL do Botão CTA",
+      "default": "/contato"
+    },
+    {
+      "type": "text",
+      "id": "ctaClass",
+      "name": "Classe do Botão CTA",
+      "default": "btn-primary"
+    },
+    {
+      "type": "text",
+      "id": "logoHeight",
+      "name": "Altura do Logo",
+      "default": "40px"
+    },
+    {
+      "type": "text",
+      "id": "classes",
+      "name": "Classes Adicionais",
+      "default": ""
+    }
+  ]
+}

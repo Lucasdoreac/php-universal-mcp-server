@@ -1,0 +1,35 @@
+/* Additional styles for Bootstrap navbar */
+
+/* Logo sizing */
+.navbar-logo {
+  height: 40px;
+  width: auto;
+}
+
+/* Custom navbar action buttons */
+.navbar-actions .nav-action {
+  color: var(--bs-navbar-color, inherit);
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-actions .nav-action:hover {
+  color: var(--bs-primary, #0d6efd);
+}
+
+/* Mobile optimizations */
+@media (max-width: 991.98px) {
+  .navbar-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+  
+  form.d-flex {
+    margin-top: 1rem;
+    width: 100%;
+  }
+}

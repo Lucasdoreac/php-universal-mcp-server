@@ -1,0 +1,90 @@
+<!-- Bootstrap Navbar Component -->
+<nav class="navbar navbar-expand-lg {{ options.variant }} {{ options.classes }}" 
+     {% if options.fixed %}{{ options.fixed }}{% endif %}
+     {% if options.bgColor %}style="background-color: {{ options.bgColor }}"{% endif %}>
+  <div class="container{{ options.containerFluid ? '-fluid' : '' }}">
+    <a class="navbar-brand" href="{{ options.homeUrl | default: '/' }}">
+      {% if site.logo %}
+      <img src="{{ site.logo }}" alt="{{ site.name }}" class="navbar-logo" 
+           {% if options.logoHeight %}style="height: {{ options.logoHeight }}"{% endif %}>
+      {% else %}
+      {{ site.name }}
+      {% endif %}
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
+            aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav {{ options.menuAlignment }}">
+        {% for item in navigation.main %}
+        <li class="nav-item">
+          <a class="nav-link {{ item.isActive ? 'active' : '' }}" 
+             {% if item.isActive %}aria-current="page"{% endif %} 
+             href="{{ item.url }}">{{ item.title }}</a>
+        </li>
+        {% endfor %}
+        
+        {% if navigation.dropdown %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
+             data-bs-toggle="dropdown" aria-expanded="false">
+            {{ navigation.dropdown.title }}
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            {% for subitem in navigation.dropdown.items %}
+            <li><a class="dropdown-item" href="{{ subitem.url }}">{{ subitem.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+      
+      {% if options.enableSearch %}
+      <form class="d-flex {{ options.menuAlignment === 'me-auto' ? 'ms-auto' : 'me-auto' }}" method="get" action="{{ options.searchUrl | default: '/search' }}">
+        <input class="form-control me-2" type="search" placeholder="{{ options.searchPlaceholder | default: 'Search' }}" 
+               aria-label="Search" name="q">
+        <button class="btn {{ options.searchButtonClass | default: 'btn-outline-primary' }}" type="submit">
+          {{ options.searchButtonText | default: 'Search' }}
+        </button>
+      </form>
+      {% endif %}
+      
+      {% if options.enableActions %}
+      <div class="d-flex navbar-actions {{ options.menuAlignment === 'me-auto' ? 'ms-2' : '' }}">
+        {% if options.enableAccount %}
+        <a href="{{ options.accountUrl | default: '/account' }}" class="btn btn-link nav-action">
+          <i class="bi bi-person{{ options.actionIconSize | default: '' }}"></i>
+        </a>
+        {% endif %}
+        
+        {% if options.enableCart %}
+        <a href="{{ options.cartUrl | default: '/cart' }}" class="btn btn-link nav-action position-relative">
+          <i class="bi bi-cart{{ options.actionIconSize | default: '' }}"></i>
+          {% if cart.count > 0 %}
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ cart.count }}
+            <span class="visually-hidden">items in cart</span>
+          </span>
+          {% endif %}
+        </a>
+        {% endif %}
+        
+        {% if options.enableWishlist %}
+        <a href="{{ options.wishlistUrl | default: '/wishlist' }}" class="btn btn-link nav-action">
+          <i class="bi bi-heart{{ options.actionIconSize | default: '' }}"></i>
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+      
+      {% if options.enableCta %}
+      <a href="{{ options.ctaUrl }}" class="btn {{ options.ctaClass | default: 'btn-primary' }} ms-2">
+        {{ options.ctaText }}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</nav>

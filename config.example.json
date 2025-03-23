@@ -2,11 +2,14 @@
   "server": {
     "tcpPort": 7654,
     "httpPort": 8080,
-    "debug": false
+    "debug": false,
+    "logLevel": "info"
   },
   "bootstrap": {
     "enabled": true,
-    "version": "5.3.0"
+    "version": "5.3.0",
+    "responsive": true,
+    "components": ["modal", "accordion", "gallery", "dashboard", "editor"]
   },
   "ecommerce": {
     "providers": {
@@ -21,7 +24,7 @@
         "password": "xxx"
       }
     },
-    "defaultProvider": "woocommerce"
+    "defaultProvider": "shopify"
   },
   "hosting": {
     "providers": {
@@ -37,16 +40,71 @@
       "ecommerce": "bs-ecommerce",
       "blog": "bs-blog",
       "landing": "bs-landing",
-      "portfolio": "bs-portfolio"
+      "portfolio": "bs-portfolio",
+      "shop": "bs-shop"
     },
     "templateOptions": {
       "colorScheme": "primary",
       "navbarFixed": true,
-      "useIcons": true
+      "useIcons": true,
+      "responsiveBreakpoints": {
+        "sm": 576,
+        "md": 768,
+        "lg": 992,
+        "xl": 1200,
+        "xxl": 1400
+      }
+    },
+    "editor": {
+      "enabled": true,
+      "components": ["header", "footer", "sidebar", "products", "banner", "gallery"]
     }
   },
   "cache": {
     "enabled": true,
-    "ttl": 3600
+    "ttl": 3600,
+    "typeTTL": {
+      "products": 1800,
+      "orders": 300,
+      "analytics": 7200,
+      "templates": 86400
+    },
+    "storage": "memory",
+    "invalidation": {
+      "events": true,
+      "maxSize": 10485760
+    },
+    "compression": true
+  },
+  "export": {
+    "formats": ["csv", "pdf", "json"],
+    "pdf": {
+      "pageSize": "A4",
+      "orientation": "portrait",
+      "margins": {
+        "top": 40,
+        "right": 40,
+        "bottom": 40,
+        "left": 40
+      },
+      "header": true,
+      "footer": true
+    },
+    "csv": {
+      "delimiter": ",",
+      "quotes": true,
+      "header": true
+    },
+    "scheduled": {
+      "enabled": false,
+      "interval": "daily",
+      "time": "00:00",
+      "destination": "email"
+    }
+  },
+  "performance": {
+    "compression": true,
+    "lazyLoading": true,
+    "asyncProcessing": true
   }
 }

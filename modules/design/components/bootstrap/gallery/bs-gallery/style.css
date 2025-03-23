@@ -1,0 +1,261 @@
+/* Estilos para o componente Bootstrap Gallery */
+
+/* Estilos gerais da galeria */
+.bs-gallery {
+  --bs-gallery-transition: all 0.3s ease;
+  --bs-gallery-overlay-bg: rgba(0, 0, 0, 0.6);
+  --bs-gallery-overlay-color: #fff;
+  --bs-gallery-caption-bg: rgba(0, 0, 0, 0.7);
+  --bs-gallery-caption-color: #fff;
+  --bs-gallery-active-border: var(--bs-primary, #0d6efd);
+}
+
+/* Estilos para layouts grid e masonry */
+.bs-gallery-item {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: var(--bs-gallery-transition);
+}
+
+/* Efeito hover - zoom */
+.bs-gallery-item.zoom-effect img {
+  transition: transform 0.5s ease;
+}
+
+.bs-gallery-item.zoom-effect:hover img {
+  transform: scale(1.1);
+}
+
+/* Efeito hover - fade */
+.bs-gallery-item.fade-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bs-gallery-overlay-bg);
+  opacity: 0;
+  transition: var(--bs-gallery-transition);
+  z-index: 1;
+}
+
+.bs-gallery-item.fade-effect:hover::before {
+  opacity: 1;
+}
+
+/* Efeito hover - overlay */
+.bs-gallery-item.overlay-effect::after {
+  content: '+';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 50px;
+  height: 50px;
+  background-color: var(--bs-primary, #0d6efd);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 50px;
+  text-align: center;
+  border-radius: 50%;
+  opacity: 0;
+  transition: var(--bs-gallery-transition);
+  z-index: 2;
+}
+
+.bs-gallery-item.overlay-effect:hover::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.bs-gallery-item.overlay-effect:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bs-gallery-overlay-bg);
+  opacity: 0.6;
+  z-index: 1;
+}
+
+/* Estilos para legendas */
+.bs-gallery-caption {
+  padding: 10px;
+  color: var(--bs-dark, #212529);
+}
+
+.bs-gallery-caption h5 {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.bs-gallery-caption p {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+/* Posições das legendas */
+.bs-gallery-caption.bottom {
+  background-color: #f8f9fa;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.bs-gallery-caption.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bs-gallery-caption-bg);
+  color: var(--bs-gallery-caption-color);
+  z-index: 2;
+}
+
+.bs-gallery-caption.hover {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bs-gallery-caption-bg);
+  color: var(--bs-gallery-caption-color);
+  transform: translateY(100%);
+  transition: var(--bs-gallery-transition);
+  z-index: 2;
+}
+
+.bs-gallery-item:hover .bs-gallery-caption.hover {
+  transform: translateY(0);
+}
+
+/* Layout de thumbnails */
+.bs-gallery-thumbnails {
+  overflow-x: auto;
+  white-space: nowrap;
+  margin-bottom: 1rem;
+}
+
+.bs-gallery-thumb {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--bs-gallery-transition);
+  opacity: 0.7;
+}
+
+.bs-gallery-thumb:hover {
+  opacity: 1;
+}
+
+.bs-gallery-thumb.active {
+  border-color: var(--bs-gallery-active-border);
+  opacity: 1;
+}
+
+/* Tamanhos de miniaturas */
+.col-small {
+  width: 60px;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.col-medium {
+  width: 80px;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.col-large {
+  width: 100px;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+/* Lightbox personalizado */
+.modal-content {
+  border: none;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.lightbox-caption {
+  text-align: center;
+  font-style: italic;
+  color: var(--bs-gray-600, #6c757d);
+}
+
+/* Filtros */
+.bs-gallery-filters {
+  margin-bottom: 1.5rem;
+}
+
+.bs-gallery-filters .btn {
+  border-radius: 30px;
+  padding: 0.375rem 1rem;
+  margin-right: 0.25rem;
+  transition: var(--bs-gallery-transition);
+}
+
+.bs-gallery-filters .btn.active {
+  box-shadow: none;
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 767.98px) {
+  .bs-gallery-filters .btn-group {
+    flex-wrap: wrap;
+  }
+  
+  .bs-gallery-filters .btn {
+    margin-bottom: 0.5rem;
+  }
+  
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .modal-footer .btn {
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+}
+
+/* Animações para Carousel */
+.bs-gallery-carousel .carousel-item {
+  transition: transform 0.6s ease-in-out;
+}
+
+/* Masonry */
+.bs-gallery-masonry {
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+}
+
+.bs-gallery-masonry > div {
+  padding: 0.5rem;
+}
+
+/* Ajustes para modo escuro */
+[data-bs-theme="dark"] .bs-gallery-item {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .bs-gallery-caption.bottom {
+  background-color: #343a40;
+  color: #f8f9fa;
+  border-top-color: rgba(255,255,255,0.1);
+}
+
+[data-bs-theme="dark"] .modal-content {
+  background-color: rgba(33, 37, 41, 0.95);
+}
+
+[data-bs-theme="dark"] .lightbox-caption {
+  color: var(--bs-gray-400, #ced4da);
+}

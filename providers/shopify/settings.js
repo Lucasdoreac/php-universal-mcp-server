@@ -21,60 +21,44 @@ class SettingsManager {
           email
           myshopifyDomain
           primaryDomain {
-            id
             url
-            sslEnabled
+            host
           }
-          plan {
-            displayName
-            partnerDevelopment
-            shopifyPlus
-          }
+          url
+          currencyCode
+          unitSystem
+          ianaTimezone
           billingAddress {
             address1
             address2
             city
             country
-            province
             zip
             phone
           }
-          currencyCode
-          currencyFormats {
-            moneyFormat
-            moneyInEmailsFormat
-            moneyWithCurrencyFormat
-            moneyWithCurrencyInEmailsFormat
+          contactEmail
+          customerAccounts
+          plan {
+            displayName
+            shopifyPlus
           }
-          unitSystem
-          timezone
-          iana_timezone
-          weight_unit
-          checkoutApiSupported
-          taxesIncluded
-          taxShipping
-          countyTaxes
-          address {
-            address1
-            address2
-            city
-            country
-            province
-            zip
-            phone
+          features {
+            marketingActivityReporting
+            multiLocation
+            storefront
           }
-          coordinates {
-            latitude
-            longitude
-          }
-          productTypes(first: 25) {
+          enabledPresentmentCurrencies
+          merchantApps {
             edges {
-              node
-            }
-          }
-          productVendors(first: 25) {
-            edges {
-              node
+              node {
+                id
+                name
+                title
+                developer
+                developerName
+                uninstallUrl
+                created
+              }
             }
           }
         }
@@ -82,7 +66,7 @@ class SettingsManager {
     `;
     
     this.policiesQuery = `
-      query getPolicies {
+      query shopPolicies {
         shop {
           privacyPolicy {
             id
@@ -118,89 +102,40 @@ class SettingsManager {
       }
     `;
     
-    this.localesQuery = `
-      query getLocales {
-        shopLocales {
-          locale
-          name
-          primary
-          published
+    this.shippingSettingsQuery = `
+      query shippingSettings {
+        shop {
+          shipsToCountries
+          currencyFormats {
+            moneyFormat
+            moneyInEmailsFormat
+          }
+          weightUnit
         }
-      }
-    `;
-    
-    this.shippingZonesQuery = `
-      query getShippingZones {
-        deliveryZones(first: 100) {
+        deliveryProfiles(first: 10) {
           edges {
             node {
               id
               name
-              countries {
-                id
-                name
-                code
-                tax
-                provinces {
-                  id
-                  name
-                  code
-                  tax
+              default
+              profileItems {
+                edges {
+                  node {
+                    id
+                  }
                 }
               }
-              carrierShippingRateProviders {
-                id
-                carrierService {
-                  id
-                  name
-                  active
-                  callbackUrl
-                  serviceDiscovery
-                  format
-                  carrierServiceType
+              profileLocations {
+                edges {
+                  node {
+                    id
+                    name
+                    country
+                    active
+                  }
                 }
-              }
-              priceBasedShippingRates {
-                id
-                name
-                price {
-                  amount
-                  currencyCode
-                }
-                minOrderSubtotal {
-                  amount
-                  currencyCode
-                }
-                maxOrderSubtotal {
-                  amount
-                  currencyCode
-                }
-              }
-              weightBasedShippingRates {
-                id
-                name
-                price {
-                  amount
-                  currencyCode
-                }
-                weightLow
-                weightHigh
               }
             }
-          }
-        }
-      }
-    `;
-    
-    this.paymentsQuery = `
-      query getPaymentSettings {
-        shop {
-          paymentSettings {
-            supportedDigitalWallets
-            acceptedCardBrands
-            cardVaultUrl
-            countryCode
-            currencyCode
           }
         }
       }
@@ -208,9 +143,9 @@ class SettingsManager {
   }
 
   /**
-   * Obtém configurações gerais da loja
+   * Obtém informações básicas da loja
    * @param {boolean} useGraphQL Indica se deve usar GraphQL
-   * @returns {Promise<Object>} Configurações gerais
+   * @returns {Promise<Object>} Informações da loja
    */
   async getShopSettings(useGraphQL = true) {
     try {
@@ -227,7 +162,7 @@ class SettingsManager {
   }
 
   /**
-   * Obtém informações sobre políticas da loja (privacidade, reembolso, etc.)
+   * Obtém políticas da loja (privacidade, reembolso, etc.)
    * @param {boolean} useGraphQL Indica se deve usar GraphQL
    * @returns {Promise<Object>} Políticas da loja
    */
@@ -238,29 +173,42 @@ class SettingsManager {
         return result.data.shop;
       }
       
-      // As políticas não são facilmente acessíveis via REST API, usando GraphQL mesmo se useGraphQL=false
-      const result = await this.api.graphql(this.policiesQuery);
-      return result.data.shop;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém locais disponíveis na loja
-   * @param {boolean} useGraphQL Indica se deve usar GraphQL
-   * @returns {Promise<Array>} Locais disponíveis
-   */
-  async getLocales(useGraphQL = true) {
-    try {
-      if (useGraphQL) {
-        const result = await this.api.graphql(this.localesQuery);
-        return result.data.shopLocales;
+      // Versão REST (precisa de múltiplas chamadas)
+      const policies = {};
+      
+      // Política de privacidade
+      try {
+        const privacy = await this.api.get('policies/privacy_policy.json');
+        policies.privacyPolicy = privacy.policy;
+      } catch (e) {
+        policies.privacyPolicy = null;
       }
       
-      // Os locais não são facilmente acessíveis via REST API, usando GraphQL mesmo se useGraphQL=false
-      const result = await this.api.graphql(this.localesQuery);
-      return result.data.shopLocales;
+      // Política de reembolso
+      try {
+        const refund = await this.api.get('policies/refund_policy.json');
+        policies.refundPolicy = refund.policy;
+      } catch (e) {
+        policies.refundPolicy = null;
+      }
+      
+      // Termos de serviço
+      try {
+        const terms = await this.api.get('policies/terms_of_service.json');
+        policies.termsOfService = terms.policy;
+      } catch (e) {
+        policies.termsOfService = null;
+      }
+      
+      // Política de envio
+      try {
+        const shipping = await this.api.get('policies/shipping_policy.json');
+        policies.shippingPolicy = shipping.policy;
+      } catch (e) {
+        policies.shippingPolicy = null;
+      }
+      
+      return policies;
     } catch (error) {
       throw error;
     }
@@ -274,121 +222,25 @@ class SettingsManager {
   async getShippingSettings(useGraphQL = true) {
     try {
       if (useGraphQL) {
-        const result = await this.api.graphql(this.shippingZonesQuery);
-        return result.data.deliveryZones.edges.map(edge => edge.node);
+        const result = await this.api.graphql(this.shippingSettingsQuery);
+        return {
+          shop: result.data.shop,
+          deliveryProfiles: result.data.deliveryProfiles.edges.map(edge => edge.node)
+        };
       }
       
-      // Nas versões mais recentes da API REST, as zonas de envio são acessíveis
-      const response = await this.api.get('shipping_zones.json');
-      return response.shipping_zones || [];
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém configurações de pagamento
-   * @param {boolean} useGraphQL Indica se deve usar GraphQL
-   * @returns {Promise<Object>} Configurações de pagamento
-   */
-  async getPaymentSettings(useGraphQL = true) {
-    try {
-      if (useGraphQL) {
-        const result = await this.api.graphql(this.paymentsQuery);
-        return result.data.shop.paymentSettings;
-      }
+      // Versão REST (obtém apenas informações básicas)
+      const shop = await this.getShopSettings(false);
       
-      // As configurações de pagamento não são facilmente acessíveis via REST API
-      const result = await this.api.graphql(this.paymentsQuery);
-      return result.data.shop.paymentSettings;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém métodos de pagamento
-   * @returns {Promise<Array>} Métodos de pagamento
-   */
-  async getPaymentMethods() {
-    try {
-      const response = await this.api.get('payment_methods.json');
-      return response.payment_methods || [];
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém fornecedores de envio
-   * @returns {Promise<Array>} Fornecedores de envio
-   */
-  async getCarrierServices() {
-    try {
-      const response = await this.api.get('carrier_services.json');
-      return response.carrier_services || [];
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Cria um fornecedor de envio
-   * @param {Object} serviceData Dados do fornecedor
-   * @returns {Promise<Object>} Fornecedor criado
-   */
-  async createCarrierService(serviceData) {
-    try {
-      const response = await this.api.post('carrier_services.json', { carrier_service: serviceData });
-      return response.carrier_service;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Atualiza um fornecedor de envio
-   * @param {number} id ID do fornecedor
-   * @param {Object} serviceData Dados do fornecedor
-   * @returns {Promise<Object>} Fornecedor atualizado
-   */
-  async updateCarrierService(id, serviceData) {
-    try {
-      const response = await this.api.put(`carrier_services/${id}.json`, { carrier_service: serviceData });
-      return response.carrier_service;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Remove um fornecedor de envio
-   * @param {number} id ID do fornecedor
-   * @returns {Promise<Object>} Resultado da operação
-   */
-  async deleteCarrierService(id) {
-    try {
-      return await this.api.delete(`carrier_services/${id}.json`);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém configurações de checkout
-   * @returns {Promise<Object>} Configurações de checkout
-   */
-  async getCheckoutSettings() {
-    try {
-      // Essa informação está embutida nas configurações gerais da loja
-      const shop = await this.getShopSettings();
-      
-      // Extrai informações relevantes de checkout
       return {
-        taxesIncluded: shop.taxesIncluded,
-        taxShipping: shop.taxShipping,
-        countyTaxes: shop.countyTaxes,
-        checkoutApiSupported: shop.checkoutApiSupported
+        shop: {
+          shipsToCountries: [], // Não disponível diretamente via REST
+          weightUnit: shop.weight_unit,
+          currencyFormats: {
+            moneyFormat: shop.money_format,
+            moneyInEmailsFormat: shop.money_with_currency_format
+          }
+        }
       };
     } catch (error) {
       throw error;
@@ -396,8 +248,170 @@ class SettingsManager {
   }
 
   /**
-   * Obtém países disponíveis para envio
-   * @returns {Promise<Array>} Países disponíveis
+   * Obtém configurações de pagamento
+   * @returns {Promise<Object>} Configurações de pagamento
+   */
+  async getPaymentSettings() {
+    try {
+      // Infelizmente, a API REST não expõe diretamente os gateways de pagamento
+      // Precisamos extrair do HTML da página de configurações ou usar a API GraphQL
+      // Aqui retornaremos apenas informações básicas disponíveis
+      const shop = await this.getShopSettings();
+      
+      return {
+        currencyCode: shop.currencyCode || shop.currency,
+        enabled_presentment_currencies: shop.enabledPresentmentCurrencies || [],
+        money_format: shop.money_format,
+        money_with_currency_format: shop.money_with_currency_format
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Obtém metafields da loja
+   * @returns {Promise<Array>} Lista de metafields
+   */
+  async getMetafields() {
+    try {
+      const response = await this.api.get('metafields.json');
+      return response.metafields || [];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Adiciona um metafield à loja
+   * @param {Object} metafieldData Dados do metafield
+   * @returns {Promise<Object>} Metafield adicionado
+   */
+  async addMetafield(metafieldData) {
+    try {
+      const response = await this.api.post('metafields.json', { metafield: metafieldData });
+      return response.metafield;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Atualiza um metafield da loja
+   * @param {number} metafieldId ID do metafield
+   * @param {Object} metafieldData Dados do metafield
+   * @returns {Promise<Object>} Metafield atualizado
+   */
+  async updateMetafield(metafieldId, metafieldData) {
+    try {
+      const response = await this.api.put(`metafields/${metafieldId}.json`, { metafield: metafieldData });
+      return response.metafield;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Remove um metafield da loja
+   * @param {number} metafieldId ID do metafield
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  async deleteMetafield(metafieldId) {
+    try {
+      return await this.api.delete(`metafields/${metafieldId}.json`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Obtém webhooks configurados
+   * @returns {Promise<Array>} Lista de webhooks
+   */
+  async getWebhooks() {
+    try {
+      const response = await this.api.get('webhooks.json');
+      return response.webhooks || [];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Cria um novo webhook
+   * @param {Object} webhookData Dados do webhook
+   * @returns {Promise<Object>} Webhook criado
+   */
+  async createWebhook(webhookData) {
+    try {
+      const response = await this.api.post('webhooks.json', { webhook: webhookData });
+      return response.webhook;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Atualiza um webhook existente
+   * @param {number} webhookId ID do webhook
+   * @param {Object} webhookData Dados do webhook
+   * @returns {Promise<Object>} Webhook atualizado
+   */
+  async updateWebhook(webhookId, webhookData) {
+    try {
+      const response = await this.api.put(`webhooks/${webhookId}.json`, { webhook: webhookData });
+      return response.webhook;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Remove um webhook
+   * @param {number} webhookId ID do webhook
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  async deleteWebhook(webhookId) {
+    try {
+      return await this.api.delete(`webhooks/${webhookId}.json`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Obtém informações sobre limites de consumo da API
+   * @returns {Promise<Object>} Informações sobre limites
+   */
+  async getApiLimits() {
+    try {
+      // Não há um endpoint dedicado, mas podemos extrair informações dos cabeçalhos
+      // Fazemos uma requisição simples e observamos os headers de limite
+      const client = await this.api.getClient();
+      const response = await client.get('shop.json', { params: { fields: 'id' } });
+      
+      // Extrair informações de limite dos cabeçalhos
+      const headers = response.headers;
+      
+      return {
+        callsMade: parseInt(headers['x-shopify-shop-api-call-limit']?.split('/')[0], 10) || 0,
+        callsLimit: parseInt(headers['x-shopify-shop-api-call-limit']?.split('/')[1], 10) || 40,
+        callsRemaining: parseInt(headers['x-shopify-shop-api-call-limit']?.split('/')[1], 10) - 
+                       (parseInt(headers['x-shopify-shop-api-call-limit']?.split('/')[0], 10) || 0),
+        retryAfter: headers['retry-after'] ? parseInt(headers['retry-after'], 10) : null,
+        graphqlCost: {
+          actualCost: parseFloat(headers['x-shopify-graphql-cost-actual-cost'] || '0'),
+          throttleStatus: headers['x-shopify-graphql-cost-throttle-status'] || 'OK'
+        }
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Obtém todos os países disponíveis
+   * @returns {Promise<Array>} Lista de países
    */
   async getCountries() {
     try {
@@ -409,120 +423,57 @@ class SettingsManager {
   }
 
   /**
-   * Obtém configurações de notificação
-   * @returns {Promise<Array>} Configurações de notificação
+   * Obtém as províncias/estados de um país
+   * @param {number} countryId ID do país
+   * @returns {Promise<Array>} Lista de províncias/estados
    */
-  async getNotificationSettings() {
+  async getProvinces(countryId) {
     try {
-      const response = await this.api.get('notification_settings.json');
-      return response.notification_settings || [];
+      const response = await this.api.get(`countries/${countryId}/provinces.json`);
+      return response.provinces || [];
     } catch (error) {
       throw error;
     }
   }
 
   /**
-   * Atualiza configurações de notificação
-   * @param {Object} settingsData Dados das configurações
-   * @returns {Promise<Object>} Configurações atualizadas
+   * Obtém configurações de gateway de pagamento (limitado)
+   * @returns {Promise<Object>} Configurações de gateway de pagamento
    */
-  async updateNotificationSettings(settingsData) {
+  async getPaymentGateways() {
     try {
-      const response = await this.api.put('notification_settings.json', { notification_settings: settingsData });
-      return response.notification_settings;
+      // Este endpoint tem restrições e pode não estar disponível
+      // dependendo das permissões da API
+      try {
+        const response = await this.api.get('payment_gateways.json');
+        return response.payment_gateways || [];
+      } catch (e) {
+        // Caso o endpoint não esteja disponível, retornar informações limitadas
+        return {
+          limited_access: true,
+          message: 'Acesso limitado às informações de gateway de pagamento. É necessário permissões adicionais.'
+        };
+      }
     } catch (error) {
       throw error;
     }
   }
 
   /**
-   * Obtém lista de scripts da loja
-   * @returns {Promise<Array>} Lista de scripts
+   * Obtém informações sobre moedas suportadas
+   * @returns {Promise<Object>} Informações sobre moedas
    */
-  async getScriptTags() {
+  async getCurrencySettings() {
     try {
-      const response = await this.api.get('script_tags.json');
-      return response.script_tags || [];
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Cria um novo script
-   * @param {Object} scriptData Dados do script
-   * @returns {Promise<Object>} Script criado
-   */
-  async createScriptTag(scriptData) {
-    try {
-      const response = await this.api.post('script_tags.json', { script_tag: scriptData });
-      return response.script_tag;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Remove um script
-   * @param {number} id ID do script
-   * @returns {Promise<Object>} Resultado da operação
-   */
-  async deleteScriptTag(id) {
-    try {
-      return await this.api.delete(`script_tags/${id}.json`);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém lista de assets da loja
-   * @returns {Promise<Array>} Lista de assets
-   */
-  async getAssets() {
-    try {
-      const response = await this.api.get('assets.json');
-      return response.assets || [];
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém configurações de impostos
-   * @returns {Promise<Array>} Configurações de impostos
-   */
-  async getTaxSettings() {
-    try {
-      // Informações básicas de impostos estão nas configurações da loja
       const shop = await this.getShopSettings();
       
-      // Extrai informações de impostos
-      const taxSettings = {
-        taxesIncluded: shop.taxesIncluded,
-        taxShipping: shop.taxShipping,
-        countyTaxes: shop.countyTaxes
-      };
-      
-      return taxSettings;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém políticas de conteúdo para adultos
-   * @returns {Promise<Object>} Políticas de conteúdo
-   */
-  async getContentPolicies() {
-    try {
-      // Essa informação é difícil de acessar via API
-      // Normalmente seria necessário verificar as configurações do tema ou da loja
-      
-      // Para este exemplo, retornaremos uma estrutura básica
       return {
-        adultContent: false,
-        ageRestriction: null
+        primary_currency: shop.currencyCode || shop.currency,
+        enabled_presentment_currencies: shop.enabledPresentmentCurrencies || [],
+        money_format: shop.money_format,
+        money_with_currency_format: shop.money_with_currency_format,
+        money_in_emails_format: shop.money_in_emails_format,
+        money_with_currency_in_emails_format: shop.money_with_currency_in_emails_format
       };
     } catch (error) {
       throw error;

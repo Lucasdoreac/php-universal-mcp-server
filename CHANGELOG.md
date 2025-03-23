@@ -5,6 +5,25 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-03-23
+
+### Adicionado
+- Componentes Bootstrap adicionais:
+  - Modal para visualização rápida de produtos (`bs-product-modal`)
+  - Accordion para FAQs e categorias (`bs-accordion`)
+  - Galeria para visualização de múltiplas imagens (`bs-gallery`)
+- Novos templates Bootstrap:
+  - Template para Blog (`bs-blog`) com múltiplos layouts e opções
+  - Template para Landing Page (`bs-landing`) altamente configurável
+- Helpers JavaScript para template de blog
+- Dados de exemplo para demonstração de blogs
+- Documentação atualizada para todos os novos componentes
+
+### Melhorado
+- Suporte ao Bootstrap 5 agora é mais completo, com opções avançadas de personalização
+- Melhor integração com o sistema de templates existente
+- Otimização de desempenho para carregamento de componentes
+
 ## [1.2.0] - 2025-03-23
 
 ### Adicionado

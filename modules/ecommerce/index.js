@@ -11,6 +11,7 @@ const CustomerController = require('./controllers/CustomerController');
 const DiscountController = require('./controllers/DiscountController');
 const ReportController = require('./controllers/ReportController');
 
+const AnalyticsDashboard = require('./analytics/AnalyticsDashboard');
 const CacheManager = require('./utils/CacheManager');
 const models = require('./models');
 
@@ -38,6 +39,9 @@ class EcommerceManager {
     this.customerController = new CustomerController({ ...options, cache: this.cache });
     this.discountController = new DiscountController({ ...options, cache: this.cache });
     this.reportController = new ReportController({ ...options, cache: this.cache });
+    
+    // Inicializa o dashboard de analytics
+    this.analyticsDashboard = new AnalyticsDashboard({ ...options, cache: this.cache });
   }
 
   /**
@@ -94,6 +98,9 @@ class EcommerceManager {
     server.registerMethod('reports.customers', this._handleApiCall.bind(this, this.reportController.generateCustomerReport.bind(this.reportController)));
     server.registerMethod('reports.inventory', this._handleApiCall.bind(this, this.reportController.generateInventoryReport.bind(this.reportController)));
     server.registerMethod('reports.dashboard', this._handleApiCall.bind(this, this.reportController.getDashboardMetrics.bind(this.reportController)));
+    
+    // Registra métodos para o dashboard de analytics
+    server.registerMethod('analytics.dashboard', this._handleApiCall.bind(this, this.analyticsDashboard.generateDashboard.bind(this.analyticsDashboard)));
   }
 
   /**
@@ -160,6 +167,14 @@ class EcommerceManager {
         error: `Erro ao limpar cache: ${error.message}`
       };
     }
+  }
+  
+  /**
+   * Retorna o dashboard de analytics
+   * @returns {Object} Instância do dashboard de analytics
+   */
+  getAnalyticsDashboard() {
+    return this.analyticsDashboard;
   }
 }
 

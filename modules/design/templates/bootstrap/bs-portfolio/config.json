@@ -1,0 +1,319 @@
+{
+  "name": "Bootstrap Portfolio Template",
+  "description": "Template responsivo para portfolios pessoais ou profissionais com suporte a Bootstrap 5",
+  "version": "1.0.0",
+  "category": "bootstrap",
+  "tags": ["portfolio", "bootstrap", "responsivo", "galeria", "projetos"],
+  "author": "PHP Universal MCP Team",
+  "dependencies": ["bootstrap"],
+  "components": [
+    "bootstrap/navbar/bs-navbar",
+    "bootstrap/footer/bs-footer",
+    "bootstrap/gallery/bs-gallery"
+  ],
+  "options": {
+    "layout": {
+      "type": "string",
+      "description": "Estilo de layout do portfolio",
+      "enum": ["grid", "masonry", "cards", "list"],
+      "default": "grid"
+    },
+    "colorScheme": {
+      "type": "string",
+      "description": "Esquema de cores principal",
+      "enum": ["primary", "dark", "light", "creative", "minimal", "custom"],
+      "default": "creative"
+    },
+    "sections": {
+      "type": "object",
+      "description": "Seções a serem exibidas no portfolio",
+      "properties": {
+        "hero": {
+          "type": "boolean",
+          "description": "Seção hero com introdução",
+          "default": true
+        },
+        "about": {
+          "type": "boolean",
+          "description": "Seção sobre (com texto e imagem)",
+          "default": true
+        },
+        "skills": {
+          "type": "boolean",
+          "description": "Seção de habilidades e competências",
+          "default": true
+        },
+        "projects": {
+          "type": "boolean",
+          "description": "Seção de projetos e trabalhos",
+          "default": true
+        },
+        "testimonials": {
+          "type": "boolean",
+          "description": "Seção de depoimentos",
+          "default": false
+        },
+        "resume": {
+          "type": "boolean",
+          "description": "Seção com resumo profissional/acadêmico",
+          "default": false
+        },
+        "blog": {
+          "type": "boolean",
+          "description": "Seção com posts do blog",
+          "default": false
+        },
+        "contact": {
+          "type": "boolean", 
+          "description": "Seção de formulário de contato",
+          "default": true
+        }
+      }
+    },
+    "projectDetailStyle": {
+      "type": "string",
+      "description": "Estilo para exibição de detalhes dos projetos",
+      "enum": ["modal", "page", "expand", "hover"],
+      "default": "modal"
+    },
+    "filterProjects": {
+      "type": "boolean",
+      "description": "Habilitar filtros para os projetos por categoria",
+      "default": true
+    },
+    "heroStyle": {
+      "type": "string",
+      "description": "Estilo da seção hero",
+      "enum": ["centered", "split", "fullscreen", "minimal", "animated"],
+      "default": "centered"
+    },
+    "animationsEnabled": {
+      "type": "boolean",
+      "description": "Habilitar animações no scroll",
+      "default": true
+    },
+    "navbarFixed": {
+      "type": "boolean",
+      "description": "Manter barra de navegação fixa ao rolar",
+      "default": true
+    },
+    "useIcons": {
+      "type": "boolean",
+      "description": "Usar ícones para recursos e botões",
+      "default": true
+    },
+    "darkMode": {
+      "type": "boolean",
+      "description": "Disponibilizar versão dark mode do template",
+      "default": false
+    },
+    "showSocialLinks": {
+      "type": "boolean",
+      "description": "Exibir links para redes sociais",
+      "default": true
+    },
+    "projectsPerRow": {
+      "type": "number",
+      "description": "Número de projetos por linha em telas grandes",
+      "enum": [2, 3, 4],
+      "default": 3
+    },
+    "footerStyle": {
+      "type": "string",
+      "description": "Estilo do rodapé",
+      "enum": ["simple", "detailed", "centered"],
+      "default": "simple"
+    },
+    "customCss": {
+      "type": "string",
+      "description": "CSS personalizado adicional",
+      "default": ""
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "profile": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "title": { "type": "string" },
+          "avatar": { "type": "string" },
+          "bio": { "type": "string" },
+          "cvUrl": { "type": "string" }
+        }
+      },
+      "hero": {
+        "type": "object",
+        "properties": {
+          "heading": { "type": "string" },
+          "subheading": { "type": "string" },
+          "backgroundImage": { "type": "string" },
+          "buttonText": { "type": "string" },
+          "buttonUrl": { "type": "string" }
+        }
+      },
+      "about": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "image": { "type": "string" },
+          "counters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string" },
+                "value": { "type": "number" },
+                "icon": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "skills": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "level": { "type": "number" },
+            "icon": { "type": "string" }
+          }
+        }
+      },
+      "projects": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "thumbnail": { "type": "string" },
+            "images": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "category": { "type": "string" },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "client": { "type": "string" },
+            "date": { "type": "string" },
+            "url": { "type": "string" },
+            "featured": { "type": "boolean" }
+          }
+        }
+      },
+      "testimonials": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "author": { "type": "string" },
+            "role": { "type": "string" },
+            "company": { "type": "string" },
+            "avatar": { "type": "string" },
+            "content": { "type": "string" }
+          }
+        }
+      },
+      "resume": {
+        "type": "object",
+        "properties": {
+          "education": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "degree": { "type": "string" },
+                "institution": { "type": "string" },
+                "location": { "type": "string" },
+                "startDate": { "type": "string" },
+                "endDate": { "type": "string" },
+                "description": { "type": "string" }
+              }
+            }
+          },
+          "experience": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "position": { "type": "string" },
+                "company": { "type": "string" },
+                "location": { "type": "string" },
+                "startDate": { "type": "string" },
+                "endDate": { "type": "string" },
+                "description": { "type": "string" },
+                "achievements": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          },
+          "certifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "issuer": { "type": "string" },
+                "date": { "type": "string" },
+                "url": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "blog": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "excerpt": { "type": "string" },
+            "image": { "type": "string" },
+            "date": { "type": "string" },
+            "url": { "type": "string" },
+            "category": { "type": "string" }
+          }
+        }
+      },
+      "contact": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "subtitle": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" },
+          "address": { "type": "string" },
+          "formEndpoint": { "type": "string" }
+        }
+      },
+      "socialLinks": {
+        "type": "object",
+        "properties": {
+          "github": { "type": "string" },
+          "linkedin": { "type": "string" },
+          "twitter": { "type": "string" },
+          "facebook": { "type": "string" },
+          "instagram": { "type": "string" },
+          "behance": { "type": "string" },
+          "dribbble": { "type": "string" },
+          "youtube": { "type": "string" }
+        }
+      },
+      "footer": {
+        "type": "object",
+        "properties": {
+          "copyright": { "type": "string" },
+          "credits": { "type": "string" }
+        }
+      }
+    }
+  }
+}

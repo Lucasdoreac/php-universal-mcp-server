@@ -1,8 +1,8 @@
 # PHP Universal MCP Server
 
-Um servidor MCP (Model Context Protocol) universal para desenvolvimento PHP, compatível com diversos provedores de hospedagem e nuvem, funcional sem chave de API.
+Um servidor MCP (Model Context Protocol) universal para desenvolvimento PHP e criação de sites, compatível com diversos provedores de hospedagem e nuvem, funcional sem chave de API.
 
-![Versão](https://img.shields.io/badge/versão-1.0.1-blue.svg)
+![Versão](https://img.shields.io/badge/versão-1.1.0-blue.svg)
 ![Licença](https://img.shields.io/badge/licença-MIT-green.svg)
 
 ## Características
@@ -14,13 +14,15 @@ Um servidor MCP (Model Context Protocol) universal para desenvolvimento PHP, com
 - **Compatibilidade MCP**: Conformidade total com o protocolo Model Context Protocol
 - **Modo Fallback**: Continua operacional mesmo quando APIs externas falham
 - **Execução PHP**: Permite executar código PHP diretamente através do Model Context Protocol
+- **Criação de sites**: Cria sites completos a partir de templates pré-definidos
 
-## Novidades da Versão 1.0.1
+## Novidades da Versão 1.1.0
 
-- Corrigido problema de importação do módulo crypto
-- Melhorada a integração com Claude Desktop
-- Adicionado suporte para detecção automática de provedores
-- [Visualize o changelog completo](./CHANGELOG.md)
+- Adicionada funcionalidade de criação de sites a partir de templates
+- Novo módulo SiteCreator para gerenciar sites e templates
+- Template de e-commerce incluído por padrão
+- Script de demonstração para criação de sites (create-site-demo.js)
+- [Veja o changelog completo](./CHANGELOG.md)
 
 ## Instalação
 
@@ -109,6 +111,41 @@ startServer({
 });
 ```
 
+## Criação de Sites
+
+O PHP Universal MCP Server permite criar sites completos a partir de templates.
+
+### Exemplo de criação de site
+
+```javascript
+// Criar um site de e-commerce
+const result = server.processCommand({
+  type: 'execute',
+  payload: {
+    action: 'createSite',
+    domain: 'minha-loja',
+    template: 'ecommerce',
+    siteName: 'Minha Loja Virtual',
+    variables: {
+      contactEmail: 'contato@exemplo.com',
+      phone: '+55 11 1234-5678'
+    }
+  }
+});
+
+// Iniciar um servidor para o site
+const serverResult = server.processCommand({
+  type: 'execute',
+  payload: {
+    action: 'startServer',
+    domain: 'minha-loja',
+    port: 8080
+  }
+});
+```
+
+Para mais detalhes sobre criação de sites, consulte o documento [SITE_CREATION.md](./SITE_CREATION.md).
+
 ## Linha de Comando
 
 ```bash
@@ -182,10 +219,9 @@ O servidor MCP aceita as seguintes opções de configuração:
 
 ## Integração com Claude Desktop
 
-Este servidor é totalmente compatível com o Claude Desktop usando o Model Context Protocol (MCP). Quando configurado no Claude Desktop, você pode executar código PHP diretamente através do Claude.
+Este servidor é totalmente compatível com o Claude Desktop usando o Model Context Protocol (MCP). Quando configurado no Claude Desktop, você pode:
 
-Exemplo de uso no Claude Desktop:
-
+1. **Executar código PHP**:
 ```
 Quero executar este código PHP:
 
@@ -197,7 +233,16 @@ function fibonacci($n) {
 echo "Fibonacci de 10: " . fibonacci(10);
 ```
 
-O Claude Desktop enviará o código para o servidor MCP que executará o código PHP e retornará os resultados.
+2. **Criar sites completos**:
+```
+Claude, crie um site de e-commerce com o domínio "minha-loja.com" usando o template ecommerce.
+```
+
+3. **Gerenciar sites existentes**:
+```
+Claude, liste todos os sites que criei.
+Claude, inicie um servidor para o site "minha-loja.com" na porta 8080.
+```
 
 ## Modos de Operação
 

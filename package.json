@@ -1,6 +1,6 @@
 {
   "name": "php-universal-mcp-server",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Servidor MCP universal para desenvolvimento PHP e criação de sites em qualquer provedor de hospedagem",
   "main": "src/index.js",
   "bin": {
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.1",
-    "basic-ftp": "^5.0.3",
+    "basic-ftp": "^5.0.5",
     "crypto": "^1.0.1",
     "events": "^3.3.0"
   },

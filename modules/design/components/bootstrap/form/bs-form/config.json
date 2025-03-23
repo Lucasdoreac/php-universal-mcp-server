@@ -1,0 +1,212 @@
+{
+  "id": "bs-form",
+  "name": "Formulário Bootstrap",
+  "description": "Componente avançado de formulário usando Bootstrap 5 com validação e recursos responsivos",
+  "version": "1.0.0",
+  "category": "form",
+  "options": [
+    {
+      "type": "text",
+      "id": "formId",
+      "name": "ID do Formulário",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "formClass",
+      "name": "Classes do Formulário",
+      "default": "needs-validation"
+    },
+    {
+      "type": "text",
+      "id": "wrapperClass",
+      "name": "Classes do Wrapper",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "method",
+      "name": "Método do Formulário",
+      "default": "POST"
+    },
+    {
+      "type": "text",
+      "id": "action",
+      "name": "Action do Formulário",
+      "default": "#"
+    },
+    {
+      "type": "toggle",
+      "id": "multipart",
+      "name": "Habilitar Upload de Arquivos",
+      "default": false
+    },
+    {
+      "type": "toggle",
+      "id": "enableValidation",
+      "name": "Habilitar Validação",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "formTitle",
+      "name": "Título do Formulário",
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "titleHeadingLevel",
+      "name": "Nível do Título",
+      "default": "3",
+      "options": [
+        { "value": "1", "label": "H1" },
+        { "value": "2", "label": "H2" },
+        { "value": "3", "label": "H3" },
+        { "value": "4", "label": "H4" },
+        { "value": "5", "label": "H5" },
+        { "value": "6", "label": "H6" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "titleClass",
+      "name": "Classes do Título",
+      "default": "mb-4"
+    },
+    {
+      "type": "text",
+      "id": "formDescription",
+      "name": "Descrição do Formulário",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "descriptionClass",
+      "name": "Classes da Descrição",
+      "default": "mb-4"
+    },
+    {
+      "type": "toggle",
+      "id": "showAlert",
+      "name": "Mostrar Alerta",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "alertType",
+      "name": "Tipo do Alerta",
+      "default": "info",
+      "options": [
+        { "value": "primary", "label": "Primário" },
+        { "value": "secondary", "label": "Secundário" },
+        { "value": "success", "label": "Sucesso" },
+        { "value": "danger", "label": "Perigo" },
+        { "value": "warning", "label": "Aviso" },
+        { "value": "info", "label": "Informação" },
+        { "value": "light", "label": "Claro" },
+        { "value": "dark", "label": "Escuro" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "alertTitle",
+      "name": "Título do Alerta",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "alertMessage",
+      "name": "Mensagem do Alerta",
+      "default": ""
+    },
+    {
+      "type": "toggle",
+      "id": "alertDismissible",
+      "name": "Alerta Pode Ser Fechado",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "legendClass",
+      "name": "Classes da Legenda do Fieldset",
+      "default": "mb-3 fw-bold"
+    },
+    {
+      "type": "text",
+      "id": "fieldsetDescriptionClass",
+      "name": "Classes da Descrição do Fieldset",
+      "default": "mb-3"
+    },
+    {
+      "type": "toggle",
+      "id": "showButtons",
+      "name": "Mostrar Botões",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "buttonAlignment",
+      "name": "Alinhamento dos Botões",
+      "default": "start",
+      "options": [
+        { "value": "start", "label": "Esquerda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "end", "label": "Direita" }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "showCancelButton",
+      "name": "Mostrar Botão Cancelar",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "cancelButtonText",
+      "name": "Texto do Botão Cancelar",
+      "default": "Cancelar"
+    },
+    {
+      "type": "text",
+      "id": "cancelButtonClass",
+      "name": "Classes do Botão Cancelar",
+      "default": "btn-outline-secondary"
+    },
+    {
+      "type": "text",
+      "id": "cancelUrl",
+      "name": "URL do Botão Cancelar",
+      "default": "#"
+    },
+    {
+      "type": "text",
+      "id": "submitButtonText",
+      "name": "Texto do Botão Enviar",
+      "default": "Enviar"
+    },
+    {
+      "type": "text",
+      "id": "submitButtonClass",
+      "name": "Classes do Botão Enviar",
+      "default": "btn-primary"
+    },
+    {
+      "type": "text",
+      "id": "submitButtonId",
+      "name": "ID do Botão Enviar",
+      "default": ""
+    },
+    {
+      "type": "toggle",
+      "id": "submitButtonDisabled",
+      "name": "Botão Enviar Desabilitado",
+      "default": false
+    },
+    {
+      "type": "toggle",
+      "id": "showSpinner",
+      "name": "Mostrar Spinner no Botão Enviar",
+      "default": false
+    }
+  ]
+}

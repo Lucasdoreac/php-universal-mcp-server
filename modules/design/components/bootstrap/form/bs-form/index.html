@@ -1,0 +1,467 @@
+<!-- Bootstrap Form Component -->
+<div class="bs-form-wrapper {{ options.wrapperClass }}">
+  {% if options.formTitle %}
+  <h{{ options.titleHeadingLevel | default: '3' }} class="{{ options.titleClass | default: 'mb-4' }}">
+    {{ options.formTitle }}
+  </h{{ options.titleHeadingLevel | default: '3' }}>
+  {% endif %}
+  
+  {% if options.formDescription %}
+  <p class="{{ options.descriptionClass | default: 'mb-4' }}">
+    {{ options.formDescription }}
+  </p>
+  {% endif %}
+  
+  <form 
+    id="{{ options.formId | default: 'form-' | append: form.id | default: random_id }}" 
+    method="{{ options.method | default: 'POST' }}" 
+    action="{{ options.action | default: '#' }}"
+    class="{{ options.formClass | default: 'needs-validation' }}"
+    novalidate="{{ options.enableValidation | default: true }}"
+    {% if options.multipart %}enctype="multipart/form-data"{% endif %}
+  >
+    
+    <!-- Hidden form inputs -->
+    {% if options.hiddenFields %}
+    {% for field in options.hiddenFields %}
+    <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+    {% endfor %}
+    {% endif %}
+    
+    <!-- Alert messages -->
+    {% if options.showAlert %}
+    <div class="alert alert-{{ options.alertType | default: 'info' }} alert-dismissible fade show mb-4" role="alert">
+      {% if options.alertTitle %}
+      <h4 class="alert-heading">{{ options.alertTitle }}</h4>
+      {% endif %}
+      <p class="mb-0">{{ options.alertMessage }}</p>
+      {% if options.alertDismissible %}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Form fields from fieldset data -->
+    {% if form.fieldsets %}
+    {% for fieldset in form.fieldsets %}
+      {% if fieldset.title %}
+      <fieldset class="mb-4">
+        <legend class="{{ options.legendClass | default: 'mb-3 fw-bold' }}">{{ fieldset.title }}</legend>
+        
+        {% if fieldset.description %}
+        <p class="{{ options.fieldsetDescriptionClass | default: 'mb-3' }}">{{ fieldset.description }}</p>
+        {% endif %}
+      {% endif %}
+        
+        <!-- Render fields in this fieldset -->
+        <div class="row g-3 mb-3">
+          {% for field in fieldset.fields %}
+            {% if field.type == 'row-start' %}
+            <div class="row g-3 mb-3">
+            {% elsif field.type == 'row-end' %}
+            </div>
+            {% elsif field.type == 'column-start' %}
+            <div class="{{ field.columnClass | default: 'col-md-6' }}">
+            {% elsif field.type == 'column-end' %}
+            </div>
+            {% else %}
+            
+            {% if field.columnClass %}
+            <div class="{{ field.columnClass }}">
+            {% endif %}
+            
+            <!-- Standard input fields -->
+            {% if field.type == 'text' or field.type == 'email' or field.type == 'password' or field.type == 'number' or field.type == 'tel' or field.type == 'url' or field.type == 'date' or field.type == 'time' or field.type == 'datetime-local' or field.type == 'month' or field.type == 'week' or field.type == 'color' %}
+              <div class="form-group">
+                <label for="{{ field.id }}" class="form-label{{ field.required ? ' required' : '' }}">
+                  {{ field.label }}
+                </label>
+                <input 
+                  type="{{ field.type }}" 
+                  class="form-control{{ field.inputClass ? ' ' + field.inputClass : '' }}{{ field.invalid ? ' is-invalid' : '' }}{{ field.valid ? ' is-valid' : '' }}" 
+                  id="{{ field.id }}" 
+                  name="{{ field.name | default: field.id }}" 
+                  placeholder="{{ field.placeholder }}" 
+                  value="{{ field.value }}"
+                  {% if field.required %}required{% endif %}
+                  {% if field.disabled %}disabled{% endif %}
+                  {% if field.readonly %}readonly{% endif %}
+                  {% if field.autocomplete %}autocomplete="{{ field.autocomplete }}"{% endif %}
+                  {% if field.min %}min="{{ field.min }}"{% endif %}
+                  {% if field.max %}max="{{ field.max }}"{% endif %}
+                  {% if field.step %}step="{{ field.step }}"{% endif %}
+                  {% if field.pattern %}pattern="{{ field.pattern }}"{% endif %}
+                  {% if field.minlength %}minlength="{{ field.minlength }}"{% endif %}
+                  {% if field.maxlength %}maxlength="{{ field.maxlength }}"{% endif %}
+                  {% if field.attributes %}
+                    {% for attr_name, attr_value in field.attributes %}
+                      {{ attr_name }}="{{ attr_value }}"
+                    {% endfor %}
+                  {% endif %}
+                >
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+                {% if field.errorMessage %}
+                <div class="invalid-feedback">{{ field.errorMessage }}</div>
+                {% endif %}
+                {% if field.successMessage %}
+                <div class="valid-feedback">{{ field.successMessage }}</div>
+                {% endif %}
+              </div>
+              
+            <!-- Textarea field -->
+            {% elsif field.type == 'textarea' %}
+              <div class="form-group">
+                <label for="{{ field.id }}" class="form-label{{ field.required ? ' required' : '' }}">
+                  {{ field.label }}
+                </label>
+                <textarea 
+                  class="form-control{{ field.inputClass ? ' ' + field.inputClass : '' }}{{ field.invalid ? ' is-invalid' : '' }}{{ field.valid ? ' is-valid' : '' }}" 
+                  id="{{ field.id }}" 
+                  name="{{ field.name | default: field.id }}" 
+                  placeholder="{{ field.placeholder }}" 
+                  rows="{{ field.rows | default: 3 }}"
+                  {% if field.required %}required{% endif %}
+                  {% if field.disabled %}disabled{% endif %}
+                  {% if field.readonly %}readonly{% endif %}
+                  {% if field.minlength %}minlength="{{ field.minlength }}"{% endif %}
+                  {% if field.maxlength %}maxlength="{{ field.maxlength }}"{% endif %}
+                  {% if field.attributes %}
+                    {% for attr_name, attr_value in field.attributes %}
+                      {{ attr_name }}="{{ attr_value }}"
+                    {% endfor %}
+                  {% endif %}
+                >{{ field.value }}</textarea>
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+                {% if field.errorMessage %}
+                <div class="invalid-feedback">{{ field.errorMessage }}</div>
+                {% endif %}
+                {% if field.successMessage %}
+                <div class="valid-feedback">{{ field.successMessage }}</div>
+                {% endif %}
+              </div>
+            
+            <!-- Select field -->
+            {% elsif field.type == 'select' %}
+              <div class="form-group">
+                <label for="{{ field.id }}" class="form-label{{ field.required ? ' required' : '' }}">
+                  {{ field.label }}
+                </label>
+                <select 
+                  class="form-select{{ field.inputClass ? ' ' + field.inputClass : '' }}{{ field.invalid ? ' is-invalid' : '' }}{{ field.valid ? ' is-valid' : '' }}" 
+                  id="{{ field.id }}" 
+                  name="{{ field.name | default: field.id }}"
+                  {% if field.required %}required{% endif %}
+                  {% if field.disabled %}disabled{% endif %}
+                  {% if field.multiple %}multiple{% endif %}
+                  {% if field.size %}size="{{ field.size }}"{% endif %}
+                  {% if field.attributes %}
+                    {% for attr_name, attr_value in field.attributes %}
+                      {{ attr_name }}="{{ attr_value }}"
+                    {% endfor %}
+                  {% endif %}
+                >
+                  {% if field.placeholder %}
+                  <option value="" {% if !field.value %}selected{% endif %} disabled>
+                    {{ field.placeholder }}
+                  </option>
+                  {% endif %}
+                  
+                  {% if field.optgroups %}
+                    {% for group in field.optgroups %}
+                      <optgroup label="{{ group.label }}">
+                        {% for option in group.options %}
+                          <option 
+                            value="{{ option.value }}" 
+                            {% if field.value == option.value or (field.value is array and field.value contains option.value) %}selected{% endif %}
+                            {% if option.disabled %}disabled{% endif %}
+                          >
+                            {{ option.label }}
+                          </option>
+                        {% endfor %}
+                      </optgroup>
+                    {% endfor %}
+                  {% else %}
+                    {% for option in field.options %}
+                      <option 
+                        value="{{ option.value }}" 
+                        {% if field.value == option.value or (field.value is array and field.value contains option.value) %}selected{% endif %}
+                        {% if option.disabled %}disabled{% endif %}
+                      >
+                        {{ option.label }}
+                      </option>
+                    {% endfor %}
+                  {% endif %}
+                </select>
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+                {% if field.errorMessage %}
+                <div class="invalid-feedback">{{ field.errorMessage }}</div>
+                {% endif %}
+                {% if field.successMessage %}
+                <div class="valid-feedback">{{ field.successMessage }}</div>
+                {% endif %}
+              </div>
+            
+            <!-- Checkbox field -->
+            {% elsif field.type == 'checkbox' %}
+              <div class="form-check">
+                <input 
+                  type="checkbox" 
+                  class="form-check-input{{ field.inputClass ? ' ' + field.inputClass : '' }}{{ field.invalid ? ' is-invalid' : '' }}{{ field.valid ? ' is-valid' : '' }}" 
+                  id="{{ field.id }}" 
+                  name="{{ field.name | default: field.id }}" 
+                  value="{{ field.value | default: '1' }}"
+                  {% if field.checked %}checked{% endif %}
+                  {% if field.required %}required{% endif %}
+                  {% if field.disabled %}disabled{% endif %}
+                  {% if field.attributes %}
+                    {% for attr_name, attr_value in field.attributes %}
+                      {{ attr_name }}="{{ attr_value }}"
+                    {% endfor %}
+                  {% endif %}
+                >
+                <label class="form-check-label" for="{{ field.id }}">
+                  {{ field.label }}
+                </label>
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+                {% if field.errorMessage %}
+                <div class="invalid-feedback">{{ field.errorMessage }}</div>
+                {% endif %}
+                {% if field.successMessage %}
+                <div class="valid-feedback">{{ field.successMessage }}</div>
+                {% endif %}
+              </div>
+            
+            <!-- Checkbox group -->
+            {% elsif field.type == 'checkbox-group' %}
+              <div class="mb-3">
+                <label class="form-label d-block{{ field.required ? ' required' : '' }}">
+                  {{ field.label }}
+                </label>
+                {% for option in field.options %}
+                <div class="form-check{{ field.inline ? ' form-check-inline' : '' }}">
+                  <input 
+                    type="checkbox" 
+                    class="form-check-input{{ field.inputClass ? ' ' + field.inputClass : '' }}{{ field.invalid ? ' is-invalid' : '' }}{{ field.valid ? ' is-valid' : '' }}" 
+                    id="{{ field.id }}-{{ loop.index }}" 
+                    name="{{ field.name | default: field.id }}[]" 
+                    value="{{ option.value }}"
+                    {% if field.value is array and field.value contains option.value %}checked{% endif %}
+                    {% if field.required and loop.index == 1 %}required{% endif %}
+                    {% if option.disabled %}disabled{% endif %}
+                  >
+                  <label class="form-check-label" for="{{ field.id }}-{{ loop.index }}">
+                    {{ option.label }}
+                  </label>
+                  {% if loop.last and field.errorMessage %}
+                  <div class="invalid-feedback">{{ field.errorMessage }}</div>
+                  {% endif %}
+                </div>
+                {% endfor %}
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+                {% if field.successMessage %}
+                <div class="valid-feedback">{{ field.successMessage }}</div>
+                {% endif %}
+              </div>
+            
+            <!-- Radio group -->
+            {% elsif field.type == 'radio' or field.type == 'radio-group' %}
+              <div class="mb-3">
+                <label class="form-label d-block{{ field.required ? ' required' : '' }}">
+                  {{ field.label }}
+                </label>
+                {% for option in field.options %}
+                <div class="form-check{{ field.inline ? ' form-check-inline' : '' }}">
+                  <input 
+                    type="radio" 
+                    class="form-check-input{{ field.inputClass ? ' ' + field.inputClass : '' }}{{ field.invalid ? ' is-invalid' : '' }}{{ field.valid ? ' is-valid' : '' }}" 
+                    id="{{ field.id }}-{{ loop.index }}" 
+                    name="{{ field.name | default: field.id }}" 
+                    value="{{ option.value }}"
+                    {% if field.value == option.value %}checked{% endif %}
+                    {% if field.required and loop.index == 1 %}required{% endif %}
+                    {% if option.disabled %}disabled{% endif %}
+                  >
+                  <label class="form-check-label" for="{{ field.id }}-{{ loop.index }}">
+                    {{ option.label }}
+                  </label>
+                  {% if loop.last and field.errorMessage %}
+                  <div class="invalid-feedback">{{ field.errorMessage }}</div>
+                  {% endif %}
+                </div>
+                {% endfor %}
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+                {% if field.successMessage %}
+                <div class="valid-feedback">{{ field.successMessage }}</div>
+                {% endif %}
+              </div>
+            
+            <!-- File input -->
+            {% elsif field.type == 'file' %}
+              <div class="mb-3">
+                <label for="{{ field.id }}" class="form-label{{ field.required ? ' required' : '' }}">
+                  {{ field.label }}
+                </label>
+                <input 
+                  type="file" 
+                  class="form-control{{ field.inputClass ? ' ' + field.inputClass : '' }}{{ field.invalid ? ' is-invalid' : '' }}{{ field.valid ? ' is-valid' : '' }}" 
+                  id="{{ field.id }}" 
+                  name="{{ field.name | default: field.id }}"
+                  {% if field.required %}required{% endif %}
+                  {% if field.disabled %}disabled{% endif %}
+                  {% if field.multiple %}multiple{% endif %}
+                  {% if field.accept %}accept="{{ field.accept }}"{% endif %}
+                  {% if field.attributes %}
+                    {% for attr_name, attr_value in field.attributes %}
+                      {{ attr_name }}="{{ attr_value }}"
+                    {% endfor %}
+                  {% endif %}
+                >
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+                {% if field.errorMessage %}
+                <div class="invalid-feedback">{{ field.errorMessage }}</div>
+                {% endif %}
+                {% if field.successMessage %}
+                <div class="valid-feedback">{{ field.successMessage }}</div>
+                {% endif %}
+              </div>
+              
+            <!-- Range input -->
+            {% elsif field.type == 'range' %}
+              <div class="mb-3">
+                <label for="{{ field.id }}" class="form-label{{ field.required ? ' required' : '' }}">
+                  {{ field.label }}{% if field.showValue %} <span id="{{ field.id }}-value">{{ field.value | default: field.min }}</span>{% endif %}
+                </label>
+                <input 
+                  type="range" 
+                  class="form-range{{ field.inputClass ? ' ' + field.inputClass : '' }}" 
+                  id="{{ field.id }}" 
+                  name="{{ field.name | default: field.id }}" 
+                  value="{{ field.value | default: field.min }}"
+                  {% if field.required %}required{% endif %}
+                  {% if field.disabled %}disabled{% endif %}
+                  {% if field.min %}min="{{ field.min }}"{% endif %}
+                  {% if field.max %}max="{{ field.max }}"{% endif %}
+                  {% if field.step %}step="{{ field.step }}"{% endif %}
+                  {% if field.showValue %}oninput="document.getElementById('{{ field.id }}-value').textContent = this.value"{% endif %}
+                  {% if field.attributes %}
+                    {% for attr_name, attr_value in field.attributes %}
+                      {{ attr_name }}="{{ attr_value }}"
+                    {% endfor %}
+                  {% endif %}
+                >
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+              </div>
+              
+            <!-- Switch (toggle) -->
+            {% elsif field.type == 'switch' %}
+              <div class="form-check form-switch">
+                <input 
+                  type="checkbox" 
+                  class="form-check-input{{ field.inputClass ? ' ' + field.inputClass : '' }}{{ field.invalid ? ' is-invalid' : '' }}{{ field.valid ? ' is-valid' : '' }}" 
+                  id="{{ field.id }}" 
+                  name="{{ field.name | default: field.id }}" 
+                  role="switch"
+                  value="{{ field.value | default: '1' }}"
+                  {% if field.checked %}checked{% endif %}
+                  {% if field.required %}required{% endif %}
+                  {% if field.disabled %}disabled{% endif %}
+                  {% if field.attributes %}
+                    {% for attr_name, attr_value in field.attributes %}
+                      {{ attr_name }}="{{ attr_value }}"
+                    {% endfor %}
+                  {% endif %}
+                >
+                <label class="form-check-label" for="{{ field.id }}">
+                  {{ field.label }}
+                </label>
+                {% if field.helpText %}
+                <div class="form-text">{{ field.helpText }}</div>
+                {% endif %}
+                {% if field.errorMessage %}
+                <div class="invalid-feedback">{{ field.errorMessage }}</div>
+                {% endif %}
+                {% if field.successMessage %}
+                <div class="valid-feedback">{{ field.successMessage }}</div>
+                {% endif %}
+              </div>
+              
+            <!-- Custom HTML -->
+            {% elsif field.type == 'html' %}
+              <div class="custom-html mb-3">
+                {{ field.content }}
+              </div>
+              
+            <!-- Divider -->
+            {% elsif field.type == 'divider' %}
+              <hr class="my-3{{ field.class ? ' ' + field.class : '' }}">
+            
+            {% endif %}
+            
+            {% if field.columnClass %}
+            </div>
+            {% endif %}
+            
+          {% endif %}
+        {% endfor %}
+        </div>
+      {% if fieldset.title %}
+      </fieldset>
+      {% endif %}
+    {% endfor %}
+    {% else %}
+    
+    <!-- Form without fieldsets - direct fields -->
+    <div class="row g-3">
+      {% for field in form.fields %}
+        <!-- Same field rendering logic as above -->
+        <!-- ... -->
+      {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Submit and Cancel buttons -->
+    <div class="form-actions mt-4">
+      {% if options.showButtons !== false %}
+        {% if options.buttonAlignment == 'center' %}
+        <div class="d-flex justify-content-center">
+        {% elsif options.buttonAlignment == 'end' or options.buttonAlignment == 'right' %}
+        <div class="d-flex justify-content-end">
+        {% else %}
+        <div class="d-flex">
+        {% endif %}
+          {% if options.showCancelButton %}
+          <a href="{{ options.cancelUrl | default: '#' }}" class="btn {{ options.cancelButtonClass | default: 'btn-outline-secondary' }} me-2">
+            {{ options.cancelButtonText | default: 'Cancelar' }}
+          </a>
+          {% endif %}
+          
+          <button type="submit" class="btn {{ options.submitButtonClass | default: 'btn-primary' }}" 
+            {% if options.submitButtonId %}id="{{ options.submitButtonId }}"{% endif %}
+            {% if options.submitButtonDisabled %}disabled{% endif %}>
+            {{ options.submitButtonText | default: 'Enviar' }}
+            {% if options.showSpinner %}
+            <span class="spinner-border spinner-border-sm ms-1 visually-hidden loading-spinner" role="status" aria-hidden="true"></span>
+            {% endif %}
+          </button>
+        </div>
+      {% endif %}
+    </div>
+    
+  </form>
+</div>

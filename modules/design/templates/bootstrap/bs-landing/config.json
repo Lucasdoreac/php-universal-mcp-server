@@ -1,0 +1,315 @@
+{
+  "name": "Bootstrap Landing Page Template",
+  "description": "Template responsivo para landing pages com suporte a Bootstrap 5",
+  "version": "1.0.0",
+  "category": "bootstrap",
+  "tags": ["landing page", "bootstrap", "responsivo", "marketing"],
+  "author": "PHP Universal MCP Team",
+  "dependencies": ["bootstrap"],
+  "components": [
+    "bootstrap/navbar/bs-navbar",
+    "bootstrap/footer/bs-footer",
+    "bootstrap/carousel/bs-carousel"
+  ],
+  "options": {
+    "layout": {
+      "type": "string",
+      "description": "Estilo de layout da landing page",
+      "enum": ["standard", "fullwidth", "centered", "split"],
+      "default": "standard"
+    },
+    "colorScheme": {
+      "type": "string",
+      "description": "Esquema de cores principal",
+      "enum": ["primary", "dark", "light", "gradient", "custom"],
+      "default": "primary"
+    },
+    "sections": {
+      "type": "object",
+      "description": "Seções a serem exibidas na landing page",
+      "properties": {
+        "hero": {
+          "type": "boolean",
+          "description": "Seção hero com destaque principal",
+          "default": true
+        },
+        "features": {
+          "type": "boolean",
+          "description": "Seção de características/recursos",
+          "default": true
+        },
+        "about": {
+          "type": "boolean",
+          "description": "Seção sobre (com texto e imagem)",
+          "default": true
+        },
+        "testimonials": {
+          "type": "boolean",
+          "description": "Seção de depoimentos",
+          "default": true
+        },
+        "pricing": {
+          "type": "boolean",
+          "description": "Seção de planos e preços",
+          "default": false
+        },
+        "faq": {
+          "type": "boolean",
+          "description": "Seção de perguntas frequentes",
+          "default": false
+        },
+        "team": {
+          "type": "boolean",
+          "description": "Seção com equipe",
+          "default": false
+        },
+        "contact": {
+          "type": "boolean",
+          "description": "Seção de formulário de contato",
+          "default": true
+        },
+        "newsletter": {
+          "type": "boolean",
+          "description": "Formulário de inscrição para newsletter",
+          "default": true
+        },
+        "cta": {
+          "type": "boolean",
+          "description": "Seção de chamada para ação",
+          "default": true
+        }
+      }
+    },
+    "heroStyle": {
+      "type": "string",
+      "description": "Estilo da seção hero",
+      "enum": ["image-background", "video-background", "gradient", "pattern", "animated-shape"],
+      "default": "image-background"
+    },
+    "ctaPosition": {
+      "type": "string",
+      "description": "Posição da chamada para ação principal",
+      "enum": ["top", "middle", "bottom", "floating"],
+      "default": "bottom"
+    },
+    "navbarStyle": {
+      "type": "string",
+      "description": "Estilo da barra de navegação",
+      "enum": ["light", "dark", "transparent", "colored"],
+      "default": "light"
+    },
+    "navbarFixed": {
+      "type": "boolean",
+      "description": "Manter barra de navegação fixa ao rolar",
+      "default": true
+    },
+    "footerStyle": {
+      "type": "string",
+      "description": "Estilo do rodapé",
+      "enum": ["simple", "detailed", "multi-column"],
+      "default": "detailed"
+    },
+    "roundedCorners": {
+      "type": "boolean",
+      "description": "Usar cantos arredondados nos elementos",
+      "default": true
+    },
+    "animationsEnabled": {
+      "type": "boolean",
+      "description": "Habilitar animações no scroll",
+      "default": true
+    },
+    "useIcons": {
+      "type": "boolean",
+      "description": "Usar ícones para recursos e botões",
+      "default": true
+    },
+    "socialLinks": {
+      "type": "boolean",
+      "description": "Exibir links para redes sociais",
+      "default": true
+    },
+    "privacyPolicy": {
+      "type": "boolean",
+      "description": "Incluir link para política de privacidade",
+      "default": true
+    },
+    "customCss": {
+      "type": "string",
+      "description": "CSS personalizado adicional",
+      "default": ""
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "siteInfo": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "tagline": { "type": "string" },
+          "logo": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "hero": {
+        "type": "object",
+        "properties": {
+          "heading": { "type": "string" },
+          "subheading": { "type": "string" },
+          "backgroundImage": { "type": "string" },
+          "backgroundVideo": { "type": "string" },
+          "primaryButtonText": { "type": "string" },
+          "primaryButtonUrl": { "type": "string" },
+          "secondaryButtonText": { "type": "string" },
+          "secondaryButtonUrl": { "type": "string" }
+        }
+      },
+      "features": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "icon": { "type": "string" },
+            "image": { "type": "string" }
+          }
+        }
+      },
+      "about": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "image": { "type": "string" },
+          "buttonText": { "type": "string" },
+          "buttonUrl": { "type": "string" }
+        }
+      },
+      "testimonials": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "author": { "type": "string" },
+            "role": { "type": "string" },
+            "company": { "type": "string" },
+            "avatar": { "type": "string" },
+            "content": { "type": "string" },
+            "rating": { "type": "number" }
+          }
+        }
+      },
+      "pricing": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "price": { "type": "string" },
+            "period": { "type": "string" },
+            "description": { "type": "string" },
+            "features": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "buttonText": { "type": "string" },
+            "buttonUrl": { "type": "string" },
+            "highlighted": { "type": "boolean" }
+          }
+        }
+      },
+      "faq": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "question": { "type": "string" },
+            "answer": { "type": "string" }
+          }
+        }
+      },
+      "team": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "role": { "type": "string" },
+            "bio": { "type": "string" },
+            "photo": { "type": "string" },
+            "socialLinks": {
+              "type": "object",
+              "properties": {
+                "linkedin": { "type": "string" },
+                "twitter": { "type": "string" },
+                "github": { "type": "string" },
+                "facebook": { "type": "string" },
+                "instagram": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "contact": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "subtitle": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" },
+          "address": { "type": "string" },
+          "mapEmbed": { "type": "string" }
+        }
+      },
+      "cta": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "subtitle": { "type": "string" },
+          "buttonText": { "type": "string" },
+          "buttonUrl": { "type": "string" },
+          "backgroundImage": { "type": "string" }
+        }
+      },
+      "footer": {
+        "type": "object",
+        "properties": {
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "links": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "text": { "type": "string" },
+                      "url": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "socialLinks": {
+            "type": "object",
+            "properties": {
+              "facebook": { "type": "string" },
+              "twitter": { "type": "string" },
+              "instagram": { "type": "string" },
+              "linkedin": { "type": "string" },
+              "youtube": { "type": "string" }
+            }
+          },
+          "copyright": { "type": "string" },
+          "privacyPolicyUrl": { "type": "string" },
+          "termsUrl": { "type": "string" }
+        }
+      }
+    }
+  }
+}

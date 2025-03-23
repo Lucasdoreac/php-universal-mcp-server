@@ -7,6 +7,11 @@
 const ProductController = require('./controllers/ProductController');
 const OrderController = require('./controllers/OrderController');
 const CategoryController = require('./controllers/CategoryController');
+const CustomerController = require('./controllers/CustomerController');
+const DiscountController = require('./controllers/DiscountController');
+const ReportController = require('./controllers/ReportController');
+
+const CacheManager = require('./utils/CacheManager');
 const models = require('./models');
 
 /**
@@ -18,13 +23,21 @@ class EcommerceManager {
    * 
    * @param {Object} options Opções de configuração
    * @param {Object} options.providerManager Gerenciador de provedores
-   * @param {Object} options.cache Sistema de cache
+   * @param {Object} options.cache Sistema de cache (opcional)
    */
   constructor(options = {}) {
     this.options = options;
-    this.productController = new ProductController(options);
-    this.orderController = new OrderController(options);
-    this.categoryController = new CategoryController(options);
+    
+    // Configura o sistema de cache
+    this.cache = options.cache || new CacheManager();
+    
+    // Configura os controladores
+    this.productController = new ProductController({ ...options, cache: this.cache });
+    this.orderController = new OrderController({ ...options, cache: this.cache });
+    this.categoryController = new CategoryController({ ...options, cache: this.cache });
+    this.customerController = new CustomerController({ ...options, cache: this.cache });
+    this.discountController = new DiscountController({ ...options, cache: this.cache });
+    this.reportController = new ReportController({ ...options, cache: this.cache });
   }
 
   /**
@@ -57,6 +70,30 @@ class EcommerceManager {
     server.registerMethod('categories.create', this._handleApiCall.bind(this, this.categoryController.create.bind(this.categoryController)));
     server.registerMethod('categories.update', this._handleApiCall.bind(this, this.categoryController.update.bind(this.categoryController)));
     server.registerMethod('categories.delete', this._handleApiCall.bind(this, this.categoryController.delete.bind(this.categoryController)));
+
+    // Registra métodos para clientes
+    server.registerMethod('customers.list', this._handleApiCall.bind(this, this.customerController.list.bind(this.customerController)));
+    server.registerMethod('customers.get', this._handleApiCall.bind(this, this.customerController.get.bind(this.customerController)));
+    server.registerMethod('customers.create', this._handleApiCall.bind(this, this.customerController.create.bind(this.customerController)));
+    server.registerMethod('customers.update', this._handleApiCall.bind(this, this.customerController.update.bind(this.customerController)));
+    server.registerMethod('customers.delete', this._handleApiCall.bind(this, this.customerController.delete.bind(this.customerController)));
+    server.registerMethod('customers.addAddress', this._handleApiCall.bind(this, this.customerController.addAddress.bind(this.customerController)));
+    server.registerMethod('customers.getOrders', this._handleApiCall.bind(this, this.customerController.getOrders.bind(this.customerController)));
+
+    // Registra métodos para cupons/descontos
+    server.registerMethod('discounts.list', this._handleApiCall.bind(this, this.discountController.list.bind(this.discountController)));
+    server.registerMethod('discounts.get', this._handleApiCall.bind(this, this.discountController.get.bind(this.discountController)));
+    server.registerMethod('discounts.create', this._handleApiCall.bind(this, this.discountController.create.bind(this.discountController)));
+    server.registerMethod('discounts.update', this._handleApiCall.bind(this, this.discountController.update.bind(this.discountController)));
+    server.registerMethod('discounts.delete', this._handleApiCall.bind(this, this.discountController.delete.bind(this.discountController)));
+    server.registerMethod('discounts.validate', this._handleApiCall.bind(this, this.discountController.validate.bind(this.discountController)));
+
+    // Registra métodos para relatórios
+    server.registerMethod('reports.sales', this._handleApiCall.bind(this, this.reportController.generateSalesReport.bind(this.reportController)));
+    server.registerMethod('reports.products', this._handleApiCall.bind(this, this.reportController.generateProductPerformanceReport.bind(this.reportController)));
+    server.registerMethod('reports.customers', this._handleApiCall.bind(this, this.reportController.generateCustomerReport.bind(this.reportController)));
+    server.registerMethod('reports.inventory', this._handleApiCall.bind(this, this.reportController.generateInventoryReport.bind(this.reportController)));
+    server.registerMethod('reports.dashboard', this._handleApiCall.bind(this, this.reportController.getDashboardMetrics.bind(this.reportController)));
   }
 
   /**
@@ -94,6 +131,35 @@ class EcommerceManager {
    */
   getModels() {
     return models;
+  }
+
+  /**
+   * Limpa o cache do sistema
+   * @param {string} pattern Padrão de chaves para limpar (opcional)
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  async clearCache(pattern) {
+    try {
+      let result;
+      if (pattern) {
+        result = await this.cache.deletePattern(pattern);
+        return {
+          success: true,
+          message: `${result} chaves de cache removidas com o padrão: ${pattern}`
+        };
+      } else {
+        result = await this.cache.clear();
+        return {
+          success: true,
+          message: 'Cache limpo com sucesso'
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: `Erro ao limpar cache: ${error.message}`
+      };
+    }
   }
 }
 

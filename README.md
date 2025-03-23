@@ -2,6 +2,9 @@
 
 Um servidor MCP (Model Context Protocol) universal para desenvolvimento PHP, compatível com diversos provedores de hospedagem e nuvem, funcional sem chave de API.
 
+![Versão](https://img.shields.io/badge/versão-1.0.1-blue.svg)
+![Licença](https://img.shields.io/badge/licença-MIT-green.svg)
+
 ## Características
 
 - **Universal**: Funciona com qualquer provedor de hospedagem ou plataforma de nuvem
@@ -11,6 +14,13 @@ Um servidor MCP (Model Context Protocol) universal para desenvolvimento PHP, com
 - **Compatibilidade MCP**: Conformidade total com o protocolo Model Context Protocol
 - **Modo Fallback**: Continua operacional mesmo quando APIs externas falham
 - **Execução PHP**: Permite executar código PHP diretamente através do Model Context Protocol
+
+## Novidades da Versão 1.0.1
+
+- Corrigido problema de importação do módulo crypto
+- Melhorada a integração com Claude Desktop
+- Adicionado suporte para detecção automática de provedores
+- [Visualize o changelog completo](./CHANGELOG.md)
 
 ## Instalação
 

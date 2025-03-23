@@ -1,0 +1,40 @@
+/* Additional styles for Bootstrap footer */
+
+/* Logo sizing */
+.footer-logo {
+  max-height: 50px;
+  width: auto;
+}
+
+/* Social icons */
+.social-icons a {
+  color: inherit;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.social-icons a:hover {
+  opacity: 1;
+}
+
+/* Footer links */
+.nav-link {
+  color: inherit;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 1;
+}
+
+/* Mobile optimizations */
+@media (max-width: 767.98px) {
+  footer h5 {
+    margin-top: 1.5rem;
+  }
+  
+  footer .col-md-2:first-of-type h5 {
+    margin-top: 0;
+  }
+}

@@ -1,0 +1,157 @@
+<!-- Bootstrap Footer Component -->
+<footer class="py-5 {{ options.bgClass }}">
+  <div class="container{{ options.containerFluid ? '-fluid' : '' }}">
+    <div class="row">
+      <!-- Coluna principal com logo e descrição -->
+      <div class="col-lg-{{ options.mainColumnWidth | default: '4' }} mb-4 mb-lg-0">
+        {% if site.logo and options.showLogo %}
+        <div class="mb-3">
+          <img src="{{ site.logo }}" alt="{{ site.name }}" 
+               class="footer-logo" style="max-height: {{ options.logoHeight | default: '50px' }}">
+        </div>
+        {% else %}
+        <h5 class="mb-3">{{ site.name }}</h5>
+        {% endif %}
+        
+        {% if site.description and options.showDescription %}
+        <p class="mb-3">{{ site.description }}</p>
+        {% endif %}
+        
+        {% if options.showSocialIcons and site.social %}
+        <div class="social-icons mb-4">
+          {% if site.social.facebook %}
+          <a href="https://facebook.com/{{ site.social.facebook }}" class="text-decoration-none me-2" 
+             target="_blank" rel="noopener">
+            <i class="bi bi-facebook fs-{{ options.socialIconSize | default: '5' }}"></i>
+          </a>
+          {% endif %}
+          
+          {% if site.social.instagram %}
+          <a href="https://instagram.com/{{ site.social.instagram }}" class="text-decoration-none me-2" 
+             target="_blank" rel="noopener">
+            <i class="bi bi-instagram fs-{{ options.socialIconSize | default: '5' }}"></i>
+          </a>
+          {% endif %}
+          
+          {% if site.social.twitter %}
+          <a href="https://twitter.com/{{ site.social.twitter }}" class="text-decoration-none me-2" 
+             target="_blank" rel="noopener">
+            <i class="bi bi-twitter fs-{{ options.socialIconSize | default: '5' }}"></i>
+          </a>
+          {% endif %}
+          
+          {% if site.social.youtube %}
+          <a href="https://youtube.com/{{ site.social.youtube }}" class="text-decoration-none me-2" 
+             target="_blank" rel="noopener">
+            <i class="bi bi-youtube fs-{{ options.socialIconSize | default: '5' }}"></i>
+          </a>
+          {% endif %}
+          
+          {% if site.social.linkedin %}
+          <a href="https://linkedin.com/company/{{ site.social.linkedin }}" class="text-decoration-none me-2" 
+             target="_blank" rel="noopener">
+            <i class="bi bi-linkedin fs-{{ options.socialIconSize | default: '5' }}"></i>
+          </a>
+          {% endif %}
+          
+          {% if site.social.pinterest %}
+          <a href="https://pinterest.com/{{ site.social.pinterest }}" class="text-decoration-none me-2" 
+             target="_blank" rel="noopener">
+            <i class="bi bi-pinterest fs-{{ options.socialIconSize | default: '5' }}"></i>
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      
+      <!-- Colunas de links -->
+      {% if options.showLinks %}
+      {% for linkGroup in footer.linkGroups %}
+      <div class="col-md-{{ options.linkColumnsWidth | default: '2' }} col-sm-6 mb-4 mb-md-0">
+        <h5 class="mb-3">{{ linkGroup.title }}</h5>
+        <ul class="nav flex-column">
+          {% for link in linkGroup.links %}
+          <li class="nav-item mb-2">
+            <a href="{{ link.url }}" class="nav-link p-0 text-decoration-none">
+              {{ link.title }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+      {% endif %}
+      
+      <!-- Coluna de contato e/ou newsletter -->
+      {% if options.showContact or options.showNewsletter %}
+      <div class="col-lg-{{ options.rightColumnWidth | default: '4' }} col-md-6">
+        {% if options.showContact %}
+        <h5 class="mb-3">{{ options.contactTitle | default: 'Contato' }}</h5>
+        <ul class="list-unstyled">
+          {% if site.address %}
+          <li class="mb-2">
+            <i class="bi bi-geo-alt me-2"></i> {{ site.address }}
+          </li>
+          {% endif %}
+          
+          {% if site.phone %}
+          <li class="mb-2">
+            <i class="bi bi-telephone me-2"></i> {{ site.phone }}
+          </li>
+          {% endif %}
+          
+          {% if site.email %}
+          <li class="mb-2">
+            <i class="bi bi-envelope me-2"></i> {{ site.email }}
+          </li>
+          {% endif %}
+        </ul>
+        {% endif %}
+        
+        {% if options.showNewsletter %}
+        <h5 class="mb-3 mt-4">{{ options.newsletterTitle | default: 'Newsletter' }}</h5>
+        <form class="mb-3">
+          <div class="input-group mb-2">
+            <input type="email" class="form-control" placeholder="{{ options.newsletterPlaceholder | default: 'Seu email' }}" required>
+            <button class="btn {{ options.newsletterButtonClass | default: 'btn-primary' }}" type="submit">
+              {{ options.newsletterButtonText | default: 'Inscrever' }}
+            </button>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="newsletter-consent" required>
+            <label class="form-check-label small" for="newsletter-consent">
+              {{ options.newsletterConsentText | default: 'Concordo em receber emails conforme a Política de Privacidade' }}
+            </label>
+          </div>
+        </form>
+        {% endif %}
+        
+        {% if options.showPaymentIcons and assets.images.payment_methods %}
+        <h5 class="mb-3 mt-4">{{ options.paymentsTitle | default: 'Formas de Pagamento' }}</h5>
+        <img src="{{ assets.images.payment_methods }}" alt="Métodos de Pagamento" class="img-fluid">
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    
+    <!-- Copyright e links de política -->
+    {% if options.showCopyright %}
+    <div class="d-flex flex-column flex-sm-row justify-content-between py-4 {{ options.dividerClass | default: 'border-top' }} mt-4">
+      <p class="mb-0">
+        &copy; {{ options.copyrightYear | default: 'now' | date: '%Y' }} {{ site.name }}. 
+        {{ options.copyrightText | default: 'Todos os direitos reservados.' }}
+      </p>
+      
+      {% if options.showPolicyLinks and footer.policyLinks %}
+      <ul class="list-unstyled d-flex mb-0">
+        {% for link in footer.policyLinks %}
+        <li class="{% if forloop.first %}ms-0{% else %}ms-3{% endif %}">
+          <a class="text-decoration-none" href="{{ link.url }}">{{ link.title }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</footer>

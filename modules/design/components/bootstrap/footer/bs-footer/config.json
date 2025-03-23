@@ -1,0 +1,178 @@
+{
+  "id": "bs-footer",
+  "name": "Bootstrap Footer",
+  "description": "Um rodapé responsivo usando Bootstrap 5",
+  "version": "1.0.0",
+  "category": "footer",
+  "options": [
+    {
+      "type": "select",
+      "id": "bgClass",
+      "name": "Estilo de Fundo",
+      "default": "bg-light",
+      "options": [
+        { "value": "bg-light", "label": "Claro" },
+        { "value": "bg-dark text-white", "label": "Escuro" },
+        { "value": "bg-primary text-white", "label": "Primário" },
+        { "value": "bg-secondary text-white", "label": "Secundário" },
+        { "value": "bg-white", "label": "Branco" },
+        { "value": "bg-transparent", "label": "Transparente" }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "containerFluid",
+      "name": "Container Fluido",
+      "default": false
+    },
+    {
+      "type": "toggle",
+      "id": "showLogo",
+      "name": "Mostrar Logo",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "logoHeight",
+      "name": "Altura do Logo",
+      "default": "50px"
+    },
+    {
+      "type": "toggle",
+      "id": "showDescription",
+      "name": "Mostrar Descrição do Site",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "showSocialIcons",
+      "name": "Mostrar Ícones Sociais",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "socialIconSize",
+      "name": "Tamanho dos Ícones Sociais",
+      "default": "5",
+      "options": [
+        { "value": "4", "label": "Pequeno" },
+        { "value": "5", "label": "Médio" },
+        { "value": "6", "label": "Grande" }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "showLinks",
+      "name": "Mostrar Colunas de Links",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "mainColumnWidth",
+      "name": "Largura da Coluna Principal",
+      "default": 4,
+      "min": 2,
+      "max": 6
+    },
+    {
+      "type": "number",
+      "id": "linkColumnsWidth",
+      "name": "Largura das Colunas de Links",
+      "default": 2,
+      "min": 1,
+      "max": 4
+    },
+    {
+      "type": "number",
+      "id": "rightColumnWidth",
+      "name": "Largura da Coluna Direita",
+      "default": 4,
+      "min": 2,
+      "max": 6
+    },
+    {
+      "type": "toggle",
+      "id": "showContact",
+      "name": "Mostrar Informações de Contato",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "contactTitle",
+      "name": "Título da Seção de Contato",
+      "default": "Contato"
+    },
+    {
+      "type": "toggle",
+      "id": "showNewsletter",
+      "name": "Mostrar Formulário de Newsletter",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newsletterTitle",
+      "name": "Título da Newsletter",
+      "default": "Newsletter"
+    },
+    {
+      "type": "text",
+      "id": "newsletterPlaceholder",
+      "name": "Placeholder do Campo de Email",
+      "default": "Seu email"
+    },
+    {
+      "type": "text",
+      "id": "newsletterButtonText",
+      "name": "Texto do Botão da Newsletter",
+      "default": "Inscrever"
+    },
+    {
+      "type": "text",
+      "id": "newsletterButtonClass",
+      "name": "Classe do Botão da Newsletter",
+      "default": "btn-primary"
+    },
+    {
+      "type": "text",
+      "id": "newsletterConsentText",
+      "name": "Texto de Consentimento da Newsletter",
+      "default": "Concordo em receber emails conforme a Política de Privacidade"
+    },
+    {
+      "type": "toggle",
+      "id": "showPaymentIcons",
+      "name": "Mostrar Ícones de Pagamento",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "paymentsTitle",
+      "name": "Título da Seção de Pagamentos",
+      "default": "Formas de Pagamento"
+    },
+    {
+      "type": "toggle",
+      "id": "showCopyright",
+      "name": "Mostrar Informações de Copyright",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "copyrightText",
+      "name": "Texto de Copyright",
+      "default": "Todos os direitos reservados."
+    },
+    {
+      "type": "text",
+      "id": "dividerClass",
+      "name": "Classe do Divisor de Copyright",
+      "default": "border-top"
+    },
+    {
+      "type": "toggle",
+      "id": "showPolicyLinks",
+      "name": "Mostrar Links de Política",
+      "default": true
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "name": "Bootstrap Gallery",
+  "description": "Galeria de imagens responsiva para produtos e portfólios",
+  "version": "1.0.0",
+  "category": "bootstrap",
+  "tags": ["galeria", "imagens", "bootstrap", "produtos", "portfólio"],
+  "author": "PHP Universal MCP Team",
+  "dependencies": ["bootstrap"],
+  "options": {
+    "id": {
+      "type": "string",
+      "description": "ID da galeria para referência em JavaScript",
+      "default": "bs-gallery"
+    },
+    "layout": {
+      "type": "string",
+      "description": "Estilo de layout da galeria",
+      "enum": ["grid", "masonry", "carousel", "thumbnails"],
+      "default": "grid"
+    },
+    "columns": {
+      "type": "object",
+      "description": "Número de colunas em diferentes breakpoints",
+      "properties": {
+        "xs": {
+          "type": "number",
+          "description": "Colunas em telas muito pequenas",
+          "default": 1
+        },
+        "sm": {
+          "type": "number",
+          "description": "Colunas em telas pequenas",
+          "default": 2
+        },
+        "md": {
+          "type": "number",
+          "description": "Colunas em telas médias",
+          "default": 3
+        },
+        "lg": {
+          "type": "number",
+          "description": "Colunas em telas grandes",
+          "default": 4
+        },
+        "xl": {
+          "type": "number",
+          "description": "Colunas em telas extra grandes",
+          "default": 4
+        }
+      }
+    },
+    "gap": {
+      "type": "number",
+      "description": "Espaçamento entre as imagens (em pixels)",
+      "default": 10
+    },
+    "aspectRatio": {
+      "type": "string",
+      "description": "Proporção das imagens (apenas para layout grid)",
+      "enum": ["1x1", "4x3", "16x9", "auto"],
+      "default": "auto"
+    },
+    "lightbox": {
+      "type": "boolean",
+      "description": "Habilitar lightbox ao clicar nas imagens",
+      "default": true
+    },
+    "captions": {
+      "type": "boolean",
+      "description": "Exibir legendas nas imagens",
+      "default": true
+    },
+    "captionPosition": {
+      "type": "string",
+      "description": "Posição das legendas",
+      "enum": ["bottom", "overlay", "hover"],
+      "default": "bottom"
+    },
+    "fullscreenButton": {
+      "type": "boolean",
+      "description": "Exibir botão de tela cheia no lightbox",
+      "default": true
+    },
+    "thumbnailSize": {
+      "type": "string",
+      "description": "Tamanho das miniaturas (para layout thumbnails)",
+      "enum": ["small", "medium", "large"],
+      "default": "medium"
+    },
+    "hoverEffect": {
+      "type": "string",
+      "description": "Efeito ao passar o mouse sobre as imagens",
+      "enum": ["none", "zoom", "fade", "overlay"],
+      "default": "zoom"
+    },
+    "roundedCorners": {
+      "type": "boolean",
+      "description": "Usar cantos arredondados nas imagens",
+      "default": true
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "images": {
+        "type": "array",
+        "description": "Imagens da galeria",
+        "items": {
+          "type": "object",
+          "properties": {
+            "src": { 
+              "type": "string",
+              "description": "URL da imagem"
+            },
+            "thumbnail": { 
+              "type": "string",
+              "description": "URL da miniatura (opcional)"
+            },
+            "alt": { 
+              "type": "string",
+              "description": "Texto alternativo"
+            },
+            "title": { 
+              "type": "string",
+              "description": "Título da imagem"
+            },
+            "caption": { 
+              "type": "string",
+              "description": "Legenda da imagem"
+            },
+            "width": { 
+              "type": "number",
+              "description": "Largura original da imagem"
+            },
+            "height": { 
+              "type": "number",
+              "description": "Altura original da imagem"
+            },
+            "tags": {
+              "type": "array",
+              "description": "Tags para filtragem (opcional)",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["src", "alt"]
+        }
+      },
+      "filters": {
+        "type": "array",
+        "description": "Filtros para as imagens (opcionais)",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": ["images"]
+  }
+}

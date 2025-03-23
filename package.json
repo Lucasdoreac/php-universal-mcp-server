@@ -1,7 +1,7 @@
 {
   "name": "php-universal-mcp-server",
-  "version": "1.0.1",
-  "description": "Servidor MCP universal para desenvolvimento PHP em qualquer provedor de hospedagem ou nuvem",
+  "version": "1.2.0",
+  "description": "Servidor MCP universal para desenvolvimento PHP e criação de sites em qualquer provedor de hospedagem",
   "main": "src/index.js",
   "bin": {
     "php-universal-mcp-server": "./src/cli.js"
@@ -10,7 +10,8 @@
     "test": "jest --forceExit",
     "start": "node src/cli.js",
     "lint": "eslint src/**/*.js",
-    "prepare": "node scripts/prepare.js"
+    "prepare": "node scripts/prepare.js",
+    "publish-all": "node scripts/publish.js"
   },
   "keywords": [
     "mcp",
@@ -24,7 +25,9 @@
     "gcp",
     "cpanel",
     "plesk",
-    "modelcontextprotocol"
+    "modelcontextprotocol",
+    "site-builder",
+    "website-generator"
   ],
   "author": "Lucas Dórea",
   "license": "MIT",
@@ -34,6 +37,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.1",
+    "basic-ftp": "^5.0.3",
     "crypto": "^1.0.1",
     "events": "^3.3.0"
   },

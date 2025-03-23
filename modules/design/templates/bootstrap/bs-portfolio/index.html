@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{profile.name}} - Portfolio</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  
+  <!-- AOS Animation Library -->
+  {{#if options.animationsEnabled}}
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  {{/if}}
+  
+  <!-- Lightbox CSS (usado para visualização de imagens) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightbox2@2.11.4/dist/css/lightbox.min.css">
+  
+  <!-- Custom Styles -->
+  <style>
+    /* Base styles */
+    :root {
+      {{#if (eq options.colorScheme "primary")}}
+      --bs-primary: #0d6efd;
+      --bs-primary-rgb: 13, 110, 253;
+      --accent-color: #6610f2;
+      --text-color: #212529;
+      --bg-light: #f8f9fa;
+      {{else if (eq options.colorScheme "dark")}}
+      --bs-primary: #212529;
+      --bs-primary-rgb: 33, 37, 41;
+      --accent-color: #495057;
+      --text-color: #212529;
+      --bg-light: #f8f9fa;
+      {{else if (eq options.colorScheme "creative")}}
+      --bs-primary: #f94c66;
+      --bs-primary-rgb: 249, 76, 102;
+      --accent-color: #6c63ff;
+      --text-color: #333333;
+      --bg-light: #f9f7fe;
+      {{else if (eq options.colorScheme "minimal")}}
+      --bs-primary: #212529;
+      --bs-primary-rgb: 33, 37, 41;
+      --accent-color: #adb5bd;
+      --text-color: #333333;
+      --bg-light: #ffffff;
+      {{/if}}
+    }
+    
+    body {
+      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      color: var(--text-color);
+      overflow-x: hidden;
+      {{#if options.darkMode}}
+      transition: background-color 0.3s ease;
+      {{/if}}
+    }
+    
+    {{#if options.darkMode}}
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .card,
+    body.dark-mode .navbar,
+    body.dark-mode .bg-light {
+      background-color: #1e1e1e !important;
+      color: #e0e0e0;
+    }
+    
+    body.dark-mode .text-dark {
+      color: #e0e0e0 !important;
+    }
+    
+    body.dark-mode .border {
+      border-color: #333 !important;
+    }
+    {{/if}}
+    
+    /* Navbar Styles */
+    {{#if options.navbarFixed}}
+    .navbar {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1030;
+      transition: all 0.3s ease;
+      padding: 1rem 0;
+    }
+    
+    .navbar.scrolled {
+      padding: 0.5rem 0;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+      padding-top: 80px;
+    }
+    {{/if}}
+    
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      padding: 6rem 0;
+      {{#if (eq options.heroStyle "fullscreen")}}
+      min-height: 100vh;
+      {{else}}
+      min-height: 60vh;
+      {{/if}}
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-light);
+      overflow: hidden;
+    }
+    
+    {{#if (eq options.heroStyle "animated")}}
+    .hero-section .animated-shape {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--bs-primary);
+      opacity: 0.1;
+      z-index: 0;
+    }
+    
+    .hero-section .shape-1 {
+      width: 300px;
+      height: 300px;
+      top: -100px;
+      right: -100px;
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    .hero-section .shape-2 {
+      width: 200px;
+      height: 200px;
+      bottom: -50px;
+      left: -50px;
+      animation: float 10s ease-in-out infinite;
+    }
+    
+    .hero-section .shape-3 {
+      width: 150px;
+      height: 150px;
+      top: 40%;
+      left: 30%;
+      animation: float 12s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.05); }
+    }
+    {{/if}}
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero-image {
+      max-width: 400px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Section Styles */
+    section {
+      padding: 5rem 0;
+    }
+    
+    .section-title {
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    
+    .section-title:after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 0;
+      width: 70px;
+      height: 4px;
+      background-color: var(--bs-primary);
+    }
+    
+    .text-center .section-title:after {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    /* About Section */
+    .about-image {
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .counter-item {
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .counter-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .counter-icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: var(--accent-color);
+    }
+    
+    .counter-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: var(--bs-primary);
+    }
+    
+    /* Skills Section */
+    .skill-item {
+      margin-bottom: 20px;
+    }
+    
+    .skill-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .skill-bar {
+      height: 10px;
+      border-radius: 5px;
+      background-color: #e9ecef;
+      overflow: hidden;
+    }
+    
+    .skill-progress {
+      height: 100%;
+      background-color: var(--bs-primary);
+      border-radius: 5px;
+      transition: width 1s ease;
+    }
+    
+    /* Projects Section */
+    .project-filters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    
+    .project-filter-btn {
+      padding: 8px 20px;
+      margin: 5px;
+      border-radius: 30px;
+      background-color: transparent;
+      border: 1px solid #dee2e6;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .project-filter-btn:hover, 
+    .project-filter-btn.active {
+      background-color: var(--bs-primary);
+      border-color: var(--bs-primary);
+      color: #fff;
+    }
+    
+    .project-item {
+      position: relative;
+      margin-bottom: 30px;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .project-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .project-image {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+    
+    {{#if (eq options.projectDetailStyle "hover")}}
+    .project-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .project-item:hover .project-overlay {
+      opacity: 1;
+    }
+    
+    .project-content {
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+    }
+    {{else}}
+    .project-content {
+      padding: 20px;
+      background-color: #fff;
+    }
+    {{/if}}
+    
+    {{#if (eq options.layout "masonry")}}
+    .masonry-grid {
+      display: flex;
+      margin-left: -15px;
+      width: auto;
+    }
+    
+    .masonry-grid-column {
+      padding-left: 15px;
+      background-clip: padding-box;
+    }
+    {{/if}}
+    
+    .project-category {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+      color: var(--bs-primary);
+      margin-bottom: 10px;
+    }
+    
+    .project-title {
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    
+    .project-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+    
+    .project-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      transition: background-color 0.3s ease;
+    }
+    
+    .project-btn:hover {
+      background-color: var(--bs-primary);
+    }
+    
+    /* Testimonials Section */
+    .testimonial-item {
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 30px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .testimonial-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .testimonial-content {
+      position: relative;
+      padding: 20px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .testimonial-content:before {
+      content: '\201C';
+      position: absolute;
+      top: 0;
+      left: 0;
+      font-size: 4rem;
+      line-height: 1;
+      color: rgba(var(--bs-primary-rgb), 0.2);
+    }
+    
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+    }
+    
+    .testimonial-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+      border: 3px solid #fff;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Resume Section */
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    
+    .timeline:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 8px;
+      height: 100%;
+      width: 2px;
+      background-color: #dee2e6;
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 40px;
+    }
+    
+    .timeline-dot {
+      position: absolute;
+      left: -30px;
+      top: 5px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: var(--bs-primary);
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.2);
+    }
+    
+    .timeline-date {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+      color: var(--bs-primary);
+      margin-bottom: 10px;
+    }
+    
+    .timeline-title {
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    
+    .timeline-subtitle {
+      margin-bottom: 15px;
+      color: #6c757d;
+    }
+    
+    /* Blog Section */
+    .blog-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-bottom: 30px;
+    }
+    
+    .blog-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .blog-image {
+      height: 200px;
+      object-fit: cover;
+      width: 100%;
+    }
+    
+    .blog-content {
+      padding: 20px;
+    }
+    
+    .blog-date {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 10px;
+    }
+    
+    .blog-category {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+      color: var(--bs-primary);
+      margin-bottom: 10px;
+    }
+    
+    .blog-title {
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    
+    /* Contact Section */
+    .contact-info-item {
+      display: flex;
+      margin-bottom: 30px;
+    }
+    
+    .contact-icon {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+      color: var(--bs-primary);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      margin-right: 20px;
+      flex-shrink: 0;
+    }
+    
+    .contact-text h4 {
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    
+    .contact-form {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Footer Styles */
+    .footer {
+      background-color: var(--bg-light);
+      padding: 4rem 0 2rem 0;
+    }
+    
+    .social-links {
+      margin-bottom: 20px;
+    }
+    
+    .social-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #fff;
+      color: var(--text-color);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      margin-right: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .social-links a:hover {
+      background-color: var(--bs-primary);
+      color: #fff;
+      transform: translateY(-3px);
+    }
+    
+    /* Dark mode toggle */
+    {{#if options.darkMode}}
+    .dark-mode-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #212529;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .dark-mode-toggle:hover {
+      transform: scale(1.1);
+    }
+    
+    .dark-mode .dark-mode-toggle {
+      background-color: #fff;
+      color: #212529;
+    }
+    {{/if}}
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .counter-item,
+      .skill-item,
+      .project-item,
+      .testimonial-item,
+      .blog-card {
+        margin-bottom: 20px;
+      }
+      
+      .section-title {
+        margin-bottom: 2rem;
+      }
+      
+      .project-filters {
+        margin-bottom: 20px;
+      }
+      
+      .project-filter-btn {
+        padding: 5px 15px;
+        margin: 3px;
+      }
+    }
+    
+    /* Custom user CSS */
+    {{{options.customCss}}}
+  </style>
+</head>
+<body {{#if options.darkMode}}class="light-mode"{{/if}}>
+  <!-- Navbar Component -->
+  {{> bootstrap/navbar/bs-navbar navbarOptions=(object theme="light" fixed=options.navbarFixed logo=profile.avatar)}}
+
+  <!-- Hero Section -->
+  {{#if options.sections.hero}}
+  <section id="home" class="hero-section">
+    {{#if (eq options.heroStyle "animated")}}
+    <div class="animated-shape shape-1"></div>
+    <div class="animated-shape shape-2"></div>
+    <div class="animated-shape shape-3"></div>
+    {{/if}}
+    
+    <div class="container">
+      <div class="row {{#if (eq options.heroStyle 'split')}}align-items-center{{/if}}">
+        {{#if (eq options.heroStyle 'centered')}}
+        <div class="col-lg-8 mx-auto text-center hero-content">
+          {{#if profile.avatar}}
+          <img src="{{profile.avatar}}" alt="{{profile.name}}" class="img-fluid rounded-circle mb-4" style="width: 150px; height: 150px; object-fit: cover;" data-aos="fade-up">
+          {{/if}}
+          
+          <h1 class="display-4 fw-bold mb-3" data-aos="fade-up" data-aos-delay="100">{{hero.heading}}</h1>
+          <p class="lead mb-5" data-aos="fade-up" data-aos-delay="200">{{hero.subheading}}</p>
+          
+          {{#if hero.buttonText}}
+          <a href="{{hero.buttonUrl}}" class="btn btn-primary btn-lg px-5" data-aos="fade-up" data-aos-delay="300">
+            {{#if options.useIcons}}<i class="bi bi-arrow-down-circle me-2"></i>{{/if}}
+            {{hero.buttonText}}
+          </a>
+          {{/if}}
+        </div>
+        {{else if (eq options.heroStyle 'split')}}
+        <div class="col-lg-6 hero-content" data-aos="fade-right">
+          <h1 class="display-4 fw-bold mb-3">{{hero.heading}}</h1>
+          <p class="lead mb-4">{{hero.subheading}}</p>
+          
+          {{#if hero.buttonText}}
+          <a href="{{hero.buttonUrl}}" class="btn btn-primary btn-lg px-4">
+            {{#if options.useIcons}}<i class="bi bi-arrow-down-circle me-2"></i>{{/if}}
+            {{hero.buttonText}}
+          </a>
+          {{/if}}
+        </div>
+        <div class="col-lg-6 text-center" data-aos="fade-left">
+          <img src="{{#if hero.backgroundImage}}{{hero.backgroundImage}}{{else}}{{profile.avatar}}{{/if}}" alt="{{profile.name}}" class="img-fluid hero-image">
+        </div>
+        {{else}}
+        <div class="col-lg-8 mx-auto text-center hero-content">
+          <h1 class="display-4 fw-bold mb-3" data-aos="fade-up" data-aos-delay="100">{{hero.heading}}</h1>
+          <p class="lead mb-5" data-aos="fade-up" data-aos-delay="200">{{hero.subheading}}</p>
+          
+          {{#if hero.buttonText}}
+          <a href="{{hero.buttonUrl}}" class="btn btn-primary btn-lg px-5" data-aos="fade-up" data-aos-delay="300">
+            {{#if options.useIcons}}<i class="bi bi-arrow-down-circle me-2"></i>{{/if}}
+            {{hero.buttonText}}
+          </a>
+          {{/if}}
+        </div>
+        {{/if}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- About Section -->
+  {{#if options.sections.about}}
+  <section id="about" class="py-5 py-md-7">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-5 mb-5 mb-lg-0" data-aos="fade-right">
+          <img src="{{about.image}}" alt="{{profile.name}}" class="img-fluid about-image">
+        </div>
+        <div class="col-lg-7 ps-lg-5" data-aos="fade-left">
+          <h2 class="section-title">{{about.title}}</h2>
+          <div class="mb-4">
+            {{{about.content}}}
+          </div>
+          
+          {{#if about.counters}}
+          <div class="row mt-5">
+            {{#each about.counters}}
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{multiply @index 100}}">
+              <div class="counter-item">
+                <div class="counter-icon">
+                  <i class="bi bi-{{this.icon}}"></i>
+                </div>
+                <div class="counter-value">{{this.value}}</div>
+                <div class="counter-label">{{this.label}}</div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          {{/if}}
+          
+          {{#if profile.cvUrl}}
+          <a href="{{profile.cvUrl}}" class="btn btn-primary mt-4" download>
+            {{#if options.useIcons}}<i class="bi bi-download me-2"></i>{{/if}}
+            Download CV
+          </a>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Skills Section -->
+  {{#if options.sections.skills}}
+  <section id="skills" class="py-5 py-md-7 bg-light">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+          <h2 class="section-title mb-5">Minhas Habilidades</h2>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-lg-6" data-aos="fade-right">
+          {{#each skills}}
+          {{#if (isEven @index)}}
+          <div class="skill-item">
+            <div class="skill-info">
+              <h4>{{this.name}}</h4>
+              <span>{{this.level}}%</span>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-progress" data-width="{{this.level}}%" style="width: 0%"></div>
+            </div>
+          </div>
+          {{/if}}
+          {{/each}}
+        </div>
+        
+        <div class="col-lg-6" data-aos="fade-left">
+          {{#each skills}}
+          {{#if (isOdd @index)}}
+          <div class="skill-item">
+            <div class="skill-info">
+              <h4>{{this.name}}</h4>
+              <span>{{this.level}}%</span>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-progress" data-width="{{this.level}}%" style="width: 0%"></div>
+            </div>
+          </div>
+          {{/if}}
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Projects Section -->
+  {{#if options.sections.projects}}
+  <section id="projects" class="py-5 py-md-7">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+          <h2 class="section-title mb-5">Meus Projetos</h2>
+        </div>
+      </div>
+      
+      {{#if options.filterProjects}}
+      <div class="project-filters" data-aos="fade-up">
+        <button class="project-filter-btn active" data-filter="*">Todos</button>
+        {{#each (uniqueCategories projects)}}
+        <button class="project-filter-btn" data-filter=".{{this}}">{{capitalize this}}</button>
+        {{/each}}
+      </div>
+      {{/if}}
+      
+      <div class="row projects-container">
+        {{#each projects}}
+        <div class="col-md-6 col-lg-{{divideBy 12 ../options.projectsPerRow}} mb-4 project-item-wrapper {{this.category}}" data-aos="fade-up" data-aos-delay="{{multiply @index 100}}">
+          <div class="project-item">
+            <img src="{{this.thumbnail}}" alt="{{this.title}}" class="project-image">
+            
+            {{#if (eq ../options.projectDetailStyle "hover")}}
+            <div class="project-overlay">
+              <div class="project-content">
+                <span class="project-category">{{this.category}}</span>
+                <h3 class="project-title">{{this.title}}</h3>
+                <p class="mb-4">{{truncate this.description 100}}</p>
+                
+                <div class="project-actions">
+                  {{#if this.url}}
+                  <a href="{{this.url}}" class="project-btn" target="_blank" title="Ver Projeto">
+                    <i class="bi bi-link-45deg"></i>
+                  </a>
+                  {{/if}}
+                  
+                  {{#if this.images}}
+                  <a href="{{firstItem this.images}}" class="project-btn" data-lightbox="project-{{@index}}" title="Ver Galeria">
+                    <i class="bi bi-images"></i>
+                  </a>
+                  {{/if}}
+                  
+                  {{#if (eq ../options.projectDetailStyle "modal")}}
+                  <a href="#" class="project-btn" data-bs-toggle="modal" data-bs-target="#projectModal{{@index}}" title="Detalhes">
+                    <i class="bi bi-info-circle"></i>
+                  </a>
+                  {{/if}}
+                </div>
+              </div>
+            </div>
+            {{else}}
+            <div class="project-content">
+              <span class="project-category">{{this.category}}</span>
+              <h3 class="project-title">{{this.title}}</h3>
+              <p>{{truncate this.description 100}}</p>
+              
+              <div class="mt-3">
+                {{#if this.url}}
+                <a href="{{this.url}}" class="btn btn-sm btn-outline-primary me-2" target="_blank">
+                  {{#if ../options.useIcons}}<i class="bi bi-link-45deg me-1"></i>{{/if}}
+                  Ver Projeto
+                </a>
+                {{/if}}
+                
+                {{#if (eq ../options.projectDetailStyle "modal")}}
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#projectModal{{@index}}">
+                  {{#if ../options.useIcons}}<i class="bi bi-info-circle me-1"></i>{{/if}}
+                  Detalhes
+                </button>
+                {{/if}}
+              </div>
+            </div>
+            {{/if}}
+            
+            <!-- Hidden images for lightbox gallery -->
+            {{#if this.images}}
+            <div class="d-none">
+              {{#each this.images}}
+              {{#if @index}}
+              <a href="{{this}}" data-lightbox="project-{{@../index}}"></a>
+              {{/if}}
+              {{/each}}
+            </div>
+            {{/if}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    
+    <!-- Project Modal Popups -->
+    {{#if (eq options.projectDetailStyle "modal")}}
+    {{#each projects}}
+    <div class="modal fade" id="projectModal{{@index}}" tabindex="-1" aria-labelledby="projectModalLabel{{@index}}" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="projectModalLabel{{@index}}">{{this.title}}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {{#if this.images}}
+            <div class="mb-4">
+              {{> bootstrap/gallery/bs-gallery galleryOptions=(object images=this.images showThumbnails=true)}}
+            </div>
+            {{else}}
+            <img src="{{this.thumbnail}}" alt="{{this.title}}" class="img-fluid mb-4 rounded">
+            {{/if}}
+            
+            <h6 class="fw-bold mb-3">Descrição</h6>
+            <p>{{this.description}}</p>
+            
+            <div class="row mt-4">
+              {{#if this.client}}
+              <div class="col-md-6 mb-3">
+                <h6 class="fw-bold">Cliente</h6>
+                <p>{{this.client}}</p>
+              </div>
+              {{/if}}
+              
+              {{#if this.date}}
+              <div class="col-md-6 mb-3">
+                <h6 class="fw-bold">Data</h6>
+                <p>{{this.date}}</p>
+              </div>
+              {{/if}}
+              
+              {{#if this.category}}
+              <div class="col-md-6 mb-3">
+                <h6 class="fw-bold">Categoria</h6>
+                <p>{{this.category}}</p>
+              </div>
+              {{/if}}
+              
+              {{#if this.tags}}
+              <div class="col-md-6 mb-3">
+                <h6 class="fw-bold">Tags</h6>
+                <p>
+                  {{#each this.tags}}
+                  <span class="badge bg-light text-dark me-1">{{this}}</span>
+                  {{/each}}
+                </p>
+              </div>
+              {{/if}}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            {{#if this.url}}
+            <a href="{{this.url}}" class="btn btn-primary" target="_blank">Ver Projeto</a>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+    {{/if}}
+  </section>
+  {{/if}}
+
+  <!-- Testimonials Section -->
+  {{#if options.sections.testimonials}}
+  <section id="testimonials" class="py-5 py-md-7 bg-light">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+          <h2 class="section-title mb-5">O Que Dizem Sobre Mim</h2>
+        </div>
+      </div>
+      
+      <div class="row">
+        {{#each testimonials}}
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="{{multiply @index 100}}">
+          <div class="testimonial-item">
+            <div class="testimonial-content">
+              <p>{{this.content}}</p>
+            </div>
+            <div class="testimonial-author">
+              {{#if this.avatar}}
+              <img src="{{this.avatar}}" alt="{{this.author}}" class="testimonial-avatar">
+              {{else}}
+              <div class="testimonial-avatar bg-primary d-flex align-items-center justify-content-center text-white">
+                {{initials this.author}}
+              </div>
+              {{/if}}
+              <div>
+                <h4>{{this.author}}</h4>
+                <p class="text-muted">{{this.role}}{{#if this.company}}, {{this.company}}{{/if}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Resume Section -->
+  {{#if options.sections.resume}}
+  <section id="resume" class="py-5 py-md-7">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+          <h2 class="section-title mb-5">Meu Currículo</h2>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right">
+          <h3 class="mb-4">Educação</h3>
+          
+          <div class="timeline">
+            {{#each resume.education}}
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <span class="timeline-date">{{this.startDate}} - {{#if this.endDate}}{{this.endDate}}{{else}}Atual{{/if}}</span>
+              <h4 class="timeline-title">{{this.degree}}</h4>
+              <p class="timeline-subtitle">{{this.institution}}, {{this.location}}</p>
+              <p>{{this.description}}</p>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+        
+        <div class="col-lg-6" data-aos="fade-left">
+          <h3 class="mb-4">Experiência</h3>
+          
+          <div class="timeline">
+            {{#each resume.experience}}
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <span class="timeline-date">{{this.startDate}} - {{#if this.endDate}}{{this.endDate}}{{else}}Atual{{/if}}</span>
+              <h4 class="timeline-title">{{this.position}}</h4>
+              <p class="timeline-subtitle">{{this.company}}, {{this.location}}</p>
+              <p>{{this.description}}</p>
+              
+              {{#if this.achievements}}
+              <ul class="mt-3">
+                {{#each this.achievements}}
+                <li>{{this}}</li>
+                {{/each}}
+              </ul>
+              {{/if}}
+            </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+      
+      {{#if resume.certifications}}
+      <div class="row mt-5">
+        <div class="col-lg-12" data-aos="fade-up">
+          <h3 class="mb-4">Certificações</h3>
+          
+          <div class="row">
+            {{#each resume.certifications}}
+            <div class="col-md-6 col-lg-4 mb-4">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">{{this.name}}</h5>
+                  <p class="card-text text-muted">{{this.issuer}}</p>
+                  <p class="card-text">Data: {{this.date}}</p>
+                  
+                  {{#if this.url}}
+                  <a href="{{this.url}}" target="_blank" class="btn btn-sm btn-outline-primary">Ver Certificado</a>
+                  {{/if}}
+                </div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Blog Section -->
+  {{#if options.sections.blog}}
+  <section id="blog" class="py-5 py-md-7 bg-light">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+          <h2 class="section-title mb-5">Últimos Posts</h2>
+        </div>
+      </div>
+      
+      <div class="row">
+        {{#each blog}}
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{multiply @index 100}}">
+          <div class="blog-card">
+            <img src="{{this.image}}" alt="{{this.title}}" class="blog-image">
+            <div class="blog-content">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="blog-date">{{this.date}}</span>
+                <span class="blog-category">{{this.category}}</span>
+              </div>
+              <h4 class="blog-title">{{this.title}}</h4>
+              <p class="blog-excerpt">{{truncate this.excerpt 100}}</p>
+              <a href="{{this.url}}" class="btn btn-sm btn-primary">Ler mais</a>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Contact Section -->
+  {{#if options.sections.contact}}
+  <section id="contact" class="py-5 py-md-7">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+          <h2 class="section-title mb-5">{{contact.title}}</h2>
+          <p class="mb-5">{{contact.subtitle}}</p>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-lg-4 mb-5 mb-lg-0" data-aos="fade-right">
+          <div class="contact-info-item">
+            <div class="contact-icon">
+              <i class="bi bi-envelope"></i>
+            </div>
+            <div class="contact-text">
+              <h4>Email</h4>
+              <p><a href="mailto:{{contact.email}}">{{contact.email}}</a></p>
+            </div>
+          </div>
+          
+          <div class="contact-info-item">
+            <div class="contact-icon">
+              <i class="bi bi-telephone"></i>
+            </div>
+            <div class="contact-text">
+              <h4>Telefone</h4>
+              <p><a href="tel:{{contact.phone}}">{{contact.phone}}</a></p>
+            </div>
+          </div>
+          
+          <div class="contact-info-item">
+            <div class="contact-icon">
+              <i class="bi bi-geo-alt"></i>
+            </div>
+            <div class="contact-text">
+              <h4>Endereço</h4>
+              <p>{{contact.address}}</p>
+            </div>
+          </div>
+          
+          {{#if options.showSocialLinks}}
+          <div class="social-links mt-4">
+            {{#if socialLinks.github}}
+            <a href="{{socialLinks.github}}" target="_blank"><i class="bi bi-github"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.linkedin}}
+            <a href="{{socialLinks.linkedin}}" target="_blank"><i class="bi bi-linkedin"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.twitter}}
+            <a href="{{socialLinks.twitter}}" target="_blank"><i class="bi bi-twitter"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.facebook}}
+            <a href="{{socialLinks.facebook}}" target="_blank"><i class="bi bi-facebook"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.instagram}}
+            <a href="{{socialLinks.instagram}}" target="_blank"><i class="bi bi-instagram"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.behance}}
+            <a href="{{socialLinks.behance}}" target="_blank"><i class="bi bi-behance"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.dribbble}}
+            <a href="{{socialLinks.dribbble}}" target="_blank"><i class="bi bi-dribbble"></i></a>
+            {{/if}}
+          </div>
+          {{/if}}
+        </div>
+        
+        <div class="col-lg-8" data-aos="fade-left">
+          <form class="contact-form" action="{{contact.formEndpoint}}" method="POST">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="name" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="subject" class="form-label">Assunto</label>
+              <input type="text" class="form-control" id="subject" name="subject" required>
+            </div>
+            
+            <div class="mb-4">
+              <label for="message" class="form-label">Mensagem</label>
+              <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+              {{#if options.useIcons}}<i class="bi bi-send me-2"></i>{{/if}}
+              Enviar Mensagem
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      {{#if (eq options.footerStyle "centered")}}
+      <div class="row">
+        <div class="col-lg-12 text-center">
+          {{#if options.showSocialLinks}}
+          <div class="social-links mb-4">
+            {{#if socialLinks.github}}
+            <a href="{{socialLinks.github}}" target="_blank"><i class="bi bi-github"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.linkedin}}
+            <a href="{{socialLinks.linkedin}}" target="_blank"><i class="bi bi-linkedin"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.twitter}}
+            <a href="{{socialLinks.twitter}}" target="_blank"><i class="bi bi-twitter"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.facebook}}
+            <a href="{{socialLinks.facebook}}" target="_blank"><i class="bi bi-facebook"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.instagram}}
+            <a href="{{socialLinks.instagram}}" target="_blank"><i class="bi bi-instagram"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.behance}}
+            <a href="{{socialLinks.behance}}" target="_blank"><i class="bi bi-behance"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.dribbble}}
+            <a href="{{socialLinks.dribbble}}" target="_blank"><i class="bi bi-dribbble"></i></a>
+            {{/if}}
+          </div>
+          {{/if}}
+          
+          <p>{{footer.copyright}}</p>
+          
+          {{#if footer.credits}}
+          <p class="text-muted mt-2">{{footer.credits}}</p>
+          {{/if}}
+        </div>
+      </div>
+      {{else}}
+      <div class="row">
+        <div class="col-md-6 mb-4 mb-md-0">
+          <h4>{{profile.name}}</h4>
+          <p>{{profile.title}}</p>
+          
+          {{#if options.showSocialLinks}}
+          <div class="social-links">
+            {{#if socialLinks.github}}
+            <a href="{{socialLinks.github}}" target="_blank"><i class="bi bi-github"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.linkedin}}
+            <a href="{{socialLinks.linkedin}}" target="_blank"><i class="bi bi-linkedin"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.twitter}}
+            <a href="{{socialLinks.twitter}}" target="_blank"><i class="bi bi-twitter"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.facebook}}
+            <a href="{{socialLinks.facebook}}" target="_blank"><i class="bi bi-facebook"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.instagram}}
+            <a href="{{socialLinks.instagram}}" target="_blank"><i class="bi bi-instagram"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.behance}}
+            <a href="{{socialLinks.behance}}" target="_blank"><i class="bi bi-behance"></i></a>
+            {{/if}}
+            
+            {{#if socialLinks.dribbble}}
+            <a href="{{socialLinks.dribbble}}" target="_blank"><i class="bi bi-dribbble"></i></a>
+            {{/if}}
+          </div>
+          {{/if}}
+        </div>
+        
+        <div class="col-md-6 text-md-end">
+          <p>{{footer.copyright}}</p>
+          
+          {{#if footer.credits}}
+          <p class="text-muted">{{footer.credits}}</p>
+          {{/if}}
+        </div>
+      </div>
+      {{/if}}
+    </div>
+  </footer>
+
+  {{#if options.darkMode}}
+  <!-- Dark Mode Toggle -->
+  <div class="dark-mode-toggle" id="darkModeToggle">
+    <i class="bi bi-moon-fill"></i>
+  </div>
+  {{/if}}
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Isotope (for filtering projects) -->
+  {{#if options.filterProjects}}
+  <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+  {{/if}}
+  
+  <!-- Lightbox JS -->
+  <script src="https://cdn.jsdelivr.net/npm/lightbox2@2.11.4/dist/js/lightbox.min.js"></script>
+  
+  <!-- AOS Animation Library -->
+  {{#if options.animationsEnabled}}
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  {{/if}}
+  
+  <!-- Custom Scripts -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize AOS animations
+      {{#if options.animationsEnabled}}
+      AOS.init({
+        duration: 800,
+        easing: 'ease-in-out',
+        once: true
+      });
+      {{/if}}
+      
+      // Navbar scroll effect
+      {{#if options.navbarFixed}}
+      var navbar = document.querySelector('.navbar');
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 100) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+      {{/if}}
+      
+      // Initialize Isotope for projects filtering
+      {{#if options.filterProjects}}
+      var projectsGrid = document.querySelector('.projects-container');
+      var iso = new Isotope(projectsGrid, {
+        itemSelector: '.project-item-wrapper',
+        layoutMode: '{{#if (eq options.layout "masonry")}}masonry{{else}}fitRows{{/if}}'
+      });
+      
+      var filterBtns = document.querySelectorAll('.project-filter-btn');
+      filterBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var filterValue = this.getAttribute('data-filter');
+          if (filterValue === '*') {
+            iso.arrange({ filter: '*' });
+          } else {
+            iso.arrange({ filter: filterValue });
+          }
+          
+          // Toggle active class
+          filterBtns.forEach(function(btn) {
+            btn.classList.remove('active');
+          });
+          this.classList.add('active');
+        });
+      });
+      {{/if}}
+      
+      // Animate skill bars
+      var skillBars = document.querySelectorAll('.skill-progress');
+      skillBars.forEach(function(bar) {
+        var width = bar.getAttribute('data-width');
+        setTimeout(function() {
+          bar.style.width = width;
+        }, 500);
+      });
+      
+      // Dark mode toggle
+      {{#if options.darkMode}}
+      var darkModeToggle = document.getElementById('darkModeToggle');
+      var icon = darkModeToggle.querySelector('i');
+      
+      // Check for saved theme preference
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        icon.classList.remove('bi-moon-fill');
+        icon.classList.add('bi-sun-fill');
+      }
+      
+      darkModeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        
+        if (document.body.classList.contains('dark-mode')) {
+          localStorage.setItem('darkMode', 'true');
+          icon.classList.remove('bi-moon-fill');
+          icon.classList.add('bi-sun-fill');
+        } else {
+          localStorage.setItem('darkMode', 'false');
+          icon.classList.remove('bi-sun-fill');
+          icon.classList.add('bi-moon-fill');
+        }
+      });
+      {{/if}}
+      
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 80,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+      
+      // Initialize lightbox
+      lightbox.option({
+        'resizeDuration': 200,
+        'wrapAround': true,
+        'albumLabel': "Imagem %1 de %2"
+      });
+    });
+  </script>
+</body>
+</html>

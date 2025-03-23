@@ -1,0 +1,69 @@
+<!-- Bootstrap Carousel Component -->
+<div id="{{#if options.id}}{{options.id}}{{else}}bs-carousel-{{random 1000}}{{/if}}" 
+     class="carousel slide {{#if options.fade}}carousel-fade{{/if}}" 
+     data-bs-ride="{{#if options.autoplay}}carousel{{else}}false{{/if}}"
+     {{#if options.interval}}data-bs-interval="{{options.interval}}"{{/if}}>
+  
+  {{#if options.indicators}}
+  <!-- Indicators -->
+  <div class="carousel-indicators">
+    {{#each items}}
+      <button type="button" 
+              data-bs-target="#{{../options.id}}" 
+              data-bs-slide-to="{{@index}}" 
+              {{#if @first}}class="active" aria-current="true"{{/if}} 
+              aria-label="Slide {{@index}}"></button>
+    {{/each}}
+  </div>
+  {{/if}}
+  
+  <!-- Slides -->
+  <div class="carousel-inner">
+    {{#each items}}
+    <div class="carousel-item {{#if @first}}active{{/if}}" {{#if ../options.height}}style="height: {{../options.height}};"{{/if}}>
+      <img src="{{image}}" class="d-block w-100" alt="{{title}}">
+      
+      {{#if title}}
+      <div class="carousel-caption d-none d-md-block text-{{#if ../options.captionPosition}}{{../options.captionPosition}}{{else}}center{{/if}} {{../options.captionClass}}">
+        <h5>{{title}}</h5>
+        {{#if description}}
+        <p>{{description}}</p>
+        {{/if}}
+        
+        {{#if button}}
+        <a href="{{button.url}}" class="btn btn-primary">{{button.text}}</a>
+        {{/if}}
+      </div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+  
+  {{#if options.controls}}
+  <!-- Controls -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#{{#if options.id}}{{options.id}}{{else}}bs-carousel-{{random 1000}}{{/if}}" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon {{#if options.darkControls}}bg-dark rounded-circle p-2{{/if}}" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#{{#if options.id}}{{options.id}}{{else}}bs-carousel-{{random 1000}}{{/if}}" data-bs-slide="next">
+    <span class="carousel-control-next-icon {{#if options.darkControls}}bg-dark rounded-circle p-2{{/if}}" aria-hidden="true"></span>
+    <span class="visually-hidden">Próximo</span>
+  </button>
+  {{/if}}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize carousel
+    var carouselElement = document.getElementById('{{#if options.id}}{{options.id}}{{else}}bs-carousel-{{random 1000}}{{/if}}');
+    if (carouselElement) {
+      var carousel = new bootstrap.Carousel(carouselElement, {
+        interval: {{#if options.interval}}{{options.interval}}{{else}}5000{{/if}},
+        wrap: true,
+        keyboard: true,
+        pause: 'hover',
+        ride: {{#if options.autoplay}}'carousel'{{else}}false{{/if}}
+      });
+    }
+  });
+</script>

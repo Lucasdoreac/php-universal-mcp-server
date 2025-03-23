@@ -1,8 +1,9 @@
 # PHP Universal MCP Server
 
 [![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)](#)
-[![Versão](https://img.shields.io/badge/versão-1.5.0-blue)](#)
+[![Versão](https://img.shields.io/badge/versão-1.7.2-blue)](#)
 [![Licença](https://img.shields.io/badge/licença-MIT-green)](#)
+[![Testes](https://img.shields.io/badge/testes-82%25-yellow)](#)
 
 ## Descrição
 
@@ -15,9 +16,12 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **Visualização Avançada**: Dashboards e interfaces interativas via artifacts do Claude
 - **Templates**: Sistema completo de design com suporte a Bootstrap 5
 - **Analytics**: Relatórios detalhados com visualização gráfica diretamente no Claude
+- **Exportação**: Exportação de relatórios em formatos CSV, PDF e JSON
 - **Segurança**: Autenticação robusta e armazenamento seguro de credenciais
 - **Automação**: Simplifique tarefas complexas com comandos simples
 - **Extensibilidade**: Arquitetura modular para fácil adição de novos provedores
+- **Responsividade**: Temas adaptados para visualização em dispositivos móveis
+- **Caching**: Sistema otimizado de cache para melhor desempenho
 
 ## Componentes
 
@@ -25,20 +29,22 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 
 - **MCP Protocol Layer**: Implementação completa do protocolo MCP sobre JSON-RPC 2.0
 - **PHP Runtime Engine**: Ambiente seguro para execução de código PHP
+- **Cache System**: Sistema de caching para otimização de operações frequentes
+- **Security Module**: Armazenamento seguro de credenciais e autenticação avançada
 
 ### Módulos
 
 - **E-commerce Manager**: API unificada para gerenciar produtos, pedidos e clientes
 - **Analytics System**: Sistema completo de relatórios e métricas com visualização via Claude
-- **Design System**: Motor de templates com suporte ao Bootstrap 5
+- **Design System**: Motor de templates com suporte ao Bootstrap 5 e adaptação responsiva
 - **Hosting Manager**: Gerenciamento de recursos de hospedagem, domínios e SSL
-- **Security Module**: Sistema de autenticação e gestão segura de credenciais
+- **Export Manager**: Sistema de exportação de relatórios em múltiplos formatos
 
 ### Provedores
 
 - **Hostinger**: Gerenciamento completo de hospedagem web e domínios
 - **Shopify**: Gerenciamento completo de lojas Shopify
-- **WooCommerce**: Gerenciamento de lojas WooCommerce (em desenvolvimento)
+- **WooCommerce**: Gerenciamento de lojas WooCommerce (70% implementado)
 
 ### Integrações
 
@@ -110,6 +116,12 @@ adicionar produto site-123 "Produto Teste" 99.90
 
 # Gerar dashboard de analytics
 analytics dashboard site-123 30 dias
+
+# Exportar relatório
+exportar relatório vendas site-123 pdf últimos-30-dias
+
+# Editar template
+editar template site-123
 ```
 
 ### Uso Programático
@@ -124,6 +136,10 @@ const server = new MCPServer({
     hostinger: {
       apiKey: 'sua-api-key'
     }
+  },
+  cache: {
+    enabled: true,
+    ttl: 3600 // 1 hora em segundos
   }
 });
 
@@ -142,7 +158,8 @@ const dashboard = await analytics.generateDashboard({
   dateRange: {
     startDate: '2025-01-01',
     endDate: '2025-03-20'
-  }
+  },
+  format: 'artifact' // Ou 'json', 'csv', 'pdf'
 });
 ```
 
@@ -155,6 +172,17 @@ O sistema de analytics fornece visualizações ricas diretamente no Claude Deskt
 - **Desempenho de Produtos**: Gráficos para análise de produtos mais vendidos
 - **Comportamento de Clientes**: Visualização de segmentação e padrões de compra
 - **Gestão de Estoque**: Representação visual de níveis de estoque e alertas
+- **Exportação Flexível**: Exportação de relatórios em CSV, PDF e JSON
+
+## Editor de Templates
+
+Nosso mais recente recurso permite editar templates diretamente no Claude:
+
+- **Editor Visual**: Interface interativa para personalização de templates
+- **Componentes Drag & Drop**: Adicione e organize elementos com facilidade
+- **Visualização em Tempo Real**: Veja as mudanças instantaneamente
+- **Responsividade**: Teste como o site ficará em diferentes dispositivos
+- **Temas Pré-definidos**: Escolha entre diversos temas profissionais
 
 ## Componentes Bootstrap via Artifacts
 
@@ -164,6 +192,7 @@ O sistema apresenta componentes diretamente no Claude via artifacts:
 - **bs-accordion**: Informações expansíveis para categorias e FAQs
 - **bs-gallery**: Visualização de imagens de produtos e templates
 - **bs-dashboard**: Visualização completa de métricas e KPIs
+- **bs-editor**: Editor visual de templates e páginas
 
 ## Templates Bootstrap
 
@@ -173,6 +202,7 @@ Templates visualizados diretamente no Claude via artifacts:
 - **bs-landing**: Template para páginas de destino
 - **bs-portfolio**: Template para portfólios profissionais
 - **bs-dashboard**: Template para visualização de métricas
+- **bs-shop**: Template responsivo para lojas online
 
 ## Contribuição
 
@@ -194,6 +224,7 @@ A documentação completa está disponível em:
 - [Sistema de Analytics](./docs/analytics/README.md)
 - [Provedores](./docs/providers/README.md)
 - [Templates e Componentes](./docs/design/README.md)
+- [Otimização de Performance](./docs/performance/README.md)
 
 ## Roadmap
 
@@ -202,9 +233,14 @@ A documentação completa está disponível em:
 - [x] Implementação do provedor Hostinger
 - [x] Implementação do provedor Shopify
 - [x] Sistema de analytics e relatórios via artifacts do Claude
-- [ ] Implementação do provedor WooCommerce 
+- [x] Implementação de temas responsivos
+- [x] Sistema de caching para otimização
+- [x] Exportação de relatórios em múltiplos formatos
+- [x] Editor visual de templates
+- [ ] Finalização do provedor WooCommerce (70% concluído)
 - [ ] Sistema de plugins de terceiros
-- [ ] Visualizações interativas mais avançadas via Claude artifacts
+- [ ] Integração com ferramentas de marketing digital
+- [ ] Suporte a mais provedores de hospedagem
 
 ## Licença
 

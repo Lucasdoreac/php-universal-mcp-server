@@ -46,6 +46,8 @@ O servidor deve iniciar e mostrar em qual porta está rodando (geralmente 3100).
 }
 ```
 
+**Para informações detalhadas sobre o formato JSON e exemplos completos, consulte [CLAUDE_CONFIG.md](CLAUDE_CONFIG.md).**
+
 3. **Reinicie o Claude Desktop** para carregar as novas configurações.
 
 ## Verificação da Configuração

@@ -44,6 +44,11 @@ class DesignSystem {
       ...options,
       bootstrapAdapter: this.enableBootstrap ? this.bootstrapAdapter : null
     });
+
+    // Log de inicialização
+    if (this.enableBootstrap) {
+      console.log(`Bootstrap support enabled (version ${options.bootstrapVersion || '5.3.0'})`);
+    }
   }
 
   /**
@@ -70,11 +75,98 @@ class DesignSystem {
     
     // Métodos específicos para Bootstrap se habilitado
     if (this.enableBootstrap) {
-      server.registerMethod('design.getBootstrapCss', this._handleApiCall.bind(this, async () => {
-        const theme = await this.designController.getCurrentTheme();
-        return {
-          css: this.bootstrapAdapter.generateCssVariables(theme.toJSON())
-        };
+      // Método para obter CSS Bootstrap personalizado
+      server.registerMethod('design.getBootstrapCss', this._handleApiCall.bind(this, async (params) => {
+        if (!params || !params.siteId) {
+          return {
+            success: false,
+            error: 'O ID do site é obrigatório'
+          };
+        }
+        
+        try {
+          const theme = await this.designController.getCurrentTheme({ siteId: params.siteId });
+          if (!theme.success) {
+            return theme; // Propaga o erro
+          }
+          
+          return {
+            success: true,
+            data: {
+              css: this.bootstrapAdapter.generateCssVariables(theme.data.theme),
+              sassVariables: this.bootstrapAdapter.generateSassVariables(theme.data.theme),
+              bootstrapLinks: {
+                css: this.bootstrapAdapter.getBootstrapCdnLink(),
+                icons: this.bootstrapAdapter.getBootstrapCdnLink('bootstrap-icons'),
+                scripts: this.bootstrapAdapter.getBootstrapScripts()
+              }
+            }
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: `Erro ao gerar CSS Bootstrap: ${error.message}`
+          };
+        }
+      }));
+      
+      // Método para verificar se um template é compatível com Bootstrap
+      server.registerMethod('design.isBootstrapTemplate', this._handleApiCall.bind(this, async (params) => {
+        if (!params || !params.templateId) {
+          return {
+            success: false,
+            error: 'O ID do template é obrigatório'
+          };
+        }
+        
+        try {
+          const template = await this.designController.getTemplate({ templateId: params.templateId });
+          if (!template.success) {
+            return template; // Propaga o erro
+          }
+          
+          const isBootstrap = 
+            template.data.templateId.startsWith('bs-') || 
+            template.data.category === 'bootstrap' ||
+            (template.data.metadata && template.data.metadata.bootstrap === true);
+          
+          return {
+            success: true,
+            data: {
+              isBootstrap,
+              templateId: template.data.templateId,
+              category: template.data.category
+            }
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: `Erro ao verificar template Bootstrap: ${error.message}`
+          };
+        }
+      }));
+      
+      // Método para listar componentes Bootstrap específicos
+      server.registerMethod('design.getBootstrapComponents', this._handleApiCall.bind(this, async (params) => {
+        try {
+          const category = params?.category || null;
+          const options = { category: category ? `bootstrap/${category}` : 'bootstrap' };
+          
+          const components = await this.designController.getComponents(options);
+          if (!components.success) {
+            return components; // Propaga o erro
+          }
+          
+          return {
+            success: true,
+            data: components.data
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: `Erro ao listar componentes Bootstrap: ${error.message}`
+          };
+        }
       }));
     }
   }
@@ -195,6 +287,8 @@ class DesignSystem {
     // Atualizar controlador com o adaptador Bootstrap
     this.designController.setBootstrapAdapter(this.bootstrapAdapter);
     
+    console.log(`Bootstrap support enabled (version ${options.version || '5.3.0'})`);
+    
     return this;
   }
 
@@ -205,11 +299,25 @@ class DesignSystem {
    * @returns {BootstrapTemplateRenderer} Renderizador de templates Bootstrap
    */
   createBootstrapRenderer(options = {}) {
+    if (!this.bootstrapAdapter && !this.enableBootstrap) {
+      console.warn('BootstrapAdapter não está disponível. Habilitando suporte ao Bootstrap automaticamente.');
+      this.enableBootstrapSupport();
+    }
+    
     return new BootstrapTemplateRenderer({
       ...options,
       cache: options.cache || this.options.cache,
-      bootstrapAdapter: this.bootstrapAdapter || undefined
+      bootstrapAdapter: this.bootstrapAdapter
     });
+  }
+  
+  /**
+   * Verifica se o suporte ao Bootstrap está habilitado
+   * 
+   * @returns {Boolean} true se o suporte ao Bootstrap estiver habilitado
+   */
+  isBootstrapEnabled() {
+    return this.enableBootstrap === true && this.bootstrapAdapter !== null;
   }
 }
 

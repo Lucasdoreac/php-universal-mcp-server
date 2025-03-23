@@ -1,0 +1,130 @@
+{
+  "name": "Bootstrap Product Modal",
+  "description": "Modal para visualização rápida de produtos em lojas e-commerce",
+  "version": "1.0.0",
+  "category": "bootstrap",
+  "tags": ["modal", "produto", "ecommerce", "bootstrap", "quickview"],
+  "author": "PHP Universal MCP Team",
+  "dependencies": ["bootstrap"],
+  "options": {
+    "id": {
+      "type": "string",
+      "description": "ID do modal para referência em JavaScript",
+      "default": "product-modal"
+    },
+    "size": {
+      "type": "string",
+      "description": "Tamanho do modal (sm, lg, xl)",
+      "enum": ["sm", "lg", "xl"],
+      "default": "lg"
+    },
+    "showGallery": {
+      "type": "boolean",
+      "description": "Exibir galeria de imagens adicionais",
+      "default": true
+    },
+    "fullscreen": {
+      "type": "boolean",
+      "description": "Modal em tela cheia em dispositivos móveis",
+      "default": false
+    },
+    "centered": {
+      "type": "boolean",
+      "description": "Centralizar modal verticalmente",
+      "default": true
+    },
+    "showClose": {
+      "type": "boolean", 
+      "description": "Exibir botão de fechar",
+      "default": true
+    },
+    "animationDuration": {
+      "type": "number",
+      "description": "Duração da animação em milissegundos",
+      "default": 300
+    },
+    "scrollable": {
+      "type": "boolean",
+      "description": "Permitir rolagem dentro do modal",
+      "default": true
+    },
+    "addToCartButton": {
+      "type": "object",
+      "description": "Configurações do botão de adicionar ao carrinho",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Texto do botão",
+          "default": "Adicionar ao Carrinho"
+        },
+        "customClass": {
+          "type": "string",
+          "description": "Classes CSS personalizadas",
+          "default": "btn-primary"
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "description": "Personalização de cores e estilos",
+      "properties": {
+        "headerBg": {
+          "type": "string",
+          "description": "Cor de fundo do cabeçalho",
+          "default": "#ffffff"
+        },
+        "footerBg": {
+          "type": "string",
+          "description": "Cor de fundo do rodapé",
+          "default": "#f8f9fa"
+        }
+      }
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "product": {
+        "type": "object",
+        "description": "Dados do produto",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "price": { "type": "number" },
+          "salePrice": { "type": "number" },
+          "description": { "type": "string" },
+          "mainImage": { "type": "string" },
+          "gallery": { 
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "sku": { "type": "string" },
+          "stock": { "type": "number" },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            }
+          },
+          "variations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "options": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

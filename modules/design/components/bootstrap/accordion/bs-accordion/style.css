@@ -1,0 +1,121 @@
+/* Estilos para o Accordion Bootstrap */
+
+/* Melhorias na aparência padrão */
+.accordion {
+  --bs-accordion-btn-focus-box-shadow: 0 0 0 0.15rem rgba(var(--bs-primary-rgb, 13, 110, 253), 0.25);
+  --bs-accordion-active-color: var(--bs-primary, #0d6efd);
+  --bs-accordion-active-bg: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.1);
+}
+
+/* Melhorias na animação */
+.accordion-collapse {
+  transition: var(--bs-accordion-animation-duration, 300ms) ease-in-out !important;
+}
+
+/* Estilização do título */
+.accordion-title {
+  font-weight: 500;
+}
+
+/* Estilos para o ícone personalizado */
+.bs-accordion-icon {
+  transition: transform var(--bs-accordion-animation-duration, 300ms) ease;
+}
+
+.accordion-button:not(.collapsed) .bs-accordion-icon.bi-plus {
+  transform: rotate(45deg);
+}
+
+/* Badges no accordion */
+.accordion-button .badge {
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+/* Modo escuro - ícones */
+[data-bs-theme="dark"] .accordion-button::after {
+  filter: invert(1);
+}
+
+/* Melhorias para categorias (classe auxiliar) */
+.accordion-categories .accordion-body {
+  padding: 0.5rem 1.25rem;
+}
+
+.accordion-categories .accordion-body ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.accordion-categories .accordion-body ul li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.accordion-categories .accordion-body ul li:last-child {
+  border-bottom: none;
+}
+
+/* Melhorias para FAQ (classe auxiliar) */
+.accordion-faq .accordion-header {
+  margin-bottom: 0;
+}
+
+.accordion-faq .accordion-button {
+  font-weight: 500;
+}
+
+.accordion-faq .accordion-body {
+  color: var(--bs-gray-700, #495057);
+}
+
+/* Variante com bordas arredondadas (classe opcional) */
+.accordion-rounded .accordion-item {
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.accordion-rounded .accordion-item:first-of-type,
+.accordion-rounded .accordion-item:first-of-type .accordion-button {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.accordion-rounded .accordion-item:last-of-type,
+.accordion-rounded .accordion-item:last-of-type .accordion-button.collapsed {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+/* Suporte para always-open sem perder o estilo */
+.accordion-item .accordion-collapse.always-open {
+  height: auto !important;
+  border-bottom: 1px solid var(--bs-accordion-border-color);
+}
+
+/* Animação diferente para o ícone de seta padrão */
+.accordion-button:not(.collapsed)::after {
+  transform: rotate(-180deg);
+  transition: transform var(--bs-accordion-animation-duration, 300ms) ease;
+}
+
+.accordion-button.collapsed::after {
+  transition: transform var(--bs-accordion-animation-duration, 300ms) ease;
+}
+
+/* Estilos responsivos */
+@media (max-width: 767.98px) {
+  .accordion-body {
+    padding: 1rem;
+  }
+  
+  .accordion-button {
+    padding: 0.75rem 1rem;
+  }
+  
+  .accordion-categories .accordion-body {
+    padding: 0.5rem 1rem;
+  }
+}

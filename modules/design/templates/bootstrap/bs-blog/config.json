@@ -1,0 +1,201 @@
+{
+  "name": "Bootstrap Blog Template",
+  "description": "Template responsivo para blogs com suporte a Bootstrap 5",
+  "version": "1.0.0",
+  "category": "bootstrap",
+  "tags": ["blog", "bootstrap", "responsivo", "artigos"],
+  "author": "PHP Universal MCP Team",
+  "dependencies": ["bootstrap"],
+  "components": [
+    "bootstrap/navbar/bs-navbar",
+    "bootstrap/footer/bs-footer",
+    "bootstrap/accordion/bs-accordion"
+  ],
+  "options": {
+    "layout": {
+      "type": "string",
+      "description": "Layout do blog",
+      "enum": ["standard", "masonry", "grid"],
+      "default": "standard"
+    },
+    "sidebar": {
+      "type": "string",
+      "description": "Posição da barra lateral",
+      "enum": ["right", "left", "none"],
+      "default": "right"
+    },
+    "postsPerPage": {
+      "type": "number",
+      "description": "Número de posts por página",
+      "default": 6
+    },
+    "excerptLength": {
+      "type": "number",
+      "description": "Comprimento do trecho exibido na lista de posts",
+      "default": 200
+    },
+    "showFeaturedImage": {
+      "type": "boolean",
+      "description": "Exibir imagem destacada nos posts",
+      "default": true
+    },
+    "showAuthor": {
+      "type": "boolean",
+      "description": "Exibir informações do autor",
+      "default": true
+    },
+    "showDate": {
+      "type": "boolean",
+      "description": "Exibir data de publicação",
+      "default": true
+    },
+    "showCategories": {
+      "type": "boolean",
+      "description": "Exibir categorias nos posts",
+      "default": true
+    },
+    "showTags": {
+      "type": "boolean",
+      "description": "Exibir tags nos posts",
+      "default": true
+    },
+    "showReadMore": {
+      "type": "boolean",
+      "description": "Exibir botão 'Ler mais'",
+      "default": true
+    },
+    "showComments": {
+      "type": "boolean",
+      "description": "Habilitar seção de comentários",
+      "default": true
+    },
+    "showSearch": {
+      "type": "boolean",
+      "description": "Exibir campo de busca",
+      "default": true
+    },
+    "featuredPostsSlider": {
+      "type": "boolean",
+      "description": "Exibir slider de posts destacados",
+      "default": true
+    },
+    "socialSharingButtons": {
+      "type": "boolean",
+      "description": "Exibir botões de compartilhamento social",
+      "default": true
+    },
+    "newsletterSignup": {
+      "type": "boolean",
+      "description": "Incluir formulário para inscrição em newsletter",
+      "default": true
+    },
+    "customCss": {
+      "type": "string",
+      "description": "CSS personalizado adicional",
+      "default": ""
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "blogInfo": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "subtitle": { "type": "string" },
+          "logo": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "posts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "title": { "type": "string" },
+            "slug": { "type": "string" },
+            "excerpt": { "type": "string" },
+            "content": { "type": "string" },
+            "featuredImage": { "type": "string" },
+            "date": { "type": "string" },
+            "author": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "avatar": { "type": "string" },
+                "bio": { "type": "string" }
+              }
+            },
+            "categories": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "isFeatured": { "type": "boolean" },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "author": { "type": "string" },
+                  "avatar": { "type": "string" },
+                  "date": { "type": "string" },
+                  "content": { "type": "string" },
+                  "replies": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "author": { "type": "string" },
+                        "avatar": { "type": "string" },
+                        "date": { "type": "string" },
+                        "content": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "categories": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "slug": { "type": "string" },
+            "count": { "type": "number" }
+          }
+        }
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "slug": { "type": "string" },
+            "count": { "type": "number" }
+          }
+        }
+      },
+      "pages": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "slug": { "type": "string" },
+            "content": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

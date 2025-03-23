@@ -1,53 +1,58 @@
 {
   "name": "php-universal-mcp-server",
-  "version": "1.2.2",
-  "description": "Servidor MCP universal para desenvolvimento PHP e criação de sites em qualquer provedor de hospedagem",
-  "main": "src/index.js",
-  "bin": {
-    "php-universal-mcp-server": "./src/cli.js"
-  },
+  "version": "1.0.0",
+  "description": "Servidor MCP Universal para PHP com suporte a múltiplas plataformas de hospedagem e e-commerce",
+  "main": "index.js",
   "scripts": {
-    "test": "jest --forceExit",
-    "start": "node src/cli.js",
-    "lint": "eslint src/**/*.js",
-    "prepare": "node scripts/prepare.js",
-    "publish-all": "node scripts/publish.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.js\""
   },
   "keywords": [
+    "php",
     "mcp",
     "server",
-    "php",
-    "universal",
-    "cloud",
-    "hosting",
-    "aws",
-    "azure",
-    "gcp",
-    "cpanel",
-    "plesk",
-    "modelcontextprotocol",
-    "site-builder",
-    "website-generator"
+    "e-commerce",
+    "hostinger",
+    "woocommerce",
+    "shopify",
+    "hosting"
   ],
-  "author": "Lucas Dórea",
+  "author": "",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Lucasdoreac/php-universal-mcp-server.git"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.1",
-    "basic-ftp": "^5.0.5",
-    "crypto": "^1.0.1",
-    "events": "^3.3.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.23.0",
-    "eslint": "^8.57.1",
-    "globals": "^16.0.0",
-    "jest": "^29.7.0"
-  },
   "engines": {
     "node": ">=14.0.0"
+  },
+  "bin": {
+    "php-universal-mcp": "./index.js"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "winston": "^3.11.0",
+    "express": "^4.18.2",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lucasdoreac/php-universal-mcp-server"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   }
 }

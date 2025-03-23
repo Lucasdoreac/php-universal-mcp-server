@@ -1,0 +1,120 @@
+{
+  "name": "Bootstrap Carousel",
+  "description": "Componente de carousel responsivo usando classes nativas do Bootstrap",
+  "category": "carousel",
+  "version": "1.0.0",
+  "supports": ["bootstrap"],
+  "author": "PHP Universal MCP Server",
+  "options": {
+    "autoplay": {
+      "type": "boolean",
+      "default": true,
+      "description": "Inicia o carousel automaticamente"
+    },
+    "interval": {
+      "type": "number",
+      "default": 5000,
+      "description": "Intervalo entre slides em milissegundos"
+    },
+    "controls": {
+      "type": "boolean",
+      "default": true,
+      "description": "Exibe controles de navegação"
+    },
+    "indicators": {
+      "type": "boolean",
+      "default": true,
+      "description": "Exibe indicadores de posição"
+    },
+    "fade": {
+      "type": "boolean",
+      "default": false,
+      "description": "Usa efeito de fade entre slides"
+    },
+    "darkControls": {
+      "type": "boolean",
+      "default": false,
+      "description": "Usa controles escuros (para fundos claros)"
+    },
+    "captionPosition": {
+      "type": "string",
+      "default": "center",
+      "enum": ["start", "center", "end"],
+      "description": "Alinhamento das legendas"
+    },
+    "captionClass": {
+      "type": "string",
+      "default": "text-white",
+      "description": "Classes CSS adicionais para legendas"
+    },
+    "height": {
+      "type": "string",
+      "default": "auto",
+      "description": "Altura do carousel"
+    }
+  },
+  "dependencies": {
+    "css": ["bootstrap"],
+    "js": ["bootstrap"]
+  },
+  "html": "index.html",
+  "css": "style.css",
+  "js": null,
+  "examples": [
+    {
+      "name": "Carousel Padrão",
+      "options": {},
+      "data": {
+        "items": [
+          {
+            "image": "https://via.placeholder.com/1200x400",
+            "title": "Primeiro Slide",
+            "description": "Descrição do primeiro slide",
+            "button": {
+              "text": "Saiba Mais",
+              "url": "#"
+            }
+          },
+          {
+            "image": "https://via.placeholder.com/1200x400",
+            "title": "Segundo Slide",
+            "description": "Descrição do segundo slide",
+            "button": {
+              "text": "Ver Produtos",
+              "url": "#"
+            }
+          },
+          {
+            "image": "https://via.placeholder.com/1200x400",
+            "title": "Terceiro Slide",
+            "description": "Descrição do terceiro slide",
+            "button": {
+              "text": "Contato",
+              "url": "#"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Carousel com Fade",
+      "options": {
+        "fade": true
+      },
+      "data": {
+        "items": [
+          {
+            "image": "https://via.placeholder.com/1200x400",
+            "title": "Efeito Fade",
+            "description": "Carousel com transição fade"
+          },
+          {
+            "image": "https://via.placeholder.com/1200x400",
+            "title": "Segundo Slide",
+            "description": "Outro slide com efeito fade"
+          }
+        ]
+      }
+    }
+  ]
+}

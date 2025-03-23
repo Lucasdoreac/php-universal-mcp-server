@@ -1,0 +1,28 @@
+{
+  "name": "php-runtime-engine",
+  "version": "1.0.0",
+  "description": "Ambiente seguro para execução de código PHP com limitação de recursos e cache",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node examples/runtime-demo.js",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "php",
+    "runtime",
+    "executor",
+    "cache",
+    "sandbox",
+    "mcp",
+    "universal"
+  ],
+  "author": "PHP Universal MCP Server Team",
+  "license": "MIT",
+  "dependencies": {
+    "crypto": "^1.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

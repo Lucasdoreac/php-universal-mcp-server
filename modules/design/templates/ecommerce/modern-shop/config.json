@@ -1,0 +1,97 @@
+{
+  "id": "modern-shop",
+  "name": "Modern Shop",
+  "description": "Um template moderno e clean para lojas virtuais",
+  "version": "1.0.0",
+  "category": "ecommerce",
+  "author": "PHP Universal MCP Team",
+  "supports": ["woocommerce", "shopify", "hostinger"],
+  "thumbnail": "preview.png",
+  "pages": [
+    {
+      "name": "Home",
+      "file": "index.html",
+      "isDefault": true
+    },
+    {
+      "name": "Produtos",
+      "file": "products.html"
+    },
+    {
+      "name": "Produto",
+      "file": "product.html"
+    },
+    {
+      "name": "Carrinho",
+      "file": "cart.html"
+    },
+    {
+      "name": "Checkout",
+      "file": "checkout.html"
+    },
+    {
+      "name": "Sobre",
+      "file": "about.html"
+    },
+    {
+      "name": "Contato",
+      "file": "contact.html"
+    }
+  ],
+  "customizations": [
+    {
+      "type": "color",
+      "id": "primary",
+      "name": "Cor Primária",
+      "default": "#3498db"
+    },
+    {
+      "type": "color",
+      "id": "secondary",
+      "name": "Cor Secundária",
+      "default": "#2ecc71"
+    },
+    {
+      "type": "color",
+      "id": "accent",
+      "name": "Cor de Destaque",
+      "default": "#e74c3c"
+    },
+    {
+      "type": "font",
+      "id": "headingFont",
+      "name": "Fonte de Títulos",
+      "default": "Montserrat",
+      "options": ["Montserrat", "Roboto", "Open Sans", "Raleway"]
+    },
+    {
+      "type": "font",
+      "id": "bodyFont",
+      "name": "Fonte de Texto",
+      "default": "Open Sans",
+      "options": ["Open Sans", "Roboto", "Lato", "Nunito"]
+    },
+    {
+      "type": "select",
+      "id": "productLayout",
+      "name": "Layout de Produtos",
+      "default": "grid",
+      "options": [
+        { "value": "grid", "label": "Grade" },
+        { "value": "list", "label": "Lista" }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "showRatings",
+      "name": "Exibir Avaliações",
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "enableQuickView",
+      "name": "Habilitar Visualização Rápida",
+      "default": true
+    }
+  ]
+}

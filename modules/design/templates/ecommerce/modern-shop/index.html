@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ site.name }} - Home</title>
+  <link rel="stylesheet" href="{{ assets.css.main }}">
+  <link href="https://fonts.googleapis.com/css2?family={{ typography.headingFont }}&family={{ typography.bodyFont }}&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <a href="/">
+            <img src="{{ site.logo }}" alt="{{ site.name }}" onerror="this.src='{{ assets.images.defaultLogo }}'">
+          </a>
+        </div>
+        
+        <nav class="main-nav">
+          <ul>
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="/products/">Produtos</a></li>
+            <li><a href="/about/">Sobre</a></li>
+            <li><a href="/contact/">Contato</a></li>
+          </ul>
+        </nav>
+        
+        <div class="header-actions">
+          <a href="/account/" class="account-link"><i class="icon-user"></i></a>
+          <a href="/cart/" class="cart-link">
+            <i class="icon-cart"></i>
+            <span class="cart-count">{{ cart.count }}</span>
+          </a>
+          <button class="search-toggle"><i class="icon-search"></i></button>
+        </div>
+      </div>
+      
+      <div class="search-container">
+        <form action="/search/" method="get" class="search-form">
+          <input type="text" name="q" placeholder="O que você está procurando?">
+          <button type="submit"><i class="icon-search"></i></button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <div class="banner-slider">
+      {% for slide in banners.main %}
+      <div class="slide" style="background-image: url('{{ slide.image }}');">
+        <div class="container">
+          <div class="slide-content">
+            <h2>{{ slide.title }}</h2>
+            <p>{{ slide.description }}</p>
+            {% if slide.button_text %}
+            <a href="{{ slide.button_url }}" class="btn btn-primary">{{ slide.button_text }}</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Featured Categories -->
+  <section class="featured-categories">
+    <div class="container">
+      <div class="section-title">
+        <h2>Categorias em Destaque</h2>
+      </div>
+      
+      <div class="categories-grid">
+        {% for category in categories.featured %}
+        <div class="category-card">
+          <a href="{{ category.url }}">
+            <div class="category-image">
+              <img src="{{ category.image }}" alt="{{ category.name }}">
+            </div>
+            <h3>{{ category.name }}</h3>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="featured-products">
+    <div class="container">
+      <div class="section-title">
+        <h2>Produtos em Destaque</h2>
+      </div>
+      
+      <div class="products-grid">
+        {% for product in products.featured %}
+        <div class="product-card">
+          <div class="product-image">
+            {% if product.discount %}
+            <span class="discount-badge">{{ product.discount }}% OFF</span>
+            {% endif %}
+            
+            <a href="{{ product.url }}">
+              <img src="{{ product.images[0] }}" alt="{{ product.name }}">
+            </a>
+            
+            <div class="product-actions">
+              <button class="quick-view" data-product-id="{{ product.id }}"><i class="icon-eye"></i></button>
+              <button class="add-to-cart" data-product-id="{{ product.id }}"><i class="icon-cart"></i></button>
+              <button class="add-to-wishlist" data-product-id="{{ product.id }}"><i class="icon-heart"></i></button>
+            </div>
+          </div>
+          
+          <div class="product-info">
+            <h3 class="product-name"><a href="{{ product.url }}">{{ product.name }}</a></h3>
+            
+            {% if product.rating and settings.showRatings %}
+            <div class="product-rating">
+              <div class="stars" style="--rating: {{ product.rating }}"></div>
+              <span class="rating-count">({{ product.reviews_count }})</span>
+            </div>
+            {% endif %}
+            
+            <div class="product-price">
+              {% if product.compare_at_price %}
+              <span class="regular-price">{{ product.compare_at_price | currency }}</span>
+              {% endif %}
+              <span class="current-price">{{ product.price | currency }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      <div class="view-all">
+        <a href="/products/" class="btn btn-outline">Ver todos os produtos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Promotional Banner -->
+  <section class="promo-banner" style="background-image: url('{{ banners.promo.image }}');">
+    <div class="container">
+      <div class="promo-content">
+        <h2>{{ banners.promo.title }}</h2>
+        <p>{{ banners.promo.description }}</p>
+        <a href="{{ banners.promo.button_url }}" class="btn btn-accent">{{ banners.promo.button_text }}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- New Arrivals -->
+  <section class="new-arrivals">
+    <div class="container">
+      <div class="section-title">
+        <h2>Novidades</h2>
+      </div>
+      
+      <div class="products-grid">
+        {% for product in products.new_arrivals %}
+        <div class="product-card">
+          <div class="product-image">
+            {% if product.is_new %}
+            <span class="new-badge">Novo</span>
+            {% endif %}
+            
+            <a href="{{ product.url }}">
+              <img src="{{ product.images[0] }}" alt="{{ product.name }}">
+            </a>
+            
+            <div class="product-actions">
+              <button class="quick-view" data-product-id="{{ product.id }}"><i class="icon-eye"></i></button>
+              <button class="add-to-cart" data-product-id="{{ product.id }}"><i class="icon-cart"></i></button>
+              <button class="add-to-wishlist" data-product-id="{{ product.id }}"><i class="icon-heart"></i></button>
+            </div>
+          </div>
+          
+          <div class="product-info">
+            <h3 class="product-name"><a href="{{ product.url }}">{{ product.name }}</a></h3>
+            
+            {% if product.rating and settings.showRatings %}
+            <div class="product-rating">
+              <div class="stars" style="--rating: {{ product.rating }}"></div>
+              <span class="rating-count">({{ product.reviews_count }})</span>
+            </div>
+            {% endif %}
+            
+            <div class="product-price">
+              {% if product.compare_at_price %}
+              <span class="regular-price">{{ product.compare_at_price | currency }}</span>
+              {% endif %}
+              <span class="current-price">{{ product.price | currency }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="icon-truck"></i>
+          </div>
+          <div class="feature-content">
+            <h3>Frete Grátis</h3>
+            <p>Para compras acima de R$ 199</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="icon-credit-card"></i>
+          </div>
+          <div class="feature-content">
+            <h3>Pagamento Seguro</h3>
+            <p>Dados criptografados</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="icon-return"></i>
+          </div>
+          <div class="feature-content">
+            <h3>7 Dias para Troca</h3>
+            <p>Em caso de problemas</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="icon-support"></i>
+          </div>
+          <div class="feature-content">
+            <h3>Suporte 24/7</h3>
+            <p>Atendimento rápido</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="newsletter">
+    <div class="container">
+      <div class="newsletter-box">
+        <div class="newsletter-content">
+          <h3>Inscreva-se na nossa newsletter</h3>
+          <p>Receba ofertas exclusivas e novidades no seu email</p>
+        </div>
+        
+        <form class="newsletter-form">
+          <div class="form-group">
+            <input type="email" placeholder="Seu melhor email" required>
+            <button type="submit" class="btn btn-accent">Inscrever-se</button>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="newsletter-consent" required>
+            <label for="newsletter-consent">Concordo em receber emails promocionais</label>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Instagram Feed -->
+  <section class="instagram-feed">
+    <div class="container">
+      <div class="section-title">
+        <h2>Siga-nos no Instagram</h2>
+        <a href="https://instagram.com/{{ site.social.instagram }}" class="insta-handle">@{{ site.social.instagram }}</a>
+      </div>
+      
+      <div class="insta-grid">
+        {% for post in instagram_feed %}
+        <div class="insta-item">
+          <a href="{{ post.url }}" target="_blank">
+            <img src="{{ post.image }}" alt="Instagram Post">
+            <div class="insta-overlay">
+              <div class="insta-icons">
+                <span><i class="icon-heart"></i> {{ post.likes }}</span>
+                <span><i class="icon-comment"></i> {{ post.comments }}</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <div class="footer-logo">
+            <img src="{{ site.logo }}" alt="{{ site.name }}">
+          </div>
+          <p class="footer-description">{{ site.description }}</p>
+          <div class="social-icons">
+            {% if site.social.facebook %}
+            <a href="https://facebook.com/{{ site.social.facebook }}" class="social-icon"><i class="icon-facebook"></i></a>
+            {% endif %}
+            
+            {% if site.social.instagram %}
+            <a href="https://instagram.com/{{ site.social.instagram }}" class="social-icon"><i class="icon-instagram"></i></a>
+            {% endif %}
+            
+            {% if site.social.twitter %}
+            <a href="https://twitter.com/{{ site.social.twitter }}" class="social-icon"><i class="icon-twitter"></i></a>
+            {% endif %}
+            
+            {% if site.social.youtube %}
+            <a href="https://youtube.com/{{ site.social.youtube }}" class="social-icon"><i class="icon-youtube"></i></a>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="footer-column">
+          <h3>Informações</h3>
+          <ul class="footer-links">
+            <li><a href="/about/">Sobre Nós</a></li>
+            <li><a href="/contact/">Contato</a></li>
+            <li><a href="/blog/">Blog</a></li>
+            <li><a href="/faq/">Perguntas Frequentes</a></li>
+            <li><a href="/privacy/">Política de Privacidade</a></li>
+            <li><a href="/terms/">Termos de Uso</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h3>Minha Conta</h3>
+          <ul class="footer-links">
+            <li><a href="/account/">Minha Conta</a></li>
+            <li><a href="/account/orders/">Meus Pedidos</a></li>
+            <li><a href="/cart/">Carrinho de Compras</a></li>
+            <li><a href="/account/wishlist/">Lista de Desejos</a></li>
+            <li><a href="/account/notifications/">Notificações</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h3>Contato</h3>
+          <ul class="contact-info">
+            <li>
+              <i class="icon-map-marker"></i>
+              <span>{{ site.address }}</span>
+            </li>
+            <li>
+              <i class="icon-phone"></i>
+              <span>{{ site.phone }}</span>
+            </li>
+            <li>
+              <i class="icon-envelope"></i>
+              <span>{{ site.email }}</span>
+            </li>
+          </ul>
+          
+          <div class="payment-methods">
+            <h4>Formas de Pagamento</h4>
+            <div class="payment-icons">
+              <img src="{{ assets.images.payment_methods }}" alt="Métodos de Pagamento">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <div class="copyright">
+          &copy; {{ 'now' | date: '%Y' }} {{ site.name }}. Todos os direitos reservados.
+        </div>
+        <div class="developer">
+          Desenvolvido por <a href="https://github.com/Lucasdoreac/php-universal-mcp-server">PHP Universal MCP Server</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Quick View Modal -->
+  <div id="quick-view-modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close"><i class="icon-close"></i></button>
+      <div id="quick-view-content">
+        <!-- AJAX loaded content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ assets.js.main }}"></script>
+  <script src="{{ assets.js.slider }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize sliders
+      initSliders();
+      
+      // Quick view functionality
+      initQuickView();
+      
+      // Add to cart functionality
+      initAddToCart();
+    });
+  </script>
+</body>
+</html>

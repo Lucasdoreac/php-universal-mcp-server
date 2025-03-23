@@ -1,0 +1,124 @@
+{
+  "colors": {
+    "primary": "#3498db",
+    "secondary": "#2ecc71",
+    "accent": "#e74c3c",
+    "background": "#ffffff",
+    "text": "#333333",
+    "lightText": "#777777",
+    "border": "#e0e0e0",
+    "success": "#27ae60",
+    "warning": "#f39c12",
+    "error": "#c0392b"
+  },
+  "typography": {
+    "headingFont": "Montserrat, sans-serif",
+    "bodyFont": "Open Sans, sans-serif",
+    "baseFontSize": "16px",
+    "smallFontSize": "14px",
+    "h1": {
+      "fontSize": "2.25rem",
+      "fontWeight": "700",
+      "lineHeight": "1.2"
+    },
+    "h2": {
+      "fontSize": "1.75rem",
+      "fontWeight": "700",
+      "lineHeight": "1.3"
+    },
+    "h3": {
+      "fontSize": "1.5rem",
+      "fontWeight": "600",
+      "lineHeight": "1.4"
+    },
+    "h4": {
+      "fontSize": "1.25rem",
+      "fontWeight": "600",
+      "lineHeight": "1.4"
+    },
+    "body": {
+      "fontSize": "1rem",
+      "fontWeight": "400",
+      "lineHeight": "1.6"
+    },
+    "small": {
+      "fontSize": "0.875rem",
+      "fontWeight": "400",
+      "lineHeight": "1.6"
+    }
+  },
+  "spacing": {
+    "base": "8px",
+    "xs": "4px",
+    "sm": "8px",
+    "md": "16px",
+    "lg": "24px",
+    "xl": "32px",
+    "xxl": "48px"
+  },
+  "layout": {
+    "containerWidth": "1200px",
+    "containerPadding": "16px",
+    "productGridColumns": 4,
+    "productSpacing": "24px",
+    "sidebarWidth": "280px"
+  },
+  "borders": {
+    "radius": "4px",
+    "cardRadius": "8px",
+    "buttonRadius": "4px",
+    "inputRadius": "4px"
+  },
+  "shadows": {
+    "sm": "0 1px 3px rgba(0,0,0,0.1)",
+    "md": "0 4px 6px rgba(0,0,0,0.1)",
+    "lg": "0 10px 15px rgba(0,0,0,0.1)"
+  },
+  "animations": {
+    "transition": "all 0.3s ease",
+    "buttonHover": "all 0.2s ease"
+  },
+  "components": {
+    "header": {
+      "background": "#ffffff",
+      "shadow": "0 2px 4px rgba(0,0,0,0.05)",
+      "height": "80px"
+    },
+    "footer": {
+      "background": "#f8f9fa",
+      "textColor": "#666666",
+      "padding": "48px 0"
+    },
+    "buttons": {
+      "primary": {
+        "background": "$colors.primary",
+        "text": "#ffffff",
+        "hoverBackground": "darken($colors.primary, 10%)"
+      },
+      "secondary": {
+        "background": "$colors.secondary",
+        "text": "#ffffff",
+        "hoverBackground": "darken($colors.secondary, 10%)"
+      },
+      "accent": {
+        "background": "$colors.accent",
+        "text": "#ffffff",
+        "hoverBackground": "darken($colors.accent, 10%)"
+      }
+    },
+    "inputs": {
+      "background": "#ffffff",
+      "border": "$colors.border",
+      "focusBorder": "$colors.primary",
+      "height": "48px",
+      "padding": "0 16px"
+    },
+    "productCard": {
+      "background": "#ffffff",
+      "border": "1px solid $colors.border",
+      "shadow": "$shadows.sm",
+      "hoverShadow": "$shadows.md",
+      "padding": "16px"
+    }
+  }
+}

@@ -1,0 +1,120 @@
+/* Estilos para o componente Bootstrap Modal */
+
+/* Animações personalizadas para o modal */
+.modal.fade {
+  transition: opacity 0.15s linear;
+}
+
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translate(0, -25px);
+}
+
+.modal.show .modal-dialog {
+  transform: translate(0, 0);
+}
+
+/* Estilos para diferentes tamanhos de modal */
+.modal-sm {
+  max-width: 300px;
+}
+
+.modal-lg {
+  max-width: 800px;
+}
+
+.modal-xl {
+  max-width: 1140px;
+}
+
+/* Estilo para tela cheia em dispositivos móveis */
+@media (max-width: 768px) {
+  .modal.modal-fullscreen-md-down .modal-dialog {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+  }
+  
+  .modal.modal-fullscreen-md-down .modal-content {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+  
+  .modal.modal-fullscreen-md-down .modal-body {
+    overflow-y: auto;
+  }
+}
+
+/* Estilos para botões do modal */
+.modal-footer .btn {
+  margin-right: 5px;
+}
+
+.modal-footer .btn:last-child {
+  margin-right: 0;
+}
+
+/* Estilo para modais com scrollable ativado */
+.modal-dialog-scrollable .modal-body {
+  overflow-y: auto;
+}
+
+.modal-dialog-scrollable .modal-content {
+  max-height: calc(100vh - 3.5rem);
+}
+
+/* Estilos para cabeçalho e rodapé em diferentes tamanhos de tela */
+@media (max-width: 576px) {
+  .modal-header, .modal-footer {
+    padding: 0.75rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-title {
+    font-size: 1.1rem;
+  }
+}
+
+/* Melhoria de acessibilidade para foco */
+.modal-content:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Estilos para backdrop estático */
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+.modal-backdrop.static {
+  cursor: not-allowed;
+}
+
+/* Estilo para transição personalizada */
+.modal-transition-fast {
+  transition: all 150ms !important;
+}
+
+.modal-transition-slow {
+  transition: all 500ms !important;
+}
+
+/* Estilos para botões personalizados */
+.modal-footer .btn-icon {
+  padding: 0.375rem 0.5rem;
+}
+
+.modal-footer .btn-icon i {
+  margin-right: 0.25rem;
+}
+
+/* Utility para enfatizar botões de ação principal */
+.modal-footer .btn-action-primary {
+  font-weight: 500;
+  min-width: 100px;
+}

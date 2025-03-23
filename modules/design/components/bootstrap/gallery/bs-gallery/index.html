@@ -1,0 +1,293 @@
+<!-- Bootstrap Gallery Component -->
+<div class="bs-gallery bs-gallery-{{options.layout}}" 
+     id="{{#if options.id}}{{options.id}}{{else}}gallery-{{random 1000}}{{/if}}"
+     data-layout="{{options.layout}}"
+     data-lightbox="{{options.lightbox}}"
+     data-hover-effect="{{options.hoverEffect}}">
+  
+  {{#if filters}}
+  <!-- Gallery Filters -->
+  <div class="bs-gallery-filters mb-4">
+    <div class="btn-group" role="group" aria-label="Gallery filters">
+      <button type="button" class="btn btn-outline-primary active" data-bs-filter="all">Todos</button>
+      {{#each filters}}
+      <button type="button" class="btn btn-outline-primary" data-bs-filter="{{this}}">{{this}}</button>
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+  
+  <!-- Gallery Content -->
+  {{#if (eq options.layout "carousel")}}
+  <!-- Carousel Layout -->
+  <div id="{{options.id}}-carousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      {{#each images}}
+      <div class="carousel-item {{#if @first}}active{{/if}}">
+        <img src="{{src}}" class="d-block w-100" alt="{{alt}}">
+        {{#if ../options.captions}}
+        {{#if caption}}
+        <div class="carousel-caption d-none d-md-block">
+          <h5>{{title}}</h5>
+          <p>{{caption}}</p>
+        </div>
+        {{/if}}
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#{{options.id}}-carousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#{{options.id}}-carousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Próximo</span>
+    </button>
+  </div>
+  {{else if (eq options.layout "thumbnails")}}
+  <!-- Thumbnails Layout -->
+  <div class="bs-gallery-main mb-3">
+    <img id="{{options.id}}-main" src="{{images.0.src}}" alt="{{images.0.alt}}" class="img-fluid {{#if options.roundedCorners}}rounded{{/if}}">
+    {{#if options.captions}}
+    {{#if images.0.caption}}
+    <div class="bs-gallery-caption mt-2 {{options.captionPosition}}">
+      <h5>{{images.0.title}}</h5>
+      <p>{{images.0.caption}}</p>
+    </div>
+    {{/if}}
+    {{/if}}
+  </div>
+  
+  <div class="bs-gallery-thumbnails">
+    <div class="row g-{{options.gap}}">
+      {{#each images}}
+      <div class="col-{{../options.thumbnailSize}}">
+        <img src="{{thumbnail}}" 
+             data-main-src="{{src}}" 
+             data-title="{{title}}" 
+             data-caption="{{caption}}"
+             alt="{{alt}}" 
+             class="img-thumbnail bs-gallery-thumb {{#if @first}}active{{/if}}"
+             onclick="changeGalleryMain('{{../options.id}}', this)">
+      </div>
+      {{/each}}
+    </div>
+  </div>
+  {{else}}
+  <!-- Grid or Masonry Layout -->
+  <div class="row {{#if (eq options.layout "masonry")}}bs-gallery-masonry{{else}}g-{{options.gap}}{{/if}}" 
+       {{#if (eq options.layout "masonry")}}data-masonry='{"percentPosition": true}'{{/if}}>
+    {{#each images}}
+    <div class="{{#if (eq ../options.layout "grid")}}col-{{../options.columns.xs}} col-sm-{{../options.columns.sm}} col-md-{{../options.columns.md}} col-lg-{{../options.columns.lg}} col-xl-{{../options.columns.xl}} mb-{{../options.gap}}{{else}}col-{{divide 12 ../options.columns.md}} mb-{{../options.gap}}{{/if}}"
+         {{#if tags}}data-tags="{{join tags ","}}"{{/if}}>
+      <div class="bs-gallery-item {{../options.hoverEffect}}-effect {{#if ../options.roundedCorners}}rounded{{/if}} overflow-hidden">
+        {{#if ../options.lightbox}}
+        <a href="{{src}}" 
+           data-bs-toggle="lightbox" 
+           data-bs-gallery="{{../options.id}}"
+           data-bs-title="{{title}}"
+           data-bs-caption="{{caption}}">
+        {{/if}}
+          <img src="{{src}}" 
+               alt="{{alt}}" 
+               class="img-fluid w-100 {{#if (eq ../options.aspectRatio "auto")}}{{else}}ratio ratio-{{../options.aspectRatio}}{{/if}}">
+        {{#if ../options.lightbox}}</a>{{/if}}
+        
+        {{#if ../options.captions}}
+        {{#if caption}}
+        <div class="bs-gallery-caption {{../options.captionPosition}}">
+          {{#if title}}<h5>{{title}}</h5>{{/if}}
+          <p>{{caption}}</p>
+        </div>
+        {{/if}}
+        {{/if}}
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+  
+  {{#if options.lightbox}}
+  <!-- Lightbox Modal -->
+  <div class="modal fade" id="{{options.id}}-lightbox" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img src="" class="img-fluid" id="{{options.id}}-lightbox-img">
+        </div>
+        <div class="modal-footer">
+          <p class="lightbox-caption w-100 mb-2"></p>
+          <div class="d-flex justify-content-between w-100">
+            <button type="button" class="btn btn-outline-secondary prev-btn">
+              <i class="bi bi-arrow-left"></i> Anterior
+            </button>
+            {{#if options.fullscreenButton}}
+            <button type="button" class="btn btn-outline-primary fullscreen-btn">
+              <i class="bi bi-arrows-fullscreen"></i> Tela Cheia
+            </button>
+            {{/if}}
+            <button type="button" class="btn btn-outline-secondary next-btn">
+              Próximo <i class="bi bi-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+</div>
+
+<script>
+  // Função para trocar imagem principal no layout de thumbnails
+  function changeGalleryMain(galleryId, thumbnailElement) {
+    const mainImg = document.getElementById(galleryId + '-main');
+    if (!mainImg) return;
+    
+    // Atualizar imagem principal
+    mainImg.src = thumbnailElement.getAttribute('data-main-src');
+    mainImg.alt = thumbnailElement.alt;
+    
+    // Atualizar legenda se existir
+    const captionContainer = mainImg.nextElementSibling;
+    if (captionContainer && captionContainer.classList.contains('bs-gallery-caption')) {
+      const title = thumbnailElement.getAttribute('data-title');
+      const caption = thumbnailElement.getAttribute('data-caption');
+      
+      const titleElement = captionContainer.querySelector('h5');
+      const captionElement = captionContainer.querySelector('p');
+      
+      if (titleElement) titleElement.textContent = title || '';
+      if (captionElement) captionElement.textContent = caption || '';
+    }
+    
+    // Marcar thumbnail atual como ativo
+    const thumbnails = document.querySelectorAll('#' + galleryId + ' .bs-gallery-thumb');
+    thumbnails.forEach(thumb => thumb.classList.remove('active'));
+    thumbnailElement.classList.add('active');
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const galleryId = '{{options.id}}';
+    const gallery = document.getElementById(galleryId);
+    if (!gallery) return;
+    
+    // Inicializar Masonry se necessário
+    if ('{{options.layout}}' === 'masonry') {
+      new Masonry('#' + galleryId + ' .bs-gallery-masonry', {
+        itemSelector: '.col-{{divide 12 options.columns.md}}',
+        percentPosition: true
+      });
+    }
+    
+    // Inicializar filtragem
+    if (gallery.querySelector('.bs-gallery-filters')) {
+      const filterButtons = gallery.querySelectorAll('[data-bs-filter]');
+      const items = gallery.querySelectorAll('.bs-gallery-item');
+      
+      filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const filter = this.getAttribute('data-bs-filter');
+          
+          // Atualizar botões ativos
+          filterButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Filtrar itens
+          items.forEach(item => {
+            const parent = item.parentElement;
+            if (filter === 'all') {
+              parent.style.display = '';
+            } else {
+              const tags = parent.getAttribute('data-tags');
+              if (tags && tags.split(',').includes(filter)) {
+                parent.style.display = '';
+              } else {
+                parent.style.display = 'none';
+              }
+            }
+          });
+          
+          // Recarregar Masonry se estiver em uso
+          if ('{{options.layout}}' === 'masonry') {
+            setTimeout(() => {
+              new Masonry('#' + galleryId + ' .bs-gallery-masonry', {
+                itemSelector: '.col-{{divide 12 options.columns.md}}',
+                percentPosition: true
+              });
+            }, 100);
+          }
+        });
+      });
+    }
+    
+    // Inicializar Lightbox se habilitado
+    if ({{options.lightbox}}) {
+      const lightboxLinks = gallery.querySelectorAll('[data-bs-toggle="lightbox"]');
+      const lightboxModal = document.getElementById('{{options.id}}-lightbox');
+      
+      if (lightboxLinks.length && lightboxModal) {
+        const modalInstance = new bootstrap.Modal(lightboxModal);
+        const modalImg = document.getElementById('{{options.id}}-lightbox-img');
+        const modalTitle = lightboxModal.querySelector('.modal-title');
+        const modalCaption = lightboxModal.querySelector('.lightbox-caption');
+        const prevBtn = lightboxModal.querySelector('.prev-btn');
+        const nextBtn = lightboxModal.querySelector('.next-btn');
+        const fullscreenBtn = lightboxModal.querySelector('.fullscreen-btn');
+        
+        let currentIndex = 0;
+        const images = Array.from(lightboxLinks);
+        
+        // Abrir lightbox
+        lightboxLinks.forEach((link, index) => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentIndex = index;
+            updateLightbox();
+            modalInstance.show();
+          });
+        });
+        
+        // Navegação
+        if (prevBtn) {
+          prevBtn.addEventListener('click', function() {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateLightbox();
+          });
+        }
+        
+        if (nextBtn) {
+          nextBtn.addEventListener('click', function() {
+            currentIndex = (currentIndex + 1) % images.length;
+            updateLightbox();
+          });
+        }
+        
+        // Tela cheia
+        if (fullscreenBtn) {
+          fullscreenBtn.addEventListener('click', function() {
+            if (modalImg.requestFullscreen) {
+              modalImg.requestFullscreen();
+            } else if (modalImg.webkitRequestFullscreen) {
+              modalImg.webkitRequestFullscreen();
+            } else if (modalImg.msRequestFullscreen) {
+              modalImg.msRequestFullscreen();
+            }
+          });
+        }
+        
+        // Função para atualizar conteúdo do lightbox
+        function updateLightbox() {
+          const link = images[currentIndex];
+          modalImg.src = link.href;
+          modalTitle.textContent = link.getAttribute('data-bs-title') || '';
+          modalCaption.textContent = link.getAttribute('data-bs-caption') || '';
+        }
+      }
+    }
+  });
+</script>

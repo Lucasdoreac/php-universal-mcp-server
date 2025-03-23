@@ -1,0 +1,69 @@
+/* Estilos personalizados para o componente Bootstrap Carousel */
+
+/* Minimizando o CSS personalizado, usando apenas o necessário para complementar o Bootstrap */
+.carousel-item {
+  background-size: cover;
+  background-position: center;
+}
+
+/* Estilos opcionais para carousels com altura fixa */
+.carousel-item img.d-block {
+  object-fit: cover;
+}
+
+/* Melhorias na legibilidade das legendas */
+.carousel-caption {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  max-width: 75%;
+  margin: 0 auto;
+  bottom: 2rem;
+}
+
+/* Melhorias para dispositivos móveis */
+@media (max-width: 768px) {
+  .carousel-caption {
+    display: block !important;
+    padding: 0.75rem;
+    max-width: 90%;
+    bottom: 1rem;
+  }
+  
+  .carousel-caption h5 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .carousel-caption p {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .carousel-caption .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Efeitos de transição melhorados */
+.carousel-fade .carousel-item {
+  opacity: 0;
+  transition-property: opacity;
+  transform: none;
+}
+
+.carousel-fade .carousel-item.active,
+.carousel-fade .carousel-item-next.carousel-item-start,
+.carousel-fade .carousel-item-prev.carousel-item-end {
+  opacity: 1;
+}
+
+/* Melhorias de acessibilidade */
+.carousel-indicators [data-bs-target] {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+  margin-left: 5px;
+}

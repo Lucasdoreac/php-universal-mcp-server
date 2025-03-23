@@ -5,6 +5,43 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-03-23
+
+### Adicionado
+- Sistema de Analytics e Relatórios:
+  - Dashboard interativo com métricas de desempenho
+  - Visualização HTML com gráficos usando Chart.js
+  - Relatórios detalhados de vendas, produtos, clientes e estoque
+  - Suporte a múltiplos formatos de saída (HTML, JSON, chart data)
+  - Utilitários de formatação para valores monetários, datas e números
+  - Métricas em tempo real para monitoramento de desempenho
+  - Exemplo completo de uso do sistema de analytics
+
+### Melhorado
+- Documentação atualizada para incluir o sistema de analytics
+- Otimização do sistema de cache para relatórios
+- Interface do E-commerce Manager para incluir acesso ao dashboard
+- README do projeto atualizado com as novas funcionalidades
+
+## [1.4.0] - 2025-03-23
+
+### Adicionado
+- Implementação completa do Shopify Provider:
+  - Autenticação OAuth com renovação automática de tokens
+  - Gerenciamento completo de produtos e suas variantes
+  - Processamento de pedidos e atualizações de status
+  - Personalização de temas e aplicativos
+  - Gerenciamento de clientes e segmentação
+  - Testes automatizados e exemplos detalhados de uso
+  - Documentação completa de todas as funcionalidades
+  - Integração com sistema de relatórios e analytics
+
+### Melhorado
+- Sistema de provedores agora mais robusto para lidar com falhas de API
+- Melhor tratamento de erros e logging nas integrações de terceiros
+- Otimização de desempenho para operações em lote
+- Documentação atualizada com exemplos práticos de uso
+
 ## [1.3.0] - 2025-03-23
 
 ### Adicionado

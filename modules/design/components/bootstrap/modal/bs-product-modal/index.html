@@ -1,0 +1,215 @@
+<!-- Bootstrap Product Modal Component -->
+<div class="modal fade" 
+     id="{{#if options.id}}{{options.id}}{{else}}product-modal-{{random 1000}}{{/if}}" 
+     tabindex="-1" 
+     aria-labelledby="{{#if options.id}}{{options.id}}-label{{else}}product-modal-{{random 1000}}-label{{/if}}" 
+     aria-hidden="true"
+     data-bs-backdrop="true"
+     {{#if options.fullscreen}}data-bs-fullscreen="md-down"{{/if}}
+     {{#if options.scrollable}}data-bs-scroll="true"{{/if}}>
+  <div class="modal-dialog modal-{{options.size}} {{#if options.centered}}modal-dialog-centered{{/if}} {{#if options.scrollable}}modal-dialog-scrollable{{/if}}">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header" {{#if options.theme.headerBg}}style="background-color: {{options.theme.headerBg}};"{{/if}}>
+        <h5 class="modal-title" id="{{#if options.id}}{{options.id}}-label{{else}}product-modal-{{random 1000}}-label{{/if}}">
+          {{product.title}}
+        </h5>
+        {{#if options.showClose}}
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        {{/if}}
+      </div>
+      
+      <!-- Body -->
+      <div class="modal-body p-3">
+        <div class="row">
+          <!-- Product Images -->
+          <div class="col-md-6 mb-4 mb-md-0">
+            <div class="product-image-container">
+              <!-- Main Image -->
+              <img src="{{product.mainImage}}" alt="{{product.title}}" class="img-fluid mb-3 main-product-image" id="main-product-image">
+              
+              <!-- Image Gallery -->
+              {{#if options.showGallery}}
+              {{#if product.gallery}}
+              <div class="product-gallery row g-2">
+                {{#each product.gallery}}
+                <div class="col-3">
+                  <img src="{{this}}" alt="{{../product.title}} - Imagem {{@index}}" 
+                       class="img-thumbnail gallery-thumbnail"
+                       onclick="document.getElementById('main-product-image').src='{{this}}'">
+                </div>
+                {{/each}}
+              </div>
+              {{/if}}
+              {{/if}}
+            </div>
+          </div>
+          
+          <!-- Product Info -->
+          <div class="col-md-6">
+            <!-- Price -->
+            <div class="product-price mb-3">
+              {{#if product.salePrice}}
+              <span class="text-muted text-decoration-line-through me-2">{{formatCurrency product.price}}</span>
+              <span class="fs-4 fw-bold text-primary">{{formatCurrency product.salePrice}}</span>
+              {{else}}
+              <span class="fs-4 fw-bold">{{formatCurrency product.price}}</span>
+              {{/if}}
+            </div>
+            
+            <!-- Stock Status -->
+            <div class="mb-3">
+              {{#if product.stock}}
+              {{#if (gt product.stock 10)}}
+              <span class="badge bg-success">Em estoque</span>
+              {{else if (gt product.stock 0)}}
+              <span class="badge bg-warning text-dark">Apenas {{product.stock}} restantes</span>
+              {{/if}}
+              {{else}}
+              <span class="badge bg-danger">Fora de estoque</span>
+              {{/if}}
+              {{#if product.sku}}
+              <span class="ms-2 text-muted">SKU: {{product.sku}}</span>
+              {{/if}}
+            </div>
+            
+            <!-- Short Description -->
+            <div class="product-description mb-4">
+              {{{product.description}}}
+            </div>
+            
+            <!-- Variations -->
+            {{#if product.variations}}
+            <div class="product-variations mb-4">
+              {{#each product.variations}}
+              <div class="mb-3">
+                <label class="form-label fw-bold">{{this.name}}</label>
+                <div class="d-flex flex-wrap">
+                  {{#each this.options}}
+                  <div class="form-check me-3">
+                    <input class="form-check-input" type="radio" name="variation-{{../name}}" id="variation-{{../name}}-{{@index}}" value="{{this}}">
+                    <label class="form-check-label" for="variation-{{../name}}-{{@index}}">
+                      {{this}}
+                    </label>
+                  </div>
+                  {{/each}}
+                </div>
+              </div>
+              {{/each}}
+            </div>
+            {{/if}}
+            
+            <!-- Quantity -->
+            <div class="product-quantity mb-4">
+              <label for="product-quantity" class="form-label fw-bold">Quantidade</label>
+              <div class="input-group" style="max-width: 150px;">
+                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="decrementQuantity()">-</button>
+                <input type="number" class="form-control text-center" id="product-quantity" value="1" min="1" max="{{#if product.stock}}{{product.stock}}{{else}}99{{/if}}">
+                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="incrementQuantity()">+</button>
+              </div>
+            </div>
+            
+            <!-- Add to Cart Button -->
+            <div class="d-grid">
+              <button type="button" 
+                     class="btn {{options.addToCartButton.customClass}}" 
+                     onclick="addToCart('{{product.id}}', document.getElementById('product-quantity').value)"
+                     {{#unless product.stock}}disabled{{/unless}}>
+                <i class="bi bi-cart-plus-fill me-2"></i>
+                {{options.addToCartButton.text}}
+              </button>
+            </div>
+            
+            <!-- Attributes -->
+            {{#if product.attributes}}
+            <div class="product-attributes mt-4">
+              <h6 class="text-uppercase text-muted fs-6">Especificações</h6>
+              <dl class="row">
+                {{#each product.attributes}}
+                <dt class="col-sm-4">{{this.name}}</dt>
+                <dd class="col-sm-8">{{this.value}}</dd>
+                {{/each}}
+              </dl>
+            </div>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="modal-footer" {{#if options.theme.footerBg}}style="background-color: {{options.theme.footerBg}};"{{/if}}>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+        <a href="/product/{{product.id}}" class="btn btn-link">Ver detalhes completos</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Quantidade
+  function incrementQuantity() {
+    var input = document.getElementById('product-quantity');
+    var value = parseInt(input.value, 10);
+    var max = parseInt(input.max, 10);
+    if (value < max) {
+      input.value = value + 1;
+    }
+  }
+  
+  function decrementQuantity() {
+    var input = document.getElementById('product-quantity');
+    var value = parseInt(input.value, 10);
+    if (value > 1) {
+      input.value = value - 1;
+    }
+  }
+  
+  // Adicionar ao carrinho
+  function addToCart(productId, quantity) {
+    // Coletando variações selecionadas
+    var variations = {};
+    var variationInputs = document.querySelectorAll('input[name^="variation-"]:checked');
+    variationInputs.forEach(function(input) {
+      var name = input.name.replace('variation-', '');
+      variations[name] = input.value;
+    });
+    
+    // Disparar evento para o sistema de carrinho
+    const event = new CustomEvent('add-to-cart', { 
+      detail: {
+        productId: productId,
+        quantity: parseInt(quantity, 10),
+        variations: variations
+      }
+    });
+    document.dispatchEvent(event);
+    
+    // Feedback visual para o usuário
+    var addButton = event.target;
+    var originalText = addButton.innerHTML;
+    addButton.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Adicionado!';
+    addButton.classList.add('btn-success');
+    setTimeout(function() {
+      addButton.innerHTML = originalText;
+      addButton.classList.remove('btn-success');
+    }, 2000);
+  }
+  
+  // Inicialização do modal com animação personalizada
+  document.addEventListener('DOMContentLoaded', function() {
+    var modalElement = document.getElementById('{{#if options.id}}{{options.id}}{{else}}product-modal-{{random 1000}}{{/if}}');
+    if (modalElement) {
+      modalElement.style.transition = 'all {{options.animationDuration}}ms';
+      var modal = new bootstrap.Modal(modalElement);
+      
+      // Evento para reiniciar galeria ao abrir
+      modalElement.addEventListener('show.bs.modal', function() {
+        var mainImage = modalElement.querySelector('.main-product-image');
+        var firstThumb = modalElement.querySelector('.gallery-thumbnail');
+        if (mainImage && firstThumb) {
+          mainImage.src = firstThumb.src;
+        }
+      });
+    }
+  });
+</script>

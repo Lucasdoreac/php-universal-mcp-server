@@ -1,6 +1,6 @@
 # Configuração do Claude Desktop
 
-Este documento fornece informações detalhadas sobre como configurar o Claude Desktop para utilizar o PHP Universal MCP Server com a funcionalidade de upload FTP.
+Este documento fornece informações detalhadas sobre como configurar o Claude Desktop para utilizar o PHP Universal MCP Server versão 1.7.2 com suporte a recursos avançados.
 
 ## Arquivo de Configuração JSON
 
@@ -16,13 +16,21 @@ Abaixo está um exemplo completo da estrutura do arquivo de configuração com o
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "mcpServers": [
     {
       "name": "PHP Universal MCP Server",
       "url": "http://localhost:3100",
       "active": true,
-      "id": "php-universal"
+      "id": "php-universal",
+      "settings": {
+        "caching": true,
+        "artifactsEnabled": true,
+        "templateEditor": true,
+        "defaultProvider": "shopify",
+        "responsive": true,
+        "exportFormats": ["csv", "pdf", "json"]
+      }
     }
   ],
   "pinnedConversations": [],
@@ -35,7 +43,12 @@ Abaixo está um exemplo completo da estrutura do arquivo de configuração com o
   },
   "proxyEnabled": false,
   "proxyUrl": "",
-  "theme": "system"
+  "theme": "system",
+  "fontSize": "medium",
+  "artifacts": {
+    "enabled": true,
+    "preferSVG": true
+  }
 }
 ```
 
@@ -50,9 +63,33 @@ Se você já tem um arquivo de configuração existente, precisa apenas adiciona
       "name": "PHP Universal MCP Server",
       "url": "http://localhost:3100",
       "active": true,
-      "id": "php-universal"
+      "id": "php-universal",
+      "settings": {
+        "caching": true,
+        "artifactsEnabled": true
+      }
     }
   ]
+}
+```
+
+## Novas Configurações na Versão 1.7.2
+
+A versão 1.7.2 introduz várias novas opções de configuração que podem ser definidas na seção `settings` do servidor MCP:
+
+```json
+"settings": {
+  "caching": true,              // Ativa o sistema de cache para melhor desempenho
+  "artifactsEnabled": true,     // Ativa o suporte para artifacts do Claude
+  "templateEditor": true,       // Ativa o editor visual de templates
+  "defaultProvider": "shopify", // Define o provedor padrão (shopify, hostinger, woocommerce)
+  "responsive": true,           // Ativa o suporte a temas responsivos
+  "exportFormats": ["csv", "pdf", "json"], // Formatos de exportação disponíveis
+  "performance": {
+    "compression": true,        // Ativa compressão de dados
+    "lazyLoading": true,        // Ativa carregamento sob demanda
+    "asyncProcessing": true     // Ativa processamento assíncrono
+  }
 }
 ```
 
@@ -92,7 +129,12 @@ Se você já tem outros servidores MCP configurados, sua seção `mcpServers` po
     "name": "PHP Universal MCP Server",
     "url": "http://localhost:3100",
     "active": true,
-    "id": "php-universal"
+    "id": "php-universal",
+    "settings": {
+      "caching": true,
+      "artifactsEnabled": true,
+      "templateEditor": true
+    }
   },
   {
     "name": "Outro Servidor MCP",
@@ -101,6 +143,30 @@ Se você já tem outros servidores MCP configurados, sua seção `mcpServers` po
     "id": "outro-servidor"
   }
 ]
+```
+
+## Configuração da Visualização de Artifacts
+
+Para aproveitar ao máximo os recursos visuais do PHP Universal MCP Server, certifique-se de que as configurações de artifacts estejam habilitadas no Claude Desktop:
+
+```json
+"artifacts": {
+  "enabled": true,
+  "preferSVG": true
+}
+```
+
+Esta configuração permite que o servidor exiba dashboards interativos, interfaces de gerenciamento e o editor visual de templates diretamente no chat do Claude.
+
+## Configuração do Modo Responsivo
+
+O suporte a temas responsivos permite testar como seu site ficará em diferentes dispositivos. Adicione estas configurações para ativar este recurso:
+
+```json
+"settings": {
+  "responsive": true,
+  "responsiveDevices": ["desktop", "tablet", "mobile"]
+}
 ```
 
 ## Resolução de Problemas
@@ -114,6 +180,14 @@ Se você já tem outros servidores MCP configurados, sua seção `mcpServers` po
    - Certifique-se de que o servidor está rodando
    - Verifique se a porta não está bloqueada por um firewall
 
-3. **Arquivo de configuração não existe**:
-   - Se você não encontrar o arquivo, inicie o Claude Desktop pelo menos uma vez para que ele seja criado
-   - Se precisar criar o arquivo do zero, use o exemplo de estrutura completa acima
+3. **Artifacts não são exibidos corretamente**:
+   - Verifique se `artifacts.enabled` está definido como `true`
+   - Atualize para a versão mais recente do Claude Desktop (1.3.x ou superior)
+
+4. **Sistema de cache não funciona**:
+   - Verifique a configuração `cache` no arquivo `config.json` do servidor
+   - Certifique-se de que há espaço suficiente em disco para armazenamento de cache
+
+5. **Editor de templates não aparece**:
+   - Verifique se `templateEditor` está definido como `true` nas configurações do servidor
+   - Certifique-se de que as dependências necessárias foram instaladas (`npm install`)

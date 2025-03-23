@@ -1,0 +1,26 @@
+{
+  "github": {
+    "enabled": true,
+    "repositories": {
+      "default": {
+        "owner": "Lucasdoreac",
+        "repo": "php-universal-mcp-server",
+        "defaultBranch": "main"
+      }
+    },
+    "auth": {
+      "useToken": true,
+      "tokenEnvVar": "GITHUB_TOKEN"
+    },
+    "features": {
+      "pullRequests": true,
+      "issues": true,
+      "actions": true,
+      "webhooks": false
+    },
+    "limits": {
+      "maxFileSizeKb": 5120,
+      "maxRequestsPerHour": 5000
+    }
+  }
+}

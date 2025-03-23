@@ -3,10 +3,11 @@
  */
 
 const HostingerProvider = require('./hostinger');
+const WooCommerceProvider = require('./woocommerce');
 
 module.exports = {
   hostinger: HostingerProvider,
+  woocommerce: WooCommerceProvider,
   // Adicione outros provedores aqui quando implementados
-  // woocommerce: require('./woocommerce'),
   // shopify: require('./shopify')
 };

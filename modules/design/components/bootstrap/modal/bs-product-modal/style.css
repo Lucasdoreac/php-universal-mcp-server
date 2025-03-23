@@ -1,0 +1,137 @@
+/* Estilos para o Modal de Produto */
+
+/* Efeito de zoom suave na imagem principal */
+.main-product-image {
+  transition: transform 0.3s ease-in-out;
+  border-radius: 4px;
+}
+
+.main-product-image:hover {
+  transform: scale(1.03);
+}
+
+/* Estilização das miniaturas da galeria */
+.gallery-thumbnail {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  object-fit: cover;
+  height: 60px;
+  border-radius: 4px;
+}
+
+.gallery-thumbnail:hover {
+  border-color: var(--bs-primary, #0d6efd);
+  transform: translateY(-2px);
+}
+
+/* Ajuste de tamanho para imagens em telas menores */
+@media (max-width: 767.98px) {
+  .product-image-container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .gallery-thumbnail {
+    height: 50px;
+  }
+}
+
+/* Melhorias no input de quantidade */
+#product-quantity {
+  font-weight: bold;
+  text-align: center;
+}
+
+.input-group .btn-outline-secondary {
+  transition: all 0.2s;
+}
+
+.input-group .btn-outline-secondary:hover {
+  background-color: var(--bs-primary, #0d6efd);
+  color: white;
+  border-color: var(--bs-primary, #0d6efd);
+}
+
+/* Estilo para variações em cor (se disponível) */
+.color-option {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.color-option.selected {
+  border-color: var(--bs-primary, #0d6efd);
+  transform: scale(1.1);
+}
+
+/* Animações para o modal */
+.modal.fade .modal-dialog {
+  transform: scale(0.95);
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.modal.show .modal-dialog {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Estilo para preços e descontos */
+.product-price .text-decoration-line-through {
+  font-size: 0.9em;
+  opacity: 0.7;
+}
+
+/* Estilo para badges de status do produto */
+.badge {
+  font-weight: 500;
+  padding: 0.5em 0.75em;
+}
+
+/* Melhorias no botão de adicionar ao carrinho */
+.btn-primary {
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para seção de atributos */
+.product-attributes {
+  border-top: 1px solid var(--bs-gray-200, #e9ecef);
+  padding-top: 1rem;
+}
+
+.product-attributes dt {
+  color: var(--bs-gray-600, #6c757d);
+  font-weight: 500;
+}
+
+.product-attributes dd {
+  margin-bottom: 0.5rem;
+}
+
+/* Modo escuro (opcional - ativado se o site tiver um tema escuro) */
+[data-bs-theme="dark"] .gallery-thumbnail {
+  background-color: var(--bs-gray-800, #343a40);
+}
+
+[data-bs-theme="dark"] .product-attributes {
+  border-top-color: var(--bs-gray-700, #495057);
+}
+
+/* Feedback visual para adição ao carrinho */
+@keyframes addToCartSuccess {
+  0% { background-color: var(--bs-success, #198754); }
+  100% { background-color: var(--bs-primary, #0d6efd); }
+}
+
+.add-to-cart-success {
+  animation: addToCartSuccess 1.5s;
+}

@@ -1,7 +1,7 @@
 # PHP Universal MCP Server
 
 [![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)](#)
-[![Versão](https://img.shields.io/badge/versão-0.9.5-blue)](#)
+[![Versão](https://img.shields.io/badge/versão-0.9.6-blue)](#)
 [![Licença](https://img.shields.io/badge/licença-MIT-green)](#)
 
 ## Descrição
@@ -13,6 +13,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **Gerenciamento Universal**: Interface unificada para diversas plataformas (Hostinger, WooCommerce, Shopify)
 - **Controle Completo**: Gerencie hospedagem, domínios, design, produtos e pedidos
 - **Templates**: Sistema completo de design com suporte a Bootstrap 5
+- **Analytics**: Dashboard de métricas e relatórios avançados para acompanhamento de desempenho
 - **Segurança**: Autenticação robusta e armazenamento seguro de credenciais
 - **Automação**: Simplifique tarefas complexas com comandos simples
 - **Extensibilidade**: Arquitetura modular para fácil adição de novos provedores
@@ -27,6 +28,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 ### Módulos
 
 - **E-commerce Manager**: API unificada para gerenciar produtos, pedidos e clientes
+- **Analytics System**: Sistema completo de relatórios e métricas de desempenho
 - **Design System**: Motor de templates com suporte ao Bootstrap 5
 - **Hosting Manager**: Gerenciamento de recursos de hospedagem, domínios e SSL
 - **Security Module**: Sistema de autenticação e gestão segura de credenciais
@@ -35,7 +37,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 
 - **Hostinger**: Gerenciamento completo de hospedagem web e domínios
 - **WooCommerce**: Gerenciamento de lojas WooCommerce (em desenvolvimento)
-- **Shopify**: Gerenciamento de lojas Shopify (em desenvolvimento)
+- **Shopify**: Gerenciamento completo de lojas Shopify
 
 ### Integrações
 
@@ -104,6 +106,9 @@ configurar ssl site-123
 
 # Adicionar produto
 adicionar produto site-123 "Produto Teste" 99.90
+
+# Gerar dashboard de analytics
+analytics dashboard site-123 30 dias
 ```
 
 ### Uso Programático
@@ -127,7 +132,28 @@ server.start();
 // Utilizar os módulos diretamente
 const { hostingManager } = server.modules;
 const sites = await hostingManager.listSites();
+
+// Utilizar o sistema de analytics
+const { ecommerceManager } = server.modules;
+const analytics = ecommerceManager.getAnalyticsDashboard();
+const dashboard = await analytics.generateDashboard({
+  siteId: 'site-123',
+  dateRange: {
+    startDate: '2025-01-01',
+    endDate: '2025-03-20'
+  }
+});
 ```
+
+## Sistema de Analytics
+
+O sistema de analytics fornece insights completos sobre o desempenho da sua loja:
+
+- **Dashboard Completo**: Visualização intuitiva de todas as métricas importantes
+- **Relatórios de Vendas**: Análise detalhada de receitas, pedidos e margens
+- **Desempenho de Produtos**: Identificação dos produtos mais vendidos e categoria
+- **Comportamento de Clientes**: Segmentação de clientes e padrões de compra
+- **Gestão de Estoque**: Alertas de estoque baixo e análise de valor de inventário
 
 ## Componentes Bootstrap
 
@@ -144,6 +170,7 @@ Templates prontos para uso:
 - **bs-blog**: Template completo para blogs
 - **bs-landing**: Template para páginas de destino
 - **bs-portfolio**: Template para portfólios profissionais
+- **bs-dashboard**: Template para dashboard administrativo
 
 ## Contribuição
 
@@ -162,6 +189,7 @@ A documentação completa está disponível em:
 - [Documentação Geral](./docs/README.md)
 - [Guia de Início Rápido](./docs/quick-start.md)
 - [Referência da API](./docs/api-reference.md)
+- [Sistema de Analytics](./docs/analytics/README.md)
 - [Provedores](./docs/providers/README.md)
 - [Templates e Componentes](./docs/design/README.md)
 
@@ -170,8 +198,9 @@ A documentação completa está disponível em:
 - [x] Implementação do protocolo MCP
 - [x] Integração com Bootstrap 5
 - [x] Implementação do provedor Hostinger
-- [ ] Implementação do provedor WooCommerce
-- [ ] Implementação do provedor Shopify
+- [x] Implementação do provedor Shopify
+- [x] Sistema de analytics e relatórios
+- [ ] Implementação do provedor WooCommerce 
 - [ ] Sistema de plugins de terceiros
 - [ ] Painel de controle web
 

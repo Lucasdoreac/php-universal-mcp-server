@@ -12,6 +12,7 @@ npm install -g php-universal-mcp-server
 
 - [Guia de Configuração Básica](CONFIGURACAO.md) - Instalação e configuração inicial
 - [Detalhes do Formato JSON](CLAUDE_CONFIG.md) - Formato detalhado do arquivo de configuração
+- [Inicialização Automática](AUTOSTART_CONFIG.md) - Configuração para inicialização automática
 
 ## Recursos
 
@@ -49,10 +50,9 @@ Claude, faça upload do site minha-loja.com para o servidor FTP ftp.meudominio.c
 
 ## Configuração do Claude Desktop
 
-Para usar este servidor com Claude Desktop:
+Existem duas formas de configurar o Claude Desktop:
 
-1. Instale o pacote globalmente: `npm install -g php-universal-mcp-server`
-2. Configure o Claude Desktop adicionando o servidor ao arquivo `claude-config.json`:
+### 1. Configuração Manual (URL)
 
 ```json
 {
@@ -67,10 +67,26 @@ Para usar este servidor com Claude Desktop:
 }
 ```
 
-3. Inicie o servidor: `php-universal-mcp-server`
-4. Reinicie o Claude Desktop
+### 2. Inicialização Automática (Recomendado)
 
-Configuração completa em [CONFIGURACAO.md](CONFIGURACAO.md) e [CLAUDE_CONFIG.md](CLAUDE_CONFIG.md).
+```json
+{
+  "mcpServers": {
+    "php-universal": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "php-universal-mcp-server"
+      ]
+    }
+  }
+}
+```
+
+Detalhes completos em:
+- [CONFIGURACAO.md](CONFIGURACAO.md) 
+- [CLAUDE_CONFIG.md](CLAUDE_CONFIG.md)
+- [AUTOSTART_CONFIG.md](AUTOSTART_CONFIG.md)
 
 ## Licença
 

@@ -8,6 +8,8 @@ Um servidor MCP universal para desenvolvimento PHP e criação de sites com supo
 npm install -g php-universal-mcp-server
 ```
 
+Para configuração detalhada com Claude Desktop, consulte o [Guia de Configuração](CONFIGURACAO.md).
+
 ## Recursos
 
 - Criação de sites com diversos templates
@@ -41,6 +43,14 @@ server.execute({
 ```
 Claude, faça upload do site minha-loja.com para o servidor FTP ftp.meudominio.com usando o usuário "login" e senha "minhasenha".
 ```
+
+## Configuração do Claude Desktop
+
+Para usar este servidor com Claude Desktop:
+
+1. Instale o pacote globalmente: `npm install -g php-universal-mcp-server`
+2. Configure o Claude Desktop adicionando o servidor ao arquivo de configuração
+3. Detalhes completos em [CONFIGURACAO.md](CONFIGURACAO.md)
 
 ## Licença
 

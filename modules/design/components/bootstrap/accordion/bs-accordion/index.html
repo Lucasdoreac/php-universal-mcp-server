@@ -1,0 +1,90 @@
+<!-- Bootstrap Accordion Component -->
+<div class="accordion {{#if options.flush}}accordion-flush{{/if}}" 
+     id="{{#if options.id}}{{options.id}}{{else}}accordion-{{random 1000}}{{/if}}"
+     style="--bs-accordion-animation-duration: {{options.animationDuration}}ms;">
+  
+  {{#each items}}
+  <div class="accordion-item" {{#if ../options.theme.borderColor}}style="border-color: {{../options.theme.borderColor}};"{{/if}}>
+    <h2 class="accordion-header">
+      <button class="accordion-button {{#unless isOpen}}collapsed{{/unless}}"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapse-{{../options.id}}-{{@index}}"
+              aria-expanded="{{#if isOpen}}true{{else}}false{{/if}}"
+              aria-controls="collapse-{{../options.id}}-{{@index}}"
+              {{#if ../options.theme.headerBg}}style="background-color: {{../options.theme.headerBg}}; color: {{../options.theme.headerColor}};"{{/if}}>
+        
+        {{#if ../options.useIcons}}
+          {{#if icon}}
+          <i class="bi bi-{{icon}} me-2"></i>
+          {{/if}}
+        {{/if}}
+        
+        {{#if ../options.iconPosition}}
+          {{#if (eq ../options.iconPosition "start")}}
+          <i class="bs-accordion-icon bi bi-{{#if isOpen}}{{../options.iconExpanded}}{{else}}{{../options.iconCollapsed}}{{/if}} me-2"
+             {{#if ../options.theme.iconColor}}style="color: {{../options.theme.iconColor}};"{{/if}}></i>
+          {{/if}}
+        {{/if}}
+        
+        <span class="accordion-title">{{title}}</span>
+        
+        {{#if badge}}
+        <span class="badge {{badge.class}} ms-2">{{badge.text}}</span>
+        {{/if}}
+      </button>
+    </h2>
+    <div id="collapse-{{../options.id}}-{{@index}}" 
+         class="accordion-collapse collapse {{#if isOpen}}show{{/if}} {{#if ../options.alwaysOpen}}always-open{{/if}}"
+         {{#unless ../options.alwaysOpen}}data-bs-parent="#{{../options.id}}"{{/unless}}>
+      <div class="accordion-body" {{#if ../options.theme.bodyBg}}style="background-color: {{../options.theme.bodyBg}};"{{/if}}>
+        {{{content}}}
+      </div>
+    </div>
+  </div>
+  {{/each}}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const accordionId = '{{options.id}}';
+    const accordion = document.getElementById(accordionId);
+    
+    if (accordion) {
+      // Adicionar evento para trocar ícones ao expandir/colapsar
+      const accordionButtons = accordion.querySelectorAll('.accordion-button');
+      
+      accordionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          if ({{options.useIcons}} && '{{options.iconPosition}}' === 'start') {
+            const icon = this.querySelector('.bs-accordion-icon');
+            if (icon) {
+              const isCollapsed = this.classList.contains('collapsed');
+              
+              // Remover classes de ícones existentes
+              icon.classList.remove('bi-{{options.iconCollapsed}}', 'bi-{{options.iconExpanded}}');
+              
+              // Adicionar nova classe de ícone com base no estado
+              if (isCollapsed) {
+                icon.classList.add('bi-{{options.iconCollapsed}}');
+              } else {
+                icon.classList.add('bi-{{options.iconExpanded}}');
+              }
+            }
+          }
+        });
+      });
+      
+      // Expandir o primeiro item se configurado
+      if ({{options.expandFirstItem}} && accordionButtons.length > 0 && !accordionButtons[0].classList.contains('show')) {
+        const firstItemId = accordionButtons[0].getAttribute('data-bs-target');
+        const firstItem = document.querySelector(firstItemId);
+        
+        if (firstItem) {
+          const bsCollapse = new bootstrap.Collapse(firstItem);
+          bsCollapse.show();
+        }
+      }
+    }
+  });
+</script>

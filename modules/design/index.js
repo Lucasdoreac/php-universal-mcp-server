@@ -5,6 +5,10 @@
  * de sites e lojas de e-commerce em diferentes plataformas.
  */
 
+const DesignController = require('./controllers/DesignController');
+const Theme = require('./models/Theme');
+const Template = require('./models/Template');
+
 /**
  * Classe principal do Site Design System
  */
@@ -18,8 +22,55 @@ class DesignSystem {
    */
   constructor(options = {}) {
     this.options = options;
-    
-    // TODO: Implementar controladores e serviços
+    this.designController = new DesignController(options);
+  }
+
+  /**
+   * Registra os métodos da API no servidor MCP
+   * 
+   * @param {Object} server Servidor MCP
+   */
+  registerApiMethods(server) {
+    if (!server) {
+      throw new Error('Servidor MCP é necessário para registrar os métodos da API');
+    }
+
+    // Registra métodos para design e templates
+    server.registerMethod('design.getTemplates', this._handleApiCall.bind(this, this.designController.getTemplates.bind(this.designController)));
+    server.registerMethod('design.getTemplate', this._handleApiCall.bind(this, this.designController.getTemplate.bind(this.designController)));
+    server.registerMethod('design.applyTemplate', this._handleApiCall.bind(this, this.designController.applyTemplate.bind(this.designController)));
+    server.registerMethod('design.customize', this._handleApiCall.bind(this, this.designController.customize.bind(this.designController)));
+    server.registerMethod('design.preview', this._handleApiCall.bind(this, this.designController.preview.bind(this.designController)));
+    server.registerMethod('design.publish', this._handleApiCall.bind(this, this.designController.publish.bind(this.designController)));
+  }
+
+  /**
+   * Manipula chamadas de API, adicionando tratamento de erros e validação
+   * 
+   * @param {Function} handlerFn Função de manipulação da chamada
+   * @param {Object} params Parâmetros da chamada
+   * @returns {Promise<Object>} Resposta da API
+   * @private
+   */
+  async _handleApiCall(handlerFn, params) {
+    try {
+      // Valida parâmetros obrigatórios comuns
+      if (!params) {
+        return {
+          success: false,
+          error: 'Parâmetros são obrigatórios'
+        };
+      }
+
+      // Executa o manipulador específico
+      return await handlerFn(params);
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Erro desconhecido',
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      };
+    }
   }
 
   /**
@@ -30,8 +81,8 @@ class DesignSystem {
    * @returns {Promise<Array>} Lista de templates disponíveis
    */
   async getTemplates(options = {}) {
-    // TODO: Implementar busca de templates
-    return [];
+    const response = await this.designController.getTemplates(options);
+    return response.success ? response.data : [];
   }
 
   /**
@@ -42,11 +93,7 @@ class DesignSystem {
    * @returns {Promise<Object>} Resultado da operação
    */
   async applyTemplate(siteId, templateId) {
-    // TODO: Implementar aplicação de template
-    return {
-      success: false,
-      error: 'Método não implementado'
-    };
+    return this.designController.applyTemplate({ siteId, templateId });
   }
 
   /**
@@ -57,11 +104,7 @@ class DesignSystem {
    * @returns {Promise<Object>} Resultado da operação
    */
   async customize(siteId, customizations) {
-    // TODO: Implementar personalização
-    return {
-      success: false,
-      error: 'Método não implementado'
-    };
+    return this.designController.customize({ siteId, customizations });
   }
 
   /**
@@ -72,11 +115,7 @@ class DesignSystem {
    * @returns {Promise<Object>} Dados do preview
    */
   async preview(siteId, changes) {
-    // TODO: Implementar preview
-    return {
-      success: false,
-      error: 'Método não implementado'
-    };
+    return this.designController.preview({ siteId, changes });
   }
 
   /**
@@ -86,14 +125,25 @@ class DesignSystem {
    * @returns {Promise<Object>} Resultado da operação
    */
   async publish(siteId) {
-    // TODO: Implementar publicação
+    return this.designController.publish({ siteId });
+  }
+
+  /**
+   * Retorna os modelos de dados disponíveis
+   * @returns {Object} Modelos de dados
+   */
+  getModels() {
     return {
-      success: false,
-      error: 'Método não implementado'
+      Theme,
+      Template
     };
   }
 }
 
 module.exports = {
-  DesignSystem
+  DesignSystem,
+  models: {
+    Theme,
+    Template
+  }
 };

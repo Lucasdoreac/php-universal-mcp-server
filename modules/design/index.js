@@ -10,6 +10,9 @@ const Theme = require('./models/Theme');
 const Template = require('./models/Template');
 const BootstrapAdapter = require('./services/BootstrapAdapter');
 const BootstrapTemplateRenderer = require('./services/BootstrapTemplateRenderer');
+const BootstrapAdminInterface = require('./services/BootstrapAdminInterface');
+const EcommerceBootstrapIntegration = require('./integrations/ecommerce-bootstrap');
+const ComponentManager = require('./services/ComponentManager');
 
 /**
  * Classe principal do Site Design System
@@ -24,6 +27,7 @@ class DesignSystem {
    * @param {Object} options.bootstrapAdapter Adaptador Bootstrap (opcional)
    * @param {Boolean} options.enableBootstrap Habilitar suporte a Bootstrap (opcional)
    * @param {String} options.bootstrapVersion Versão do Bootstrap (opcional)
+   * @param {Object} options.ecommerceManager Gerenciador de e-commerce (opcional)
    */
   constructor(options = {}) {
     this.options = options;
@@ -39,11 +43,32 @@ class DesignSystem {
       });
     }
     
+    // Gerenciador de componentes
+    this.componentManager = new ComponentManager({
+      cache: options.cache
+    });
+    
     // Inicializar controller com bootstrap se habilitado
     this.designController = new DesignController({
       ...options,
-      bootstrapAdapter: this.enableBootstrap ? this.bootstrapAdapter : null
+      bootstrapAdapter: this.enableBootstrap ? this.bootstrapAdapter : null,
+      componentManager: this.componentManager
     });
+    
+    // Integração com e-commerce se disponível
+    if (options.ecommerceManager && this.enableBootstrap) {
+      this.ecommerceIntegration = new EcommerceBootstrapIntegration({
+        ecommerceManager: options.ecommerceManager,
+        logger: options.logger || console
+      });
+    }
+    
+    // Interface de administração Bootstrap
+    if (this.enableBootstrap) {
+      this.adminInterface = new BootstrapAdminInterface({
+        logger: options.logger || console
+      });
+    }
 
     // Log de inicialização
     if (this.enableBootstrap) {
@@ -72,6 +97,7 @@ class DesignSystem {
     // Métodos adicionais para componentes
     server.registerMethod('design.getComponents', this._handleApiCall.bind(this, this.designController.getComponents.bind(this.designController)));
     server.registerMethod('design.getComponent', this._handleApiCall.bind(this, this.designController.getComponent.bind(this.designController)));
+    server.registerMethod('design.renderComponent', this._handleApiCall.bind(this, this.designController.renderComponent.bind(this.designController)));
     
     // Métodos específicos para Bootstrap se habilitado
     if (this.enableBootstrap) {
@@ -168,6 +194,126 @@ class DesignSystem {
           };
         }
       }));
+      
+      // Método para gerar preview do admin interface
+      server.registerMethod('design.generateBootstrapPreview', this._handleApiCall.bind(this, async (params) => {
+        if (!this.adminInterface) {
+          return {
+            success: false,
+            error: 'Interface de administração Bootstrap não está inicializada'
+          };
+        }
+        
+        try {
+          await this.adminInterface.initialize();
+          
+          if (params.componentId) {
+            // Preview de componente
+            const html = await this.adminInterface.generateComponentPreview(
+              params.componentId,
+              params.options || {},
+              params.data || {}
+            );
+            
+            return {
+              success: true,
+              data: {
+                html,
+                componentId: params.componentId
+              }
+            };
+          } else if (params.templateId) {
+            // Preview de template
+            const html = await this.adminInterface.generateTemplatePreview(
+              params.templateId,
+              params.options || {},
+              params.data || {}
+            );
+            
+            return {
+              success: true,
+              data: {
+                html,
+                templateId: params.templateId
+              }
+            };
+          } else {
+            return {
+              success: false,
+              error: 'Necessário especificar componentId ou templateId'
+            };
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: `Erro ao gerar preview Bootstrap: ${error.message}`
+          };
+        }
+      }));
+      
+      // E-commerce integrations if available
+      if (this.ecommerceIntegration) {
+        // Método para renderizar templates de produtos
+        server.registerMethod('design.renderProductTemplate', this._handleApiCall.bind(this, async (params) => {
+          if (!params || !params.productId) {
+            return {
+              success: false,
+              error: 'O ID do produto é obrigatório'
+            };
+          }
+          
+          try {
+            const html = await this.ecommerceIntegration.renderProductTemplate(
+              params.productId,
+              params.templateName || 'product-detail',
+              params.options || {}
+            );
+            
+            return {
+              success: true,
+              data: {
+                html,
+                productId: params.productId
+              }
+            };
+          } catch (error) {
+            return {
+              success: false,
+              error: `Erro ao renderizar template de produto: ${error.message}`
+            };
+          }
+        }));
+        
+        // Método para renderizar templates de categoria
+        server.registerMethod('design.renderCategoryTemplate', this._handleApiCall.bind(this, async (params) => {
+          if (!params || !params.categoryId) {
+            return {
+              success: false,
+              error: 'O ID da categoria é obrigatório'
+            };
+          }
+          
+          try {
+            const html = await this.ecommerceIntegration.renderCategoryTemplate(
+              params.categoryId,
+              params.options || {}
+            );
+            
+            return {
+              success: true,
+              data: {
+                html,
+                categoryId: params.categoryId
+              }
+            };
+          } catch (error) {
+            return {
+              success: false,
+              error: `Erro ao renderizar template de categoria: ${error.message}`
+            };
+          }
+        }));
+      }
     }
   }
 
@@ -287,6 +433,19 @@ class DesignSystem {
     // Atualizar controlador com o adaptador Bootstrap
     this.designController.setBootstrapAdapter(this.bootstrapAdapter);
     
+    // Inicializar interface de administração Bootstrap
+    this.adminInterface = new BootstrapAdminInterface({
+      logger: this.options.logger || console
+    });
+    
+    // Inicializar integração com e-commerce se disponível
+    if (this.options.ecommerceManager) {
+      this.ecommerceIntegration = new EcommerceBootstrapIntegration({
+        ecommerceManager: this.options.ecommerceManager,
+        logger: this.options.logger || console
+      });
+    }
+    
     console.log(`Bootstrap support enabled (version ${options.version || '5.3.0'})`);
     
     return this;
@@ -312,6 +471,45 @@ class DesignSystem {
   }
   
   /**
+   * Retorna a interface de administração Bootstrap
+   * 
+   * @returns {BootstrapAdminInterface} Interface de administração Bootstrap
+   */
+  getBootstrapAdminInterface() {
+    if (!this.enableBootstrap || !this.adminInterface) {
+      console.warn('BootstrapAdminInterface não está disponível. Habilitando suporte ao Bootstrap automaticamente.');
+      this.enableBootstrapSupport();
+    }
+    
+    return this.adminInterface;
+  }
+  
+  /**
+   * Retorna a integração com e-commerce Bootstrap
+   * 
+   * @returns {EcommerceBootstrapIntegration} Integração com e-commerce Bootstrap
+   */
+  getEcommerceBootstrapIntegration() {
+    if (!this.ecommerceIntegration) {
+      if (!this.options.ecommerceManager) {
+        throw new Error('EcommerceManager não está disponível. A integração com e-commerce não pode ser inicializada.');
+      }
+      
+      if (!this.enableBootstrap) {
+        console.warn('Bootstrap não está habilitado. Habilitando suporte ao Bootstrap automaticamente.');
+        this.enableBootstrapSupport();
+      }
+      
+      this.ecommerceIntegration = new EcommerceBootstrapIntegration({
+        ecommerceManager: this.options.ecommerceManager,
+        logger: this.options.logger || console
+      });
+    }
+    
+    return this.ecommerceIntegration;
+  }
+  
+  /**
    * Verifica se o suporte ao Bootstrap está habilitado
    * 
    * @returns {Boolean} true se o suporte ao Bootstrap estiver habilitado
@@ -328,5 +526,8 @@ module.exports = {
     Template
   },
   BootstrapAdapter,
-  BootstrapTemplateRenderer
+  BootstrapTemplateRenderer,
+  BootstrapAdminInterface,
+  EcommerceBootstrapIntegration,
+  ComponentManager
 };

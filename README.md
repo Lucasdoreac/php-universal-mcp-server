@@ -11,6 +11,8 @@ Um servidor MCP (Model Context Protocol) que permite executar código PHP direta
 - Customize temas e adicione produtos através de comandos simples
 - Sistema completo de relatórios e analytics
 - Interface natural para comandos via chat
+- **NOVO!** Componentes Bootstrap avançados para interfaces modernas
+- **NOVO!** Templates prontos para blogs e landing pages
 
 ## 📋 Pré-requisitos
 
@@ -111,6 +113,18 @@ Claude, mostre os últimos 10 pedidos do meu site Shopify e calcule o valor méd
 Claude, gere um relatório de vendas dos últimos 30 dias para o meu site WooCommerce
 ```
 
+### 6. Usar componentes Bootstrap
+
+```
+Claude, crie uma página de produto usando o componente bs-product-modal com o título "Smartphone XYZ" e preço R$ 1.999,00
+```
+
+### 7. Criar um blog completo
+
+```
+Claude, crie um blog com o template bs-blog para o meu site, com o título "Blog de Tecnologia"
+```
+
 ## 📊 Componentes Principais
 
 ### MCP Protocol Layer
@@ -126,7 +140,7 @@ API unificada para gerenciamento de produtos, pedidos, clientes, categorias, cup
 Adaptadores específicos para cada plataforma suportada: Hostinger, WooCommerce, Shopify.
 
 ### Site Design System
-Motor de templates para sites e e-commerce com personalização de temas.
+Motor de templates para sites e e-commerce com personalização de temas, componentes Bootstrap, e templates completos.
 
 ### Hosting Manager
 Gerenciamento de recursos de hospedagem, incluindo domínios, DNS e SSL.
@@ -141,6 +155,18 @@ Para documentação detalhada de cada componente, visite os seguintes links:
 - [Multi-provider Integration](docs/providers.md)
 - [Site Design System](docs/design.md)
 - [Hosting Manager](docs/hosting.md)
+- [Componentes Bootstrap](docs/bootstrap-components.md) [NOVO!]
+
+## 🛠️ Componentes Bootstrap
+
+O PHP Universal MCP Server agora inclui componentes Bootstrap avançados:
+
+- **Modal**: Visualização rápida de produtos com galeria de imagens
+- **Accordion**: FAQs e categorias expansíveis
+- **Gallery**: Visualização de produtos com múltiplos layouts
+- **Templates completos**: Blog e landing pages prontos para uso
+
+Para mais detalhes, consulte a [documentação dos componentes Bootstrap](docs/bootstrap-components.md).
 
 ## 🤝 Contribuindo
 

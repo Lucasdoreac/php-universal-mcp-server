@@ -7,6 +7,7 @@
 const Theme = require('../models/Theme');
 const TemplateManager = require('./TemplateManager');
 const TemplateRenderer = require('./TemplateRenderer');
+const BootstrapTemplateRenderer = require('./BootstrapTemplateRenderer');
 const ComponentManager = require('./ComponentManager');
 const ThemeManager = require('./ThemeManager');
 const path = require('path');
@@ -17,10 +18,12 @@ class DesignService {
    * @param {Object} options Opções de configuração
    * @param {Object} options.providerManager Gerenciador de provedores
    * @param {Object} options.cache Sistema de cache (opcional)
+   * @param {Object} options.bootstrapAdapter Adaptador Bootstrap (opcional)
    */
   constructor(options = {}) {
     this.providerManager = options.providerManager;
     this.cache = options.cache || null;
+    this.bootstrapAdapter = options.bootstrapAdapter || null;
     
     // Diretórios base
     const baseDir = path.resolve(__dirname, '..');
@@ -29,11 +32,21 @@ class DesignService {
     const themesDir = path.join(baseDir, 'themes');
     
     // Inicializar serviços
-    this.templateRenderer = new TemplateRenderer({
-      templatesDir,
-      componentsDir,
-      cache: this.cache
-    });
+    // Escolher o renderizador apropriado com base na disponibilidade do Bootstrap
+    if (this.bootstrapAdapter) {
+      this.templateRenderer = new BootstrapTemplateRenderer({
+        templatesDir,
+        componentsDir,
+        cache: this.cache,
+        bootstrapAdapter: this.bootstrapAdapter
+      });
+    } else {
+      this.templateRenderer = new TemplateRenderer({
+        templatesDir,
+        componentsDir,
+        cache: this.cache
+      });
+    }
     
     this.componentManager = new ComponentManager({
       componentsDir,
@@ -51,6 +64,36 @@ class DesignService {
       templatesDir,
       cache: this.cache
     });
+  }
+
+  /**
+   * Define o adaptador Bootstrap
+   * 
+   * @param {Object} bootstrapAdapter Adaptador Bootstrap
+   */
+  setBootstrapAdapter(bootstrapAdapter) {
+    this.bootstrapAdapter = bootstrapAdapter;
+    
+    // Atualizar ou trocar o renderizador
+    const templatesDir = this.templateRenderer.options.templatesDir;
+    const componentsDir = this.templateRenderer.options.componentsDir;
+    
+    // Se não for um BootstrapTemplateRenderer, cria um novo
+    if (!(this.templateRenderer instanceof BootstrapTemplateRenderer)) {
+      this.templateRenderer = new BootstrapTemplateRenderer({
+        templatesDir,
+        componentsDir,
+        cache: this.cache,
+        bootstrapAdapter: this.bootstrapAdapter
+      });
+      
+      // Atualiza o ComponentManager com o novo renderizador
+      this.componentManager.options.templateRenderer = this.templateRenderer;
+      this.themeManager.options.templateRenderer = this.templateRenderer;
+    } else {
+      // Já é um BootstrapTemplateRenderer, apenas atualiza o adaptador
+      this.templateRenderer.bootstrapAdapter = bootstrapAdapter;
+    }
   }
 
   /**
@@ -148,6 +191,20 @@ class DesignService {
     // Aplicar o tema do template ao site
     const theme = await this.themeManager.applyTemplateTheme(siteId, template.theme, templateId);
     
+    // Verificar se o template é do tipo Bootstrap
+    const isBootstrapTemplate = templateId.startsWith('bs-') || template.category === 'bootstrap';
+    
+    // Se for Bootstrap e o adaptador não estiver disponível, emitir um aviso
+    if (isBootstrapTemplate && !this.bootstrapAdapter) {
+      console.warn(`Template Bootstrap ${templateId} aplicado, mas o adaptador Bootstrap não está disponível. Algumas funcionalidades podem estar limitadas.`);
+    }
+    
+    // Gerar CSS do Bootstrap se disponível e for um template Bootstrap
+    let bootstrapCss = null;
+    if (isBootstrapTemplate && this.bootstrapAdapter) {
+      bootstrapCss = this.bootstrapAdapter.generateCssVariables(theme.toJSON());
+    }
+    
     // Sincronizar com o provedor (quando implementado)
     // Se o provedor tiver API para isso
     if (provider && typeof provider.updateSiteTheme === 'function') {
@@ -157,6 +214,7 @@ class DesignService {
     return {
       theme: theme.toJSON(),
       template: template,
+      bootstrapCss,
       appliedAt: new Date().toISOString()
     };
   }
@@ -174,6 +232,18 @@ class DesignService {
     
     const provider = await this._getProviderForSite(siteId);
     
+    // Determinar se o tema é Bootstrap (verificando metadata)
+    const themeData = customizedTheme.toJSON();
+    const isBootstrapTheme = themeData.metadata && 
+                          (themeData.metadata.templateId && themeData.metadata.templateId.startsWith('bs-') || 
+                           themeData.metadata.bootstrap);
+    
+    // Gerar CSS para o Bootstrap, se aplicável
+    let bootstrapCss = null;
+    if (isBootstrapTheme && this.bootstrapAdapter) {
+      bootstrapCss = this.bootstrapAdapter.generateCssVariables(themeData);
+    }
+    
     // Sincronizar com o provedor (quando implementado)
     // Se o provedor tiver API para isso
     if (provider && typeof provider.updateSiteTheme === 'function') {
@@ -186,6 +256,7 @@ class DesignService {
     return {
       theme: customizedTheme.toJSON(),
       cssVariables,
+      bootstrapCss,
       updatedAt: new Date().toISOString()
     };
   }
@@ -201,11 +272,23 @@ class DesignService {
     // Gerar preview usando o ThemeManager
     const previewData = await this.themeManager.generateThemePreview(siteId, changes);
     
+    // Determinar se o tema é Bootstrap (verificando metadata)
+    const isBootstrapTheme = previewData.theme.metadata && 
+                          (previewData.theme.metadata.templateId && previewData.theme.metadata.templateId.startsWith('bs-') || 
+                           previewData.theme.metadata.bootstrap);
+    
+    // Gerar CSS para o Bootstrap, se aplicável
+    let bootstrapCss = null;
+    if (isBootstrapTheme && this.bootstrapAdapter) {
+      bootstrapCss = this.bootstrapAdapter.generateCssVariables(previewData.theme);
+    }
+    
     // Em uma implementação real, geraria uma URL de preview
     const previewUrl = `https://preview.example.com/${siteId}?preview=${previewData.previewId}`;
     
     return {
       ...previewData,
+      bootstrapCss,
       previewUrl
     };
   }
@@ -318,21 +401,32 @@ class DesignService {
       }
     };
     
-    // Encontrar um template associado ou usar um padrão
-    let templateId = 'modern-shop';
-    let templateCategory = 'ecommerce';
+    // Verificar se é um tema Bootstrap a partir dos metadados
+    const isBootstrapTheme = theme.metadata && 
+                          (theme.metadata.templateId && theme.metadata.templateId.startsWith('bs-') || 
+                           theme.metadata.bootstrap);
     
-    if (theme.metadata && theme.metadata.templateId) {
-      templateId = theme.metadata.templateId;
+    let templateId, templateCategory;
+    
+    if (isBootstrapTheme) {
+      // Para temas Bootstrap, usar o template correspondente de bootstrap/
+      templateId = theme.metadata.templateId || 'bs-ecommerce';
+      templateCategory = 'bootstrap';
+    } else {
+      // Para temas padrão, usar o template associado ou um padrão
+      templateId = theme.metadata.templateId || 'modern-shop';
+      templateCategory = 'ecommerce';
     }
+    
+    // Componentes específicos com base no tipo de template
+    const components = isBootstrapTheme ? 
+      ['bootstrap/navbar/bs-navbar', 'bootstrap/product/bs-product-card', 'bootstrap/footer/bs-footer'] : 
+      ['header/modern-header', 'product/product-card'];
     
     // Renderizar o template com os dados
     return this.templateRenderer.renderTemplate(templateId, renderData, {
       category: templateCategory,
-      components: [
-        'header/modern-header',
-        'product/product-card'
-      ]
+      components
     });
   }
 
@@ -353,13 +447,26 @@ class DesignService {
       await provider.publishSiteTheme(siteId, currentTheme.toJSON());
     }
     
+    // Verificar se é um tema Bootstrap
+    const themeData = currentTheme.toJSON();
+    const isBootstrapTheme = themeData.metadata && 
+                          (themeData.metadata.templateId && themeData.metadata.templateId.startsWith('bs-') || 
+                           themeData.metadata.bootstrap);
+    
     // Gerar CSS a partir do tema
-    const cssVariables = this.templateRenderer.generateThemeCSS(currentTheme.toJSON());
+    const cssVariables = this.templateRenderer.generateThemeCSS(themeData);
+    
+    // Gerar CSS para o Bootstrap, se aplicável
+    let bootstrapCss = null;
+    if (isBootstrapTheme && this.bootstrapAdapter) {
+      bootstrapCss = this.bootstrapAdapter.generateCssVariables(themeData);
+    }
     
     return {
       published: true,
-      theme: currentTheme.toJSON(),
+      theme: themeData,
       cssVariables,
+      bootstrapCss,
       publishedAt: new Date().toISOString(),
       siteUrl: `https://site.example.com/${siteId}`
     };
@@ -374,21 +481,42 @@ class DesignService {
   async createAssetBundle(siteId) {
     // Obter o tema atual do site
     const currentTheme = await this.themeManager.getSiteTheme(siteId);
+    const themeData = currentTheme.toJSON();
     
-    // Obter informações sobre os componentes usados no template
-    // Em uma implementação real, isso viria do provedor ou do banco de dados
-    const componentsList = [
-      { id: 'header/modern-header', options: {} },
-      { id: 'product/product-card', options: { style: 'default', showRatings: true } },
-      { id: 'footer/standard-footer', options: {} }
-    ];
+    // Verificar se é um tema Bootstrap
+    const isBootstrapTheme = themeData.metadata && 
+                          (themeData.metadata.templateId && themeData.metadata.templateId.startsWith('bs-') || 
+                           themeData.metadata.bootstrap);
+    
+    // Componentes a incluir com base no tipo de tema
+    let componentsList;
+    
+    if (isBootstrapTheme) {
+      componentsList = [
+        { id: 'bootstrap/navbar/bs-navbar', options: {} },
+        { id: 'bootstrap/product/bs-product-card', options: { style: 'default', showRatings: true } },
+        { id: 'bootstrap/footer/bs-footer', options: {} }
+      ];
+    } else {
+      componentsList = [
+        { id: 'header/modern-header', options: {} },
+        { id: 'product/product-card', options: { style: 'default', showRatings: true } },
+        { id: 'footer/standard-footer', options: {} }
+      ];
+    }
     
     // Criar pacote de componentes
     const bundle = await this.componentManager.createComponentBundle(
       siteId,
       componentsList,
-      currentTheme.toJSON()
+      themeData
     );
+    
+    // Adicionar CSS do Bootstrap ao pacote, se aplicável
+    if (isBootstrapTheme && this.bootstrapAdapter) {
+      const bootstrapCss = this.bootstrapAdapter.generateCssVariables(themeData);
+      bundle.bootstrapCss = bootstrapCss;
+    }
     
     return bundle;
   }

@@ -5,6 +5,26 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-03-23
+
+### Adicionado
+- Implementação completa do E-commerce Manager Core
+- Modelos para Produtos, Pedidos, Clientes, Categorias e Cupons
+- Controladores e serviços para operações CRUD
+- Sistema avançado de relatórios e analytics
+- Exemplos de uso para produtos e relatórios
+- Documentação detalhada do componente de e-commerce
+- Sistema de cache para otimização de desempenho
+
+## [1.1.0] - 2025-03-23
+
+### Adicionado
+- Implementação do PHP Runtime Engine
+- Ambiente seguro para execução de código PHP
+- Sistema de limitação de recursos (tempo, memória, execuções)
+- Captura estruturada de saídas e erros
+- Gerenciamento de bibliotecas para e-commerce e web
+
 ## [1.0.1] - 2025-03-23
 
 ### Corrigido
@@ -12,7 +32,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Corrigido problema de retorno no método _handleStream que não incluía o objeto stream
 
 ### Adicionado
-- Integração completa com Claude Desktop via MCP
+- Implementação completa do MCP Protocol Layer
+- Integração com Claude Desktop via MCP
 - Suporte para detecção automática de provedores de hospedagem
 
 ## [1.0.0] - 2025-03-22

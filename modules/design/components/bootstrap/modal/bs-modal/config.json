@@ -1,0 +1,182 @@
+{
+  "name": "Bootstrap Modal",
+  "description": "Um componente de modal genérico e reutilizável baseado no Bootstrap 5",
+  "version": "1.0.0",
+  "category": "bootstrap",
+  "tags": ["modal", "bootstrap", "popup", "dialog"],
+  "author": "PHP Universal MCP Team",
+  "dependencies": ["bootstrap"],
+  "options": {
+    "id": {
+      "type": "string",
+      "description": "ID do modal para referência em JavaScript",
+      "default": "bs-modal"
+    },
+    "title": {
+      "type": "string",
+      "description": "Título do modal",
+      "default": "Modal Title"
+    },
+    "size": {
+      "type": "string",
+      "description": "Tamanho do modal (sm, lg, xl)",
+      "enum": ["sm", "lg", "xl"],
+      "default": "md"
+    },
+    "fullscreen": {
+      "type": "boolean",
+      "description": "Modal em tela cheia em dispositivos móveis",
+      "default": false
+    },
+    "centered": {
+      "type": "boolean",
+      "description": "Centralizar modal verticalmente",
+      "default": true
+    },
+    "showClose": {
+      "type": "boolean", 
+      "description": "Exibir botão de fechar",
+      "default": true
+    },
+    "animationDuration": {
+      "type": "number",
+      "description": "Duração da animação em milissegundos",
+      "default": 300
+    },
+    "scrollable": {
+      "type": "boolean",
+      "description": "Permitir rolagem dentro do modal",
+      "default": true
+    },
+    "staticBackdrop": {
+      "type": "boolean",
+      "description": "Não fechar o modal ao clicar fora dele",
+      "default": false
+    },
+    "headerStyle": {
+      "type": "object",
+      "description": "Estilos do cabeçalho",
+      "properties": {
+        "bgColor": {
+          "type": "string",
+          "description": "Cor de fundo do cabeçalho",
+          "default": "#ffffff"
+        },
+        "textColor": {
+          "type": "string",
+          "description": "Cor do texto do cabeçalho",
+          "default": "#212529"
+        },
+        "borderColor": {
+          "type": "string",
+          "description": "Cor da borda do cabeçalho",
+          "default": "#dee2e6"
+        }
+      }
+    },
+    "footerStyle": {
+      "type": "object",
+      "description": "Estilos do rodapé",
+      "properties": {
+        "bgColor": {
+          "type": "string",
+          "description": "Cor de fundo do rodapé",
+          "default": "#f8f9fa"
+        },
+        "textColor": {
+          "type": "string",
+          "description": "Cor do texto do rodapé",
+          "default": "#212529"
+        },
+        "borderColor": {
+          "type": "string",
+          "description": "Cor da borda do rodapé",
+          "default": "#dee2e6"
+        }
+      }
+    },
+    "customClasses": {
+      "type": "object",
+      "description": "Classes CSS personalizadas para diferentes partes do modal",
+      "properties": {
+        "container": {
+          "type": "string",
+          "description": "Classes para o container do modal",
+          "default": ""
+        },
+        "header": {
+          "type": "string",
+          "description": "Classes para o cabeçalho",
+          "default": ""
+        },
+        "body": {
+          "type": "string",
+          "description": "Classes para o corpo",
+          "default": ""
+        },
+        "footer": {
+          "type": "string",
+          "description": "Classes para o rodapé",
+          "default": ""
+        }
+      }
+    },
+    "buttons": {
+      "type": "array",
+      "description": "Botões para o rodapé do modal",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Texto do botão"
+          },
+          "type": {
+            "type": "string",
+            "description": "Tipo do botão",
+            "enum": ["primary", "secondary", "success", "danger", "warning", "info", "light", "dark", "link"],
+            "default": "primary"
+          },
+          "dismiss": {
+            "type": "boolean",
+            "description": "Se o botão deve fechar o modal",
+            "default": false
+          },
+          "id": {
+            "type": "string",
+            "description": "ID do botão para referência em JavaScript"
+          },
+          "customClass": {
+            "type": "string",
+            "description": "Classes CSS personalizadas"
+          }
+        }
+      },
+      "default": [
+        {
+          "text": "Fechar",
+          "type": "secondary",
+          "dismiss": true
+        },
+        {
+          "text": "Salvar",
+          "type": "primary",
+          "id": "save-btn"
+        }
+      ]
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "content": {
+        "type": "string",
+        "description": "Conteúdo principal do modal (pode ser HTML)"
+      },
+      "data": {
+        "type": "object",
+        "description": "Dados adicionais para uso no modal"
+      }
+    }
+  }
+}

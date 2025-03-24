@@ -9,7 +9,7 @@
  * interativo do processo de criação.
  * 
  * @author Lucas Dórea
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 const path = require('path');
@@ -31,6 +31,9 @@ const galleryManager = require('../../modules/design/components/bootstrap/galler
 const formManager = require('../../modules/design/components/bootstrap/form');
 const footerManager = require('../../modules/design/components/bootstrap/footer');
 const productManager = require('../../modules/design/components/bootstrap/product');
+
+// Importar visualizador de artifacts
+const artifactVisualizer = require('./artifact-visualizer');
 
 // Templates disponíveis
 const TEMPLATES = {
@@ -135,6 +138,10 @@ class BootstrapBuilder {
     try {
       // Criar componente usando o gerenciador apropriado
       const component = await componentManagers[componentType].create(this.activeSite.id, targetSelector, options);
+      
+      // Adicionar atributos especiais para detecção no artifact-visualizer
+      component.content = component.content.replace(/<([a-z]+[^>]*)/gi, `<$1 data-component-id="${component.id}" data-component-type="${componentType}"`);
+      
       return component;
     } catch (error) {
       console.error(`Erro ao adicionar componente ${componentType}:`, error);
@@ -168,6 +175,10 @@ class BootstrapBuilder {
       }
       
       const updatedComponent = await manager.update(this.activeSite.id, componentId, updates);
+      
+      // Atualizar atributos especiais para detecção no artifact-visualizer
+      updatedComponent.content = updatedComponent.content.replace(/<([a-z]+[^>]*)/gi, `<$1 data-component-id="${updatedComponent.id}" data-component-type="${componentType}"`);
+      
       return updatedComponent;
     } catch (error) {
       console.error('Erro ao atualizar componente:', error);
@@ -213,6 +224,24 @@ class BootstrapBuilder {
   }
 
   /**
+   * Obter lista de componentes do site ativo
+   * @returns {Array} Lista de componentes
+   */
+  async getComponents() {
+    if (!this.activeSite) {
+      throw new Error('Nenhum site ativo');
+    }
+    
+    try {
+      const components = await componentService.getSiteComponents(this.activeSite.id);
+      return components;
+    } catch (error) {
+      console.error('Erro ao obter componentes:', error);
+      return [];
+    }
+  }
+
+  /**
    * Publicar site
    * @param {Object} options - Opções de publicação
    * @returns {Object} - Informações da publicação
@@ -237,15 +266,79 @@ class BootstrapBuilder {
    */
   async generateArtifact() {
     try {
+      // Gerar prévia do HTML
       const preview = await this.generatePreview();
       
+      // Obter componentes para exibição
+      const components = await this.getComponents();
+      
+      // Gerar visualização melhorada com o artifact-visualizer
+      const html = await artifactVisualizer.generateWebsiteVisualization(
+        this.activeSite,
+        preview,
+        components
+      );
+      
+      return artifactVisualizer.prepareArtifact(
+        html,
+        this.activeSite ? this.activeSite.title : 'Preview do Site'
+      );
+    } catch (error) {
+      console.error('Erro ao gerar artifact:', error);
+      
+      // Fallback para exibição simples em caso de erro
       return {
         type: 'text/html',
         title: this.activeSite ? this.activeSite.title : 'Preview do Site',
-        content: preview
+        content: `
+          <html>
+            <head>
+              <title>Preview do Site</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            </head>
+            <body>
+              <div class="container p-4">
+                <div class="alert alert-warning">
+                  <h4>Erro ao gerar visualização avançada</h4>
+                  <p>${error.message}</p>
+                </div>
+                <div class="mt-4">
+                  ${await this.generatePreview()}
+                </div>
+              </div>
+            </body>
+          </html>
+        `
       };
+    }
+  }
+  
+  /**
+   * Gerar artifact específico para visualização de um componente
+   * @param {string} componentId - ID do componente
+   * @returns {Object} - Dados para o artifact
+   */
+  async generateComponentArtifact(componentId) {
+    try {
+      if (!this.activeSite) {
+        throw new Error('Nenhum site ativo');
+      }
+      
+      // Obter detalhes do componente
+      const component = await componentService.getComponent(this.activeSite.id, componentId);
+      if (!component) {
+        throw new Error(`Componente ${componentId} não encontrado`);
+      }
+      
+      // Gerar visualização melhorada com o artifact-visualizer
+      const html = await artifactVisualizer.generateComponentVisualization(component);
+      
+      return artifactVisualizer.prepareArtifact(
+        html,
+        `Componente: ${component.name || component.type}`
+      );
     } catch (error) {
-      console.error('Erro ao gerar artifact:', error);
+      console.error('Erro ao gerar artifact de componente:', error);
       throw error;
     }
   }
@@ -276,12 +369,12 @@ async function processCommand(command, session) {
         const artifact = await builder.generateArtifact();
         
         return new MCPResponse({
-          message: `Site ${site.title} criado com sucesso!`,
+          message: `Site ${site.title} criado com sucesso! Você pode adicionar componentes com comandos como "adicionar menu" ou "inserir carrossel".`,
           artifacts: [artifact]
         });
         
       case 'add-component':
-        await builder.addComponent(
+        const component = await builder.addComponent(
           parsedCommand.componentType,
           parsedCommand.targetSelector,
           parsedCommand.options
@@ -291,8 +384,17 @@ async function processCommand(command, session) {
         const updatedArtifact = await builder.generateArtifact();
         
         return new MCPResponse({
-          message: `Componente ${parsedCommand.componentType} adicionado com sucesso!`,
+          message: `Componente ${parsedCommand.componentType} adicionado com sucesso! ID do componente: ${component.id}`,
           artifacts: [updatedArtifact]
+        });
+        
+      case 'view-component':
+        // Visualizar um componente específico
+        const componentArtifact = await builder.generateComponentArtifact(parsedCommand.componentId);
+        
+        return new MCPResponse({
+          message: `Visualizando componente ${parsedCommand.componentId}:`,
+          artifacts: [componentArtifact]
         });
         
       case 'update-component':
@@ -319,7 +421,7 @@ async function processCommand(command, session) {
         
       case 'preview':
         return new MCPResponse({
-          message: `Prévia do site gerada:`,
+          message: `Prévia do site atualizada:`,
           artifacts: [await builder.generateArtifact()]
         });
         
@@ -359,10 +461,18 @@ function parseNaturalCommand(text) {
     const titleMatch = normalizedText.match(/(?:chamado|título|titulado|nome)[:\s]+["'](.+?)["']/i);
     if (titleMatch) title = titleMatch[1];
     
+    // Extrair cor primária se fornecida
+    let primaryColor = null;
+    const colorMatch = normalizedText.match(/cor(?:\s+primária)?[:\s]+([#][0-9a-fA-F]{6}|[a-zA-Z]+)/i);
+    if (colorMatch) primaryColor = colorMatch[1];
+    
     return {
       action: 'create',
       templateType,
-      options: { title }
+      options: { 
+        title,
+        primaryColor
+      }
     };
   }
   
@@ -378,18 +488,86 @@ function parseNaturalCommand(text) {
     if (normalizedText.includes('rodapé') || normalizedText.includes('footer')) componentType = 'footer';
     if (normalizedText.includes('produto') || normalizedText.includes('product')) componentType = 'product';
     
+    // Extrair variante para componentes que suportam
+    let variant = null;
+    const variantMatch = normalizedText.match(/variante[:\s]+([a-zA-Z]+)/i);
+    if (variantMatch) variant = variantMatch[1];
+    
+    // Extrair seletor alvo (onde inserir)
+    let targetSelector = '#content';
+    if (normalizedText.includes('no cabeçalho') || normalizedText.includes('no header')) {
+      targetSelector = 'header';
+    }
+    if (normalizedText.includes('no rodapé') || normalizedText.includes('no footer')) {
+      targetSelector = 'footer';
+    }
+    
     return {
       action: 'add-component',
       componentType: componentType || 'navbar', // Padrão para navbar se não detectado
-      targetSelector: '#content', // Seletor padrão
-      options: {}
+      targetSelector,
+      options: { variant }
+    };
+  }
+  
+  if (normalizedText.includes('visualizar componente') || normalizedText.includes('ver componente')) {
+    // Extrair ID do componente
+    const idMatch = normalizedText.match(/componente[:\s]+([a-zA-Z0-9-]+)/i);
+    const componentId = idMatch ? idMatch[1] : null;
+    
+    if (!componentId) {
+      return { action: 'preview' }; // Fallback para preview do site
+    }
+    
+    return {
+      action: 'view-component',
+      componentId
+    };
+  }
+  
+  if (normalizedText.includes('atualizar componente') || normalizedText.includes('editar componente')) {
+    // Extrair ID do componente
+    const idMatch = normalizedText.match(/componente[:\s]+([a-zA-Z0-9-]+)/i);
+    const componentId = idMatch ? idMatch[1] : null;
+    
+    if (!componentId) {
+      return { action: 'preview' }; // Fallback para preview do site
+    }
+    
+    // Extrair propriedades a atualizar
+    // Este é um parser básico, um parser real com NLP seria mais robusto
+    const updates = {};
+    
+    if (normalizedText.includes('cor:')) {
+      const colorMatch = normalizedText.match(/cor[:\s]+([#][0-9a-fA-F]{6}|[a-zA-Z]+)/i);
+      if (colorMatch) updates.color = colorMatch[1];
+    }
+    
+    if (normalizedText.includes('texto:')) {
+      const textMatch = normalizedText.match(/texto[:\s]+["'](.+?)["']/i);
+      if (textMatch) updates.text = textMatch[1];
+    }
+    
+    if (normalizedText.includes('título:')) {
+      const titleMatch = normalizedText.match(/título[:\s]+["'](.+?)["']/i);
+      if (titleMatch) updates.title = titleMatch[1];
+    }
+    
+    return {
+      action: 'update-component',
+      componentId,
+      updates
     };
   }
   
   if (normalizedText.includes('publicar') || normalizedText.includes('deploy')) {
+    // Extrair domínio se fornecido
+    const domainMatch = normalizedText.match(/(?:em|para|no)[:\s]+([a-zA-Z0-9][a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i);
+    const domain = domainMatch ? domainMatch[1] : null;
+    
     return {
       action: 'publish',
-      options: {}
+      options: domain ? { domain } : {}
     };
   }
   

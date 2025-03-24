@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+      {{styles}}
+      
+      /* Estilos específicos para artefato de website */
+      .site-info {
+        background-color: rgba(0, 123, 255, 0.1);
+        border-left: 4px solid var(--primary-color);
+        padding: 10px 15px;
+        margin-bottom: 15px;
+      }
+      
+      .site-title {
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-right: 15px;
+      }
+      
+      .site-description {
+        font-style: italic;
+        color: #555;
+      }
+      
+      .component-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-right: 5px;
+        background-color: #e9ecef;
+        color: #495057;
+      }
+      
+      .component-badge.navbar {
+        background-color: #cfe2ff;
+        color: #084298;
+      }
+      
+      .component-badge.carousel {
+        background-color: #d1e7dd;
+        color: #0f5132;
+      }
+      
+      .component-badge.accordion {
+        background-color: #f8d7da;
+        color: #842029;
+      }
+      
+      .component-badge.modal {
+        background-color: #fff3cd;
+        color: #664d03;
+      }
+      
+      .component-badge.gallery {
+        background-color: #e0cffc;
+        color: #6610f2;
+      }
+      
+      .component-badge.form {
+        background-color: #d3d3fc;
+        color: #4400c2;
+      }
+      
+      .component-badge.footer {
+        background-color: #cdcdcd;
+        color: #333333;
+      }
+      
+      .component-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      
+      .device-button {
+        padding: 5px 10px;
+        margin: 0 5px;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      
+      .device-button.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+      
+      /* Destacar componentes no preview */
+      .highlight-components [data-component-id] {
+        position: relative;
+        outline: 1px dashed rgba(0, 123, 255, 0.5);
+      }
+      
+      .highlight-components [data-component-id]:hover {
+        outline: 2px solid rgba(0, 123, 255, 0.8);
+      }
+      
+      .highlight-components [data-component-id]::before {
+        content: attr(data-component-type);
+        position: absolute;
+        top: -20px;
+        left: 0;
+        font-size: 10px;
+        background-color: rgba(0, 123, 255, 0.8);
+        color: white;
+        padding: 2px 4px;
+        border-radius: 2px;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      
+      .highlight-components [data-component-id]:hover::before {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-wrapper">
+      <div class="preview-header">
+        <div>{{title}}</div>
+        <div>PHP Universal MCP Server</div>
+      </div>
+      
+      <div class="site-info">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="site-title">{{title}}</span>
+            <span class="site-description">{{description}}</span>
+          </div>
+          <div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="highlightComponentsSwitch">
+              <label class="form-check-label" for="highlightComponentsSwitch">Destacar componentes</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="responsive-controls">
+        <button class="device-button active" data-width="100%">
+          <i class="bi bi-laptop"></i> Desktop
+        </button>
+        <button class="device-button" data-width="768px">
+          <i class="bi bi-tablet"></i> Tablet
+        </button>
+        <button class="device-button" data-width="375px">
+          <i class="bi bi-phone"></i> Mobile
+        </button>
+      </div>
+      
+      <div class="preview-container">
+        {{{content}}}
+      </div>
+      
+      <div class="component-list">
+        <div class="component-list-header">
+          <h5>Componentes ({{componentsCount}})</h5>
+          <span class="text-muted">Use "visualizar componente [ID]" para detalhes</span>
+        </div>
+        
+        {{#if componentsCount}}
+          {{#each components}}
+            <div class="component-item">
+              <div>
+                <span class="component-badge {{type}}">{{type}}</span>
+                <span>{{name}}</span>
+              </div>
+              <span class="text-muted">ID: {{id}}</span>
+            </div>
+          {{/each}}
+        {{else}}
+          <p>Nenhum componente adicionado ainda. Use comandos como "adicionar menu" ou "inserir carrossel" para adicionar elementos ao seu site.</p>
+        {{/if}}
+      </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Controles responsivos
+      document.querySelectorAll('.device-button').forEach(button => {
+        button.addEventListener('click', function() {
+          const width = this.getAttribute('data-width');
+          document.querySelector('.preview-container').style.width = width;
+          
+          // Atualizar botão ativo
+          document.querySelectorAll('.device-button').forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+      
+      // Destacar componentes
+      const highlightSwitch = document.getElementById('highlightComponentsSwitch');
+      const previewContainer = document.querySelector('.preview-container');
+      
+      highlightSwitch.addEventListener('change', function() {
+        if (this.checked) {
+          previewContainer.classList.add('highlight-components');
+        } else {
+          previewContainer.classList.remove('highlight-components');
+        }
+      });
+    </script>
+  </body>
+</html>

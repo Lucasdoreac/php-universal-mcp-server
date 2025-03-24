@@ -2,12 +2,13 @@
  * PHP Universal MCP Server
  * 
  * Servidor MCP para gerenciamento de sites e e-commerces através do Claude Desktop
- * Versão 1.7.2
+ * Versão 1.8.0
  */
 
 const net = require('net');
 const fs = require('fs');
 const path = require('path');
+const { EventEmitter } = require('events');
 const NodeCache = require('node-cache');
 const zlib = require('zlib');
 
@@ -15,6 +16,7 @@ const zlib = require('zlib');
 const { DesignSystem } = require('./modules/design/index');
 const { ExportManager } = require('./modules/export/index');
 const { TemplateEditor } = require('./modules/design/editor');
+const PluginManager = require('./core/plugin-manager');
 
 // Configurações
 const DEFAULT_PORT = process.env.MCP_PORT || 7654;
@@ -42,7 +44,8 @@ class CacheManager {
         products: 1800,
         orders: 300,
         analytics: 7200,
-        templates: 86400
+        templates: 86400,
+        plugins: 3600
       },
       storage: 'memory',
       compression: true,
@@ -164,13 +167,17 @@ const exportManager = new ExportManager({
 });
 
 // Classe principal do servidor MCP
-class MCPServer {
+class MCPServer extends EventEmitter {
   constructor() {
+    super();
     this.methods = {};
     this.tcpServer = null;
     this.clients = new Set();
     this.cacheManager = cacheManager;
     this.config = config;
+    
+    // Inicializar gerenciador de plugins
+    this.pluginManager = new PluginManager(this, config.plugins || {});
     
     // Registrar métodos de API
     this._registerMethods();
@@ -186,6 +193,9 @@ class MCPServer {
     // Registrar métodos do Export Manager
     exportManager.registerApiMethods(this);
     
+    // Registrar métodos do Plugin Manager
+    this.pluginManager.registerApiMethods();
+    
     // Registrar método de eco para testes
     this.registerMethod('echo', async (params) => {
       return {
@@ -200,12 +210,16 @@ class MCPServer {
         success: true,
         data: {
           name: 'PHP Universal MCP Server',
-          version: '1.7.2',
+          version: '1.8.0',
           bootstrap: designSystem.isBootstrapEnabled(),
           caching: this.cacheManager.options.enabled,
           templateEditor: config.design?.editor?.enabled !== false,
           responsive: config.bootstrap?.responsive !== false,
-          exportFormats: config.export?.formats || ['csv', 'pdf', 'json']
+          exportFormats: config.export?.formats || ['csv', 'pdf', 'json'],
+          plugins: {
+            count: Object.keys(this.pluginManager.plugins).length,
+            enabled: true
+          }
         }
       };
     });
@@ -233,6 +247,15 @@ class MCPServer {
     if (DEBUG) console.log(`Registered method: ${name}`);
   }
   
+  unregisterMethod(name) {
+    if (this.methods[name]) {
+      delete this.methods[name];
+      if (DEBUG) console.log(`Unregistered method: ${name}`);
+      return true;
+    }
+    return false;
+  }
+  
   async processRequest(request) {
     if (!request || request.jsonrpc !== '2.0') {
       return {
@@ -257,6 +280,7 @@ class MCPServer {
       return { jsonrpc: '2.0', result, id };
     } catch (error) {
       console.error(`Error processing request: ${error.message}`, error.stack);
+      this.emit('error', error);
       return {
         jsonrpc: '2.0',
         error: { code: -32603, message: error.message, stack: DEBUG ? error.stack : undefined },
@@ -265,58 +289,76 @@ class MCPServer {
     }
   }
   
-  startServer(port = DEFAULT_PORT) {
-    this.tcpServer = net.createServer((socket) => {
-      console.log('Client connected');
-      this.clients.add(socket);
+  async start(port = DEFAULT_PORT) {
+    try {
+      // Inicializar gerenciador de plugins
+      await this.pluginManager.initialize();
       
-      let buffer = '';
-      
-      socket.on('data', async (data) => {
-        buffer += data.toString();
+      this.tcpServer = net.createServer((socket) => {
+        console.log('Client connected');
+        this.clients.add(socket);
         
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
+        let buffer = '';
         
-        for (const line of lines) {
-          if (!line.trim()) continue;
+        socket.on('data', async (data) => {
+          buffer += data.toString();
           
-          try {
-            const request = JSON.parse(line);
-            const response = await this.processRequest(request);
-            socket.write(JSON.stringify(response) + '\n');
-          } catch (error) {
-            socket.write(JSON.stringify({
-              jsonrpc: '2.0',
-              error: { code: -32700, message: 'Parse error' },
-              id: null
-            }) + '\n');
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            
+            try {
+              const request = JSON.parse(line);
+              const response = await this.processRequest(request);
+              socket.write(JSON.stringify(response) + '\n');
+            } catch (error) {
+              socket.write(JSON.stringify({
+                jsonrpc: '2.0',
+                error: { code: -32700, message: 'Parse error' },
+                id: null
+              }) + '\n');
+            }
           }
-        }
+        });
+        
+        socket.on('close', () => {
+          console.log('Client disconnected');
+          this.clients.delete(socket);
+        });
+        
+        socket.on('error', (error) => {
+          console.error('Socket error:', error);
+          this.clients.delete(socket);
+        });
       });
       
-      socket.on('close', () => {
-        console.log('Client disconnected');
-        this.clients.delete(socket);
+      this.tcpServer.listen(port, () => {
+        console.log(`PHP Universal MCP Server v1.8.0 listening on port ${port}`);
+        console.log(`Cache: ${this.cacheManager.options.enabled ? 'Enabled' : 'Disabled'}`);
+        console.log(`Bootstrap: ${designSystem.isBootstrapEnabled() ? 'Enabled' : 'Disabled'}`);
+        console.log(`Template Editor: ${config.design?.editor?.enabled !== false ? 'Enabled' : 'Disabled'}`);
+        console.log(`Export formats: ${config.export?.formats?.join(', ') || 'csv, pdf, json'}`);
+        console.log(`Plugins: ${this.pluginManager.plugins.size} active plugins`);
+        
+        // Emitir evento de inicialização do servidor
+        this.emit('server:started');
       });
       
-      socket.on('error', (error) => {
-        console.error('Socket error:', error);
-        this.clients.delete(socket);
-      });
-    });
-    
-    this.tcpServer.listen(port, () => {
-      console.log(`PHP Universal MCP Server v1.7.2 listening on port ${port}`);
-      console.log(`Cache: ${this.cacheManager.options.enabled ? 'Enabled' : 'Disabled'}`);
-      console.log(`Bootstrap: ${designSystem.isBootstrapEnabled() ? 'Enabled' : 'Disabled'}`);
-      console.log(`Template Editor: ${config.design?.editor?.enabled !== false ? 'Enabled' : 'Disabled'}`);
-      console.log(`Export formats: ${config.export?.formats?.join(', ') || 'csv, pdf, json'}`);
-    });
+      return true;
+    } catch (error) {
+      console.error('Failed to start server:', error);
+      this.emit('error', error);
+      return false;
+    }
   }
   
   stop() {
     if (this.tcpServer) {
+      // Emitir evento de desligamento
+      this.emit('server:shutdown');
+      
       this.tcpServer.close();
       console.log('Server stopped');
     }

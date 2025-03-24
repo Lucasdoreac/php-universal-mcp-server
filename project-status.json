@@ -2,15 +2,15 @@
   "projectInfo": {
     "name": "PHP Universal MCP Server",
     "version": "1.10.0-dev",
-    "lastUpdated": "2025-03-24T22:32:00Z",
+    "lastUpdated": "2025-03-24T22:39:00Z",
     "description": "Servidor MCP (Model Context Protocol) para gerenciamento completo de sites e e-commerce com suporte a múltiplas plataformas",
     "repository": "Lucasdoreac/php-universal-mcp-server",
-    "lastState": "Desenvolvimento do Criador de Websites com Bootstrap progrediu significativamente com a implementação do bootstrap-builder.js e testes de integração. O foco atual está em aprimorar a visualização via artifacts e documentação."
+    "lastState": "Visualização avançada de componentes implementada com artifact-visualizer.js e templates Handlebars. Sistema de comandos naturais aprimorado. Próximos passos: documentação e testes."
   },
   "development": {
-    "currentFile": "tests/integrations/claude/bootstrap-builder.test.js",
-    "currentComponent": "Criador de Websites com Bootstrap integrado ao Claude MCP",
-    "inProgress": "Aprimoramento da visualização de componentes Bootstrap via artifacts do Claude",
+    "currentFile": "integrations/claude/artifact-visualizer.js",
+    "currentComponent": "Visualização avançada para o Claude via artifacts",
+    "inProgress": "Documentação de uso do Bootstrap Website Builder",
     "completedComponents": [
       "MCP Protocol Layer",
       "PHP Runtime Engine",
@@ -38,7 +38,8 @@
       "Marketplace Installer",
       "Bootstrap Website Builder - estrutura base",
       "Integração inicial com Claude MCP",
-      "Sistema de comandos naturais para criação de websites"
+      "Sistema de comandos naturais para criação de websites",
+      "Visualização avançada de sites e componentes via artifacts"
     ],
     "pendingComponents": [
       "AWS Lambda Manager",
@@ -98,12 +99,14 @@
       "Bootstrap Website Builder - implementação base",
       "Bootstrap Website Builder - testes unitários",
       "Integração Claude MCP - Router principal",
-      "Sistema básico de comandos naturais para websites"
+      "Sistema básico de comandos naturais para websites",
+      "artifact-visualizer para visualizações avançadas",
+      "Templates Handlebars para artifacts",
+      "Sistema de debug para componentes no preview"
     ],
     "inProgress": [
-      "Testes de integração completos para Bootstrap Website Builder",
-      "Visualização avançada via artifacts do Claude",
       "Documentação do Bootstrap Website Builder",
+      "Testes de integração para artifact-visualizer",
       "AWS Lambda Manager",
       "AWS CloudFront Manager",
       "GCP Cloud SQL Manager",
@@ -122,14 +125,13 @@
     ]
   },
   "context": {
-    "lastThought": "A implementação do bootstrap-builder.js e seus testes de integração foi concluída, permitindo a criação de websites via comandos naturais no Claude com visualização em tempo real. O próximo foco é aprimorar as visualizações via artifacts e completar a documentação antes de publicar o pacote npm.",
+    "lastThought": "A implementação do artifact-visualizer.js com templates Handlebars para visualização de componentes Bootstrap proporciona uma experiência muito mais rica ao usuário final. Agora o usuário pode ver detalhes dos componentes, testar a responsividade e visualizar o código HTML. O próximo passo é completar a documentação.",
     "nextSteps": [
-      "Finalizar testes de integração restantes para o Bootstrap Website Builder",
-      "Aprimorar a visualização de componentes via artifacts do Claude",
-      "Desenvolver comandos naturais mais avançados para edição de websites",
-      "Completar documentação de uso para o criador de websites",
-      "Preparar pacote npm para distribuição",
-      "Desenvolver exemplos de uso para documentação"
+      "Criar documentação de uso para o Bootstrap Website Builder",
+      "Desenvolver testes de integração para o artifact-visualizer",
+      "Explorar otimizações de performance nos templates",
+      "Adicionar mais recursos de edição visual para os componentes",
+      "Preparar pacote npm para distribuição"
     ],
     "dependencies": [
       "@modelcontextprotocol/sdk",
@@ -149,7 +151,7 @@
     ],
     "repository": "https://github.com/Lucasdoreac/php-universal-mcp-server",
     "branch": "main",
-    "lastCommit": "Adicionar index.js para integrar todos os módulos Claude MCP"
+    "lastCommit": "Criar template avançado para visualização de componentes individuais"
   },
   "mcpTools": {
     "lastUsed": {

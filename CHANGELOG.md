@@ -8,9 +8,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 ## [1.10.0-dev] - Em Desenvolvimento
 
 ### Adicionado
+- Implementação completa do AWS RDS Manager para gerenciamento de bancos de dados
+- Templates de visualização para instâncias RDS e suas métricas
+- Testes de integração para AWS RDS Manager
 - Implementação do núcleo do AWS Provider
 - Implementação do EC2 Manager para AWS
-- Interfaces iniciais para AWS S3, RDS, Lambda e CloudFront
+- Implementação do S3 Manager para AWS com gerenciamento de buckets e objetos
+- Templates de visualização para buckets S3 e objetos
+- Interfaces iniciais para AWS Lambda e CloudFront
 - Implementação inicial do GCP Provider
 - Implementação do App Engine Manager para GCP
 - Implementação do Cloud Storage Manager para GCP
@@ -25,12 +30,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 - Expansão do sistema de plugins para suportar o Marketplace
 - Melhoria no sistema de logging para Cloud Providers
 - Otimização do sistema de cache para recursos cloud
+- Ampliação do sistema de tratamento de erros para operações assíncronas
+- Melhoria na validação e segurança das operações cloud
 
 ### Correções
 - Resolução de conflitos entre diferentes versões de plugins
 - Correção na detecção de credenciais para provedores cloud
 - Melhoria na validação de erros para operações AWS e GCP
 - Correção de problemas de temporizações em operações assíncronas
+- Correção de problemas de permissão em operações de armazenamento S3
+- Aprimoramento na validação de métricas de desempenho RDS
 
 ## [1.9.0] - 2025-03-15
 

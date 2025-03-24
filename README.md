@@ -130,6 +130,12 @@ exportar relatório vendas site-123 pdf últimos-30-dias
 # Editar template
 editar template site-123
 
+# Gerenciar pedidos
+pedidos listar site-123
+pedidos visualizar site-123 456
+pedidos atualizar site-123 456 concluído "Pedido entregue e confirmado pelo cliente"
+pedidos dashboard site-123
+
 # Gerenciar plugins
 plugins listar
 plugins instalar <nome-plugin>
@@ -224,14 +230,39 @@ marketing tracking gerar-código site-123 google
 marketing tracking conversões site-123 por-fonte
 ```
 
-### Automação via Plugins
+## Sistema de Gerenciamento de Pedidos
 
-O sistema de marketing inclui plugins para automação:
+Nossa implementação completa do WooCommerce Provider (100%) inclui:
 
-- **Content Generator**: Gera conteúdo automático para redes sociais a partir de produtos
-- **SEO Optimizer**: Sugere e aplica otimizações de SEO automaticamente
-- **Campaign Scheduler**: Agenda campanhas de email com base em eventos específicos
-- **Social Publisher**: Publica produtos em redes sociais automaticamente
+- **Dashboard Completo**: Visualização interativa de todos os pedidos
+- **Filtros Avançados**: Filtre por status, data, cliente e mais
+- **Análise de Desempenho**: Gráficos de receita e distribuição de status
+- **Detalhamento de Pedidos**: Acesse todas as informações de cada pedido
+- **Atualização de Status**: Gerencie o ciclo de vida dos pedidos
+- **Processamento de Reembolsos**: Gerencie reembolsos completos ou parciais
+- **Exportação de Dados**: Exporte dados de pedidos em múltiplos formatos
+
+### Comandos de Pedidos no Claude Desktop
+
+```
+# Listar pedidos com filtros
+pedidos listar site-123 status=processing
+
+# Visualizar detalhes do pedido
+pedidos visualizar site-123 456
+
+# Atualizar status do pedido
+pedidos atualizar site-123 456 concluído "Entrega confirmada pelo cliente"
+
+# Processar reembolso
+pedidos reembolsar site-123 456 parcial "Produto com defeito" 49.90
+
+# Ver dashboard de pedidos
+pedidos dashboard site-123 últimos-30-dias
+
+# Exportar dados de pedidos
+pedidos exportar site-123 csv status=completed período=último-mês
+```
 
 ## Sistema de Plugins
 
@@ -266,48 +297,6 @@ plugins info <nome-plugin>
 
 # Criar um novo plugin (requer descrição detalhada)
 criar plugin <nome-plugin> "descrição do que o plugin deve fazer"
-```
-
-### Exemplos de Plugins Disponíveis
-
-- **SEO Analytics**: Análise de SEO para produtos e páginas
-- **Social Media Integration**: Integração com redes sociais
-- **Backup Manager**: Gerenciamento avançado de backups
-- **Security Scanner**: Verificação de segurança para sites
-- **Performance Optimizer**: Otimização de desempenho para sites
-- **Marketing Content Generator**: Geração automática de conteúdo para marketing
-
-### Desenvolvendo Plugins
-
-Plugins seguem uma estrutura simples e consistente:
-
-```javascript
-class MeuPlugin {
-  static get info() {
-    return {
-      name: 'meu-plugin',
-      version: '1.0.0',
-      description: 'Meu plugin personalizado',
-      author: 'Seu Nome',
-      hooks: ['server:started', 'product:created']
-    };
-  }
-
-  constructor(server, options) {
-    this.server = server;
-    this.options = options;
-  }
-
-  async initialize() {
-    // Registrar hooks e métodos
-    return true;
-  }
-
-  async deactivate() {
-    // Limpar recursos
-    return true;
-  }
-}
 ```
 
 ## Sistema de Analytics via Claude Artifacts

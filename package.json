@@ -1,6 +1,6 @@
 {
   "name": "php-universal-mcp-server",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Um servidor MCP universal para desenvolvimento PHP em qualquer provedor de hospedagem ou nuvem",
   "main": "server-part2.js",
   "scripts": {
@@ -21,7 +21,11 @@
     "woocommerce",
     "artifacts",
     "responsive",
-    "plugins"
+    "plugins",
+    "marketing",
+    "seo",
+    "social-media",
+    "email-marketing"
   ],
   "author": "Lucas Dórea",
   "license": "MIT",
@@ -32,7 +36,14 @@
     "sass": "^1.69.5",
     "node-cache": "^5.1.2",
     "jspdf": "^2.5.1",
-    "json2csv": "^5.0.7"
+    "json2csv": "^5.0.7",
+    "googleapis": "^128.0.0",
+    "mailchimp-api-v3": "^1.15.0",
+    "nodemailer": "^6.9.7",
+    "sib-api-v3-sdk": "^8.5.0",
+    "fb": "^2.0.0",
+    "twitter-api-v2": "^1.15.1",
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "chai": "^4.3.8",

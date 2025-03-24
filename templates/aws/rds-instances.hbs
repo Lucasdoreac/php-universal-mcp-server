@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instâncias RDS - AWS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .page-title {
+      margin: 0;
+      color: #0c4b8e;
+      font-size: 24px;
+    }
+    
+    .aws-region {
+      background-color: #f1f1f1;
+      padding: 5px 10px;
+      border-radius: 4px;
+      color: #555;
+      font-size: 14px;
+    }
+    
+    .aws-logo {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+    
+    .aws-header {
+      display: flex;
+      align-items: center;
+    }
+    
+    .instances-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .instances-table th {
+      background-color: #0c4b8e;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: normal;
+    }
+    
+    .instances-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .instances-table tr:hover {
+      background-color: #f9f9f9;
+    }
+    
+    .instances-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .no-instances {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+    
+    .aws-actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .aws-button {
+      padding: 8px 15px;
+      background-color: #ff9900;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      text-decoration: none;
+    }
+    
+    .aws-button:hover {
+      background-color: #e88a00;
+    }
+    
+    .instance-detail {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .instance-name {
+      font-weight: bold;
+      color: #0c4b8e;
+    }
+    
+    .instance-endpoint {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    .instance-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .status-available {
+      background-color: #2ecc71;
+      color: white;
+    }
+    
+    .status-creating {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .status-backing-up {
+      background-color: #f39c12;
+      color: white;
+    }
+    
+    .status-modifying {
+      background-color: #f39c12;
+      color: white;
+    }
+    
+    .status-rebooting {
+      background-color: #f39c12;
+      color: white;
+    }
+    
+    .status-deleting {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .status-stopped {
+      background-color: #95a5a6;
+      color: white;
+    }
+    
+    .status-failed {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .status-inaccessible-encryption-credentials {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .status-incompatible-network {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .status-incompatible-option-group {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .status-incompatible-parameters {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .status-incompatible-restore {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .status-maintenance {
+      background-color: #f39c12;
+      color: white;
+    }
+    
+    .status-starting {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .status-stopping {
+      background-color: #f39c12;
+      color: white;
+    }
+    
+    .status-storage-full {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .actions-cell {
+      white-space: nowrap;
+    }
+    
+    .action-button {
+      display: inline-block;
+      padding: 4px 8px;
+      background-color: #f1f1f1;
+      color: #333;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-right: 5px;
+      text-decoration: none;
+    }
+    
+    .action-button:hover {
+      background-color: #ddd;
+    }
+    
+    .action-button.danger {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .action-button.danger:hover {
+      background-color: #f5c6cb;
+    }
+    
+    .tab-container {
+      margin-bottom: 20px;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 15px;
+    }
+    
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      margin-right: 5px;
+      border-radius: 5px 5px 0 0;
+    }
+    
+    .tab.active {
+      background-color: #fff;
+      border-color: #ddd;
+      border-bottom: 1px solid #fff;
+      margin-bottom: -1px;
+      color: #0c4b8e;
+    }
+    
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      flex: 1;
+      min-width: 200px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      padding: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #0c4b8e;
+    }
+    
+    .instance-info {
+      margin-top: 5px;
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .info-row {
+      display: flex;
+      margin-bottom: 3px;
+    }
+    
+    .info-label {
+      width: 100px;
+      font-weight: bold;
+    }
+    
+    .engine-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <div class="aws-header">
+        <svg class="aws-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path fill="#FF9900" d="M4.787 14.994a.7.7 0 0 0-.123.097c-.203.213-.356.457-.356.871 0 .327.147.664.39.9.243.238.582.385.93.385a1.34 1.34 0 0 0 .952-.39c.224-.232.355-.56.355-.895 0-.4-.147-.675-.318-.87-.243-.259-.524-.347-.795-.347-.39 0-.794.15-.9.18-.043.01-.086.03-.135.07zm9.114-4.432c-.09.08-.355.31-.355.71 0 .18.09.336.22.464.31.217.738.363 1.25.363.203 0 .406-.34.552-.89.146-.55.236-.144.236-.31 0-.073-.023-.136-.068-.18-.045-.045-.113-.068-.18-.068h-1.485a.412.412 0 0 0-.17.02zm6.92.48a.672.672 0 0 0-.123-.02h-.264c-.192 0-.339.123-.395.272L18.71 15.32c-.11.035-.11.069 0 .092.1.024.34.024.56.013h.24c.19 0 .352-.114.396-.272l1.327-4.025c.012-.34.012-.068 0-.08-.012-.025-.034-.025-.057-.025zm-4.4-.548a.679.679 0 0 0-.57-.235h-1.51c-.203 0-.393.108-.484.283l-1.738 3.47a.128.128 0 0 0 0 .115l.576 1.078a.128.128 0 0 0 .113.068h.293c.214 0 .395-.115.486-.283l2.82-4.328a.127.127 0 0 0 .014-.168zm2.74-.235c.18 0 .352.113.396.272l1.328 4.025c.11.035.11.068 0 .08-.12.024-.34.024-.56.024h-.218c-.19 0-.351-.113-.396-.272L18.88 10.25c-.011-.034-.011-.068 0-.08.012-.24.034-.24.057-.012h.124zM8.4 10.25c-.045-.148-.203-.272-.394-.272h-.215c-.17 0-.317.12-.373.283l-1.408 4.048a.127.127 0 0 0 .117.17h.293c.18 0 .352-.114.396-.272L8.4.305c.01-.35.01-.068 0-.08-.012-.025-.035-.025-.057-.025h-.146a.672.672 0 0 0-.124.02.127.127 0 0 0-.9.092L6.555 13.88a.127.127 0 0 1-.117.089.115.115 0 0 1-.09-.046.127.127 0 0 1-.027-.11L7.318 10.4c.01-.35.01-.08-.002-.102-.012-.025-.035-.025-.057-.025h-.26c-.18 0-.341.113-.396.272l-.679 2.154c-.1.035-.1.057-.33.08a.116.116 0 0 1-.113.046.127.127 0 0 1-.1-.078l-.544-1.797a.128.128 0 0 0-.122-.088h-.26c-.57 0-.102.046-.102.102 0 .011 0 .023.003.034l.829 2.603a.383.383 0 0 0 .363.26h.214c.158 0 .294-.102.352-.249l.53-1.695a.128.128 0 0 1 .116-.089.115.115 0 0 1 .09.046.127.127 0 0 1 .027.11l-.656 2.09a.383.383 0 0 0 .363.487h.226c.158 0 .294-.102.35-.25l1.799-5.634a.15.15 0 0 0-.005-.149zm-4.379 3.496c.317.225.75.336 1.16.336.203 0 .406-.34.552-.89.147-.55.236-.144.236-.31 0-.072-.023-.135-.068-.18-.045-.044-.113-.067-.18-.067h-1.104c-.26 0-.43-.08-.43-.239 0-.057.012-.114.034-.148.08-.079.282-.147.485-.147h.18c.259 0 .485.057.689.159.146.09.248.034.305-.91.056-.112.033-.204-.113-.295a1.938 1.938 0 0 0-.938-.214c-.531 0-.944.294-.944.71 0 .348.26.631.633.7.193.037.533.1.824.159.157.033.259.16.158.272-.9.102-.248.147-.452.147-.292 0-.54-.102-.686-.237-.035-.034-.08-.057-.112-.069-.214-.056-.259.08-.18.17.101.123.26.222.451.313z"/>
+        </svg>
+        <h1 class="page-title">Instâncias RDS</h1>
+      </div>
+      <div class="aws-region">Região: {{region}}</div>
+    </div>
+    
+    <div class="tab-container">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('instances')">Instâncias</div>
+        <div class="tab" onclick="switchTab('snapshots')">Snapshots</div>
+        <div class="tab" onclick="switchTab('parameters')">Parameter Groups</div>
+        <div class="tab" onclick="switchTab('engines')">Engines</div>
+      </div>
+    </div>
+    
+    <div id="instances-tab" class="tab-content">
+      {{#if instances.length}}
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-title">Total de Instâncias</div>
+            <div class="stat-value">{{instances.length}}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Status</div>
+            <div class="stat-value">
+              {{countByStatus instances 'available'}} Disponíveis
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Engines</div>
+            <div class="stat-value">
+              {{countUniqueEngines instances}}
+            </div>
+          </div>
+        </div>
+        
+        <table class="instances-table">
+          <thead>
+            <tr>
+              <th>Instância</th>
+              <th>Engine</th>
+              <th>Classe</th>
+              <th>Storage</th>
+              <th>Status</th>
+              <th>Endpoint</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each instances}}
+              <tr>
+                <td>
+                  <div class="instance-detail">
+                    <div class="instance-name">{{DBInstanceIdentifier}}</div>
+                    <div class="instance-info">
+                      <div class="info-row">
+                        <div class="info-label">Versão:</div>
+                        <div>{{EngineVersion}}</div>
+                      </div>
+                      {{#if MultiAZ}}
+                        <div class="info-row">
+                          <div class="info-label">Multi-AZ:</div>
+                          <div>Sim</div>
+                        </div>
+                      {{/if}}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div style="display: flex; align-items: center;">
+                    <span class="engine-icon {{getEngineIconClass Engine}}"></span>
+                    {{Engine}}
+                  </div>
+                </td>
+                <td>{{DBInstanceClass}}</td>
+                <td>{{AllocatedStorage}} GB</td>
+                <td>
+                  <span class="instance-status status-{{toLowerCase DBInstanceStatus}}">
+                    {{DBInstanceStatus}}
+                  </span>
+                </td>
+                <td>
+                  {{#if Endpoint}}
+                    <div class="instance-endpoint">
+                      {{Endpoint.Address}}:{{Endpoint.Port}}
+                    </div>
+                  {{else}}
+                    <div class="instance-endpoint">-</div>
+                  {{/if}}
+                </td>
+                <td class="actions-cell">
+                  <a href="#" class="action-button">Detalhes</a>
+                  {{#if (isStatusAvailable DBInstanceStatus)}}
+                    <a href="#" class="action-button">Modificar</a>
+                    <a href="#" class="action-button">Reiniciar</a>
+                    <a href="#" class="action-button">Parar</a>
+                    <a href="#" class="action-button">Snapshot</a>
+                    <a href="#" class="action-button danger">Excluir</a>
+                  {{/if}}
+                  {{#if (isStatusStopped DBInstanceStatus)}}
+                    <a href="#" class="action-button">Iniciar</a>
+                    <a href="#" class="action-button danger">Excluir</a>
+                  {{/if}}
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+        
+        <div class="aws-actions">
+          <a href="#" class="aws-button">Criar Nova Instância</a>
+          <a href="#" class="aws-button">Atualizar Lista</a>
+        </div>
+      {{else}}
+        <div class="no-instances">
+          <p>Nenhuma instância RDS encontrada nesta região.</p>
+          <a href="#" class="aws-button">Criar Primeira Instância</a>
+        </div>
+      {{/if}}
+    </div>
+    
+    <div id="snapshots-tab" class="tab-content" style="display: none;">
+      <p>Carregando snapshots...</p>
+    </div>
+    
+    <div id="parameters-tab" class="tab-content" style="display: none;">
+      <p>Carregando parameter groups...</p>
+    </div>
+    
+    <div id="engines-tab" class="tab-content" style="display: none;">
+      <p>Carregando engines disponíveis...</p>
+    </div>
+  </div>
+  
+  <script>
+    // Helper functions
+    function switchTab(tabId) {
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabs.forEach(tab => tab.classList.remove('active'));
+      tabContents.forEach(content => content.style.display = 'none');
+      
+      document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+      document.getElementById(`${tabId}-tab`).style.display = 'block';
+    }
+    
+    function getEngineIconClass(engine) {
+      if (!engine) return '';
+      
+      engine = engine.toLowerCase();
+      
+      if (engine.includes('mysql')) {
+        return 'mysql-icon';
+      } else if (engine.includes('postgres') || engine.includes('postgresql')) {
+        return 'postgres-icon';
+      } else if (engine.includes('aurora')) {
+        return 'aurora-icon';
+      } else if (engine.includes('oracle')) {
+        return 'oracle-icon';
+      } else if (engine.includes('sqlserver') || engine.includes('sql server')) {
+        return 'sqlserver-icon';
+      } else if (engine.includes('mariadb')) {
+        return 'mariadb-icon';
+      }
+      
+      return '';
+    }
+    
+    function countByStatus(instances, status) {
+      if (!instances || !Array.isArray(instances)) return 0;
+      
+      return instances.filter(instance => 
+        instance.DBInstanceStatus && 
+        instance.DBInstanceStatus.toLowerCase() === status.toLowerCase()
+      ).length;
+    }
+    
+    function countUniqueEngines(instances) {
+      if (!instances || !Array.isArray(instances)) return 0;
+      
+      const uniqueEngines = new Set();
+      instances.forEach(instance => {
+        if (instance.Engine) {
+          uniqueEngines.add(instance.Engine);
+        }
+      });
+      
+      return uniqueEngines.size;
+    }
+    
+    function isStatusAvailable(status) {
+      return status && status.toLowerCase() === 'available';
+    }
+    
+    function isStatusStopped(status) {
+      return status && status.toLowerCase() === 'stopped';
+    }
+    
+    function toLowerCase(str) {
+      return str ? str.toLowerCase() : '';
+    }
+  </script>
+</body>
+</html>

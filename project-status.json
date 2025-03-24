@@ -2,15 +2,15 @@
   "projectInfo": {
     "name": "PHP Universal MCP Server",
     "version": "1.10.0-dev",
-    "lastUpdated": "2025-03-24T21:21:30Z",
+    "lastUpdated": "2025-03-24T21:35:00Z",
     "description": "Servidor MCP (Model Context Protocol) para gerenciamento completo de sites e e-commerce com suporte a múltiplas plataformas",
     "repository": "Lucasdoreac/php-universal-mcp-server",
-    "lastState": "Atualizações recentes incluem a implementação do AWS RDS Manager para gerenciamento de bancos de dados, adição de templates de visualização para instâncias RDS, bem como testes de integração para o AWS RDS Manager. O projeto continua expandindo o suporte para provedores cloud, com ênfase na implementação dos serviços AWS e GCP."
+    "lastState": "Desenvolvimento prioriza a finalização dos testes de integração para o criador de websites com Bootstrap e a integração completa com Claude via MCP. A implementação dos provedores cloud (AWS/GCP) continua em paralelo."
   },
   "development": {
-    "currentFile": "providers/cloud/aws/rds.js",
-    "currentComponent": "AWS RDS Manager e templates de visualização",
-    "inProgress": "Finalização da integração de serviços AWS (RDS, S3) e GCP, além do Marketplace de Plugins",
+    "currentFile": "integrations/claude/bootstrap-builder.js",
+    "currentComponent": "Criador de Websites com Bootstrap integrado ao Claude MCP",
+    "inProgress": "Finalização dos testes de integração para o criador de websites com Bootstrap e MCP",
     "completedComponents": [
       "MCP Protocol Layer",
       "PHP Runtime Engine",
@@ -94,15 +94,16 @@
       "Marketplace Installer"
     ],
     "inProgress": [
+      "Testes de integração completos para Bootstrap Website Builder",
+      "Integração completa com Claude MCP",
+      "Sistema de comandos naturais para criação de websites",
+      "Visualização avançada via artifacts do Claude",
       "AWS Lambda Manager",
       "AWS CloudFront Manager",
       "GCP Cloud SQL Manager",
       "GCP Cloud Functions Manager",
       "Marketplace UI",
-      "Marketplace Security Validator",
-      "Testes de integração para novos componentes",
-      "CI/CD Pipeline",
-      "Test Framework"
+      "Marketplace Security Validator"
     ],
     "pending": [
       "AWS Route53 Manager",
@@ -110,20 +111,19 @@
       "Azure Provider",
       "DigitalOcean Provider",
       "Sistema de automação avançada",
-      "Expandir visualizações para configurações de hospedagem",
       "Documentation System",
       "Installation Manager"
     ]
   },
   "context": {
-    "lastThought": "O projeto PHP Universal MCP Server está evoluindo para versão 1.10.0 com foco na implementação de provedores cloud AWS e GCP, além do Marketplace de Plugins. A implementação do AWS RDS Manager e seus templates de visualização está completa, permitindo o gerenciamento integrado de bancos de dados na AWS.",
+    "lastThought": "O desenvolvimento está sendo priorizado para finalizar os testes de integração do criador de websites com Bootstrap, aproveitando as capacidades do Claude com MCP. O desenvolvimento no GitHub será seguido por implantação e testes locais após a conclusão dos componentes fundamentais.",
     "nextSteps": [
-      "Completar implementação do AWS Lambda Manager",
-      "Desenvolver o AWS CloudFront Manager",
-      "Iniciar o desenvolvimento do GCP Cloud SQL Manager",
-      "Finalizar os testes de integração para os componentes recentes",
-      "Desenvolver interface de usuário para o Marketplace de Plugins",
-      "Implementar sistema de validação para plugins de terceiros"
+      "Finalizar testes de integração para o Bootstrap Website Builder",
+      "Aprimorar a integração dos comandos naturais com o Claude MCP",
+      "Desenvolver visualizações avançadas para o criador de websites",
+      "Completar documentação de uso para o criador de websites",
+      "Implementar testes automatizados para validação de comandos",
+      "Preparar pacote npm para distribuição"
     ],
     "dependencies": [
       "@modelcontextprotocol/sdk",
@@ -137,11 +137,13 @@
       "json2csv",
       "aws-sdk",
       "googleapis",
-      "azure-sdk-for-js"
+      "bootstrap",
+      "jquery",
+      "popper.js"
     ],
     "repository": "https://github.com/Lucasdoreac/php-universal-mcp-server",
     "branch": "main",
-    "lastCommit": "Atualizar AWS Provider para integração com RDS Manager"
+    "lastCommit": "Atualizar prioridade para o criador de websites Bootstrap"
   },
   "mcpTools": {
     "lastUsed": {

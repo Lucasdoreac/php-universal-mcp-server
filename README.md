@@ -1,7 +1,7 @@
 # PHP Universal MCP Server
 
 [![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)](#)
-[![Versão](https://img.shields.io/badge/versão-1.7.2-blue)](#)
+[![Versão](https://img.shields.io/badge/versão-1.8.0-blue)](#)
 [![Licença](https://img.shields.io/badge/licença-MIT-green)](#)
 [![Testes](https://img.shields.io/badge/testes-82%25-yellow)](#)
 
@@ -22,6 +22,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **Extensibilidade**: Arquitetura modular para fácil adição de novos provedores
 - **Responsividade**: Temas adaptados para visualização em dispositivos móveis
 - **Caching**: Sistema otimizado de cache para melhor desempenho
+- **Sistema de Plugins**: Extensão dinâmica de funcionalidades via plugins
 
 ## Componentes
 
@@ -31,6 +32,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **PHP Runtime Engine**: Ambiente seguro para execução de código PHP
 - **Cache System**: Sistema de caching para otimização de operações frequentes
 - **Security Module**: Armazenamento seguro de credenciais e autenticação avançada
+- **Plugin Manager**: Sistema para extensão dinâmica de funcionalidades
 
 ### Módulos
 
@@ -44,7 +46,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 
 - **Hostinger**: Gerenciamento completo de hospedagem web e domínios
 - **Shopify**: Gerenciamento completo de lojas Shopify
-- **WooCommerce**: Gerenciamento de lojas WooCommerce (70% implementado)
+- **WooCommerce**: Gerenciamento de lojas WooCommerce (100% implementado)
 
 ### Integrações
 
@@ -122,6 +124,11 @@ exportar relatório vendas site-123 pdf últimos-30-dias
 
 # Editar template
 editar template site-123
+
+# Gerenciar plugins
+plugins listar
+plugins instalar <nome-plugin>
+plugins remover <nome-plugin>
 ```
 
 ### Uso Programático
@@ -161,6 +168,82 @@ const dashboard = await analytics.generateDashboard({
   },
   format: 'artifact' // Ou 'json', 'csv', 'pdf'
 });
+```
+
+## Sistema de Plugins
+
+Nossa nova funcionalidade permite estender o servidor com plugins personalizados:
+
+- **Plugins Dinâmicos**: Adicione novas funcionalidades sem modificar o core
+- **Plugins Gerados pelo Claude**: O Claude pode criar plugins sob demanda via prompts
+- **API Completa**: Interface de programação simples para desenvolver plugins
+- **Gerenciamento Seguro**: Validação e sandbox para execução segura
+- **Hot Reload**: Ativação e desativação sem reiniciar o servidor
+
+### Comandos de Plugins no Claude Desktop
+
+```
+# Listar plugins instalados
+plugins listar
+
+# Instalar um plugin
+plugins instalar <nome-plugin>
+
+# Remover um plugin
+plugins remover <nome-plugin>
+
+# Ativar um plugin
+plugins ativar <nome-plugin>
+
+# Desativar um plugin
+plugins desativar <nome-plugin>
+
+# Obter informações de um plugin
+plugins info <nome-plugin>
+
+# Criar um novo plugin (requer descrição detalhada)
+criar plugin <nome-plugin> "descrição do que o plugin deve fazer"
+```
+
+### Exemplos de Plugins Disponíveis
+
+- **SEO Analytics**: Análise de SEO para produtos e páginas
+- **Social Media Integration**: Integração com redes sociais
+- **Backup Manager**: Gerenciamento avançado de backups
+- **Security Scanner**: Verificação de segurança para sites
+- **Performance Optimizer**: Otimização de desempenho para sites
+
+### Desenvolvendo Plugins
+
+Plugins seguem uma estrutura simples e consistente:
+
+```javascript
+class MeuPlugin {
+  static get info() {
+    return {
+      name: 'meu-plugin',
+      version: '1.0.0',
+      description: 'Meu plugin personalizado',
+      author: 'Seu Nome',
+      hooks: ['server:started', 'product:created']
+    };
+  }
+
+  constructor(server, options) {
+    this.server = server;
+    this.options = options;
+  }
+
+  async initialize() {
+    // Registrar hooks e métodos
+    return true;
+  }
+
+  async deactivate() {
+    // Limpar recursos
+    return true;
+  }
+}
 ```
 
 ## Sistema de Analytics via Claude Artifacts
@@ -225,6 +308,7 @@ A documentação completa está disponível em:
 - [Provedores](./docs/providers/README.md)
 - [Templates e Componentes](./docs/design/README.md)
 - [Otimização de Performance](./docs/performance/README.md)
+- [Sistema de Plugins](./docs/plugins/README.md)
 
 ## Roadmap
 
@@ -237,10 +321,11 @@ A documentação completa está disponível em:
 - [x] Sistema de caching para otimização
 - [x] Exportação de relatórios em múltiplos formatos
 - [x] Editor visual de templates
-- [ ] Finalização do provedor WooCommerce (70% concluído)
-- [ ] Sistema de plugins de terceiros
+- [x] Finalização do provedor WooCommerce (100% implementado)
+- [x] Sistema de plugins de terceiros
 - [ ] Integração com ferramentas de marketing digital
 - [ ] Suporte a mais provedores de hospedagem
+- [ ] Marketplace de plugins e templates
 
 ## Licença
 

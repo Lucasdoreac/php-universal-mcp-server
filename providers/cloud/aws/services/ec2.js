@@ -24,74 +24,68 @@ class EC2Service {
   }
 
   /**
-   * Obtém métricas do serviço EC2
-   * @returns {Promise<Object>} Métricas do serviço EC2
+   * Obtém métricas das instâncias EC2
+   * @returns {Promise<Object>} Métricas das instâncias
    */
   async getMetrics() {
     try {
-      // Obter número de instâncias em execução
+      // Obter número de instâncias
       const instances = await this.ec2.describeInstances({
         Filters: [
           {
             Name: 'instance-state-name',
-            Values: ['running']
+            Values: ['pending', 'running', 'stopping', 'stopped']
           }
         ]
       }).promise();
-
-      // Contar instâncias em execução
-      let runningInstances = 0;
+      
+      // Contar instâncias
+      let instanceCount = 0;
       instances.Reservations.forEach(reservation => {
-        runningInstances += reservation.Instances.length;
+        instanceCount += reservation.Instances.length;
       });
-
-      // Obter métricas básicas de CPU para instâncias gerenciadas pelo servidor
-      const metrics = {
-        runningInstances,
-        instancesMetrics: []
+      
+      // Classificar instâncias por estado
+      const instancesByState = {
+        running: 0,
+        stopped: 0,
+        pending: 0,
+        stopping: 0
       };
-
-      // Para cada instância, tenta obter métricas de CPU
-      for (const reservation of instances.Reservations) {
-        for (const instance of reservation.Instances) {
-          try {
-            // Verificar se a instância tem a tag que indica que é gerenciada por este servidor
-            const managedByUs = instance.Tags && instance.Tags.some(tag => 
-              tag.Key === 'ManagedBy' && tag.Value === 'php-universal-mcp-server'
-            );
-
-            if (managedByUs) {
-              // Obter métricas de CPU para esta instância
-              const cpuMetrics = await this.cloudWatchClient.getMetricStatistics({
-                Namespace: 'AWS/EC2',
-                MetricName: 'CPUUtilization',
-                Dimensions: [
-                  {
-                    Name: 'InstanceId',
-                    Value: instance.InstanceId
-                  }
-                ],
-                StartTime: new Date(Date.now() - 24 * 60 * 60 * 1000), // Últimas 24 horas
-                EndTime: new Date(),
-                Period: 3600, // Agregado por hora
-                Statistics: ['Average']
-              }).promise();
-
-              metrics.instancesMetrics.push({
-                instanceId: instance.InstanceId,
-                instanceType: instance.InstanceType,
-                state: instance.State.Name,
-                publicDnsName: instance.PublicDnsName,
-                cpuMetrics: cpuMetrics.Datapoints
-              });
-            }
-          } catch (error) {
-            console.error(`Erro ao obter métricas para instância ${instance.InstanceId}:`, error);
+      
+      instances.Reservations.forEach(reservation => {
+        reservation.Instances.forEach(instance => {
+          const state = instance.State.Name;
+          if (instancesByState[state] !== undefined) {
+            instancesByState[state]++;
           }
-        }
-      }
-
-      return metrics;
+        });
+      });
+      
+      // Obter métricas de utilização de CPU
+      const endTime = new Date();
+      const startTime = new Date();
+      startTime.setHours(startTime.getHours() - 24);
+      
+      const cpuMetrics = await this.cloudWatchClient.getMetricStatistics({
+        Namespace: 'AWS/EC2',
+        MetricName: 'CPUUtilization',
+        Dimensions: [],
+        StartTime: startTime,
+        EndTime: endTime,
+        Period: 3600,
+        Statistics: ['Average', 'Maximum']
+      }).promise();
+      
+      return {
+        instanceCount,
+        instancesByState,
+        cpuUtilization: cpuMetrics.Datapoints.map(dp => ({
+          timestamp: dp.Timestamp,
+          average: dp.Average,
+          maximum: dp.Maximum
+        }))
+      };
     } catch (error) {
       console.error('Erro ao obter métricas do EC2:', error);
       throw error;
@@ -99,206 +93,140 @@ class EC2Service {
   }
 
   /**
-   * Cria um site PHP em uma instância EC2
+   * Cria uma nova instância EC2 para hospedar um site PHP
    * @param {Object} siteConfig - Configuração do site
-   * @param {string} siteConfig.name - Nome do site
-   * @param {string} siteConfig.domain - Domínio do site
-   * @param {string} siteConfig.instanceType - Tipo de instância EC2 (padrão: t2.micro)
-   * @param {string} siteConfig.phpVersion - Versão do PHP (padrão: 7.4)
-   * @returns {Promise<Object>} Informações do site criado
+   * @returns {Promise<Object>} Informações da instância criada
    */
   async createPhpSite(siteConfig) {
     try {
-      // Verificar configuração mínima
-      if (!siteConfig.name) {
-        throw new Error('Nome do site é obrigatório');
-      }
-
-      // Definir valores padrão
+      // Configurações padrão para a instância EC2
+      const amiId = this.config.phpAmiId || 'ami-0c55b159cbfafe1f0'; // Ubuntu Server 20.04 LTS (exemplo)
       const instanceType = siteConfig.instanceType || 't2.micro';
-      const phpVersion = siteConfig.phpVersion || '7.4';
-
-      // Script de inicialização para instalar PHP e configurar o site
-      const userData = Buffer.from(`#!/bin/bash
-# Atualizar pacotes
-apt-get update
-apt-get upgrade -y
-
-# Instalar Apache e PHP
-apt-get install -y apache2 php${phpVersion} php${phpVersion}-mysql php${phpVersion}-curl php${phpVersion}-gd php${phpVersion}-mbstring php${phpVersion}-xml php${phpVersion}-zip
-
-# Configurar virtual host para o site
-cat > /etc/apache2/sites-available/${siteConfig.name}.conf << EOF
-<VirtualHost *:80>
-    ServerName ${siteConfig.domain || siteConfig.name}
-    DocumentRoot /var/www/html/${siteConfig.name}
-    
-    <Directory /var/www/html/${siteConfig.name}>
-        AllowOverride All
-        Require all granted
-    </Directory>
-    
-    ErrorLog \${APACHE_LOG_DIR}/${siteConfig.name}-error.log
-    CustomLog \${APACHE_LOG_DIR}/${siteConfig.name}-access.log combined
-</VirtualHost>
-EOF
-
-# Criar diretório para o site
-mkdir -p /var/www/html/${siteConfig.name}
-echo "<?php phpinfo(); ?>" > /var/www/html/${siteConfig.name}/index.php
-chown -R www-data:www-data /var/www/html/${siteConfig.name}
-
-# Ativar o site e reiniciar Apache
-a2ensite ${siteConfig.name}.conf
-systemctl restart apache2
-
-# Instalar certbot para SSL
-apt-get install -y certbot python3-certbot-apache
-
-# Tentativa de obter certificado SSL se o domínio estiver configurado
-if [[ "${siteConfig.domain}" != "" ]]; then
-  certbot --non-interactive --agree-tos -m webmaster@${siteConfig.domain} --apache -d ${siteConfig.domain}
-fi
-
-# Configurar monitoramento básico
-apt-get install -y awscli amazon-cloudwatch-agent
-cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << EOF
-{
-  "metrics": {
-    "metrics_collected": {
-      "cpu": {
-        "resources": ["*"],
-        "measurement": ["cpu_usage_idle", "cpu_usage_user", "cpu_usage_system"]
-      },
-      "mem": {
-        "measurement": ["mem_used_percent"]
-      },
-      "disk": {
-        "resources": ["/"],
-        "measurement": ["disk_used_percent"]
+      const keyName = this.config.keyName;
+      
+      if (!keyName) {
+        throw new Error('Par de chaves não configurado para EC2');
       }
-    }
-  }
-}
-EOF
-
-# Iniciar agente CloudWatch
-systemctl enable amazon-cloudwatch-agent
-systemctl start amazon-cloudwatch-agent
-      `).toString('base64');
-
+      
       // Criar grupo de segurança para o site
-      const sgParams = {
-        Description: `Security group for PHP site ${siteConfig.name}`,
-        GroupName: `php-site-${siteConfig.name}-sg`,
-        TagSpecifications: [
-          {
-            ResourceType: 'security-group',
-            Tags: [
-              {
-                Key: 'Name',
-                Value: `php-site-${siteConfig.name}-sg`
-              },
-              {
-                Key: 'ManagedBy',
-                Value: 'php-universal-mcp-server'
-              }
-            ]
-          }
-        ]
-      };
-
-      const sgResult = await this.ec2.createSecurityGroup(sgParams).promise();
+      const securityGroupName = `php-site-${siteConfig.name}-sg`;
+      
+      const sgResult = await this.ec2.createSecurityGroup({
+        GroupName: securityGroupName,
+        Description: `Security group for PHP site ${siteConfig.name}`
+      }).promise();
+      
       const securityGroupId = sgResult.GroupId;
-
-      // Adicionar regras de entrada para HTTP e HTTPS
+      
+      // Configurar regras do grupo de segurança
       await this.ec2.authorizeSecurityGroupIngress({
         GroupId: securityGroupId,
         IpPermissions: [
           {
+            // HTTP
             IpProtocol: 'tcp',
             FromPort: 80,
             ToPort: 80,
             IpRanges: [{ CidrIp: '0.0.0.0/0' }]
           },
           {
+            // HTTPS
             IpProtocol: 'tcp',
             FromPort: 443,
             ToPort: 443,
             IpRanges: [{ CidrIp: '0.0.0.0/0' }]
           },
           {
+            // SSH (para administração)
             IpProtocol: 'tcp',
             FromPort: 22,
             ToPort: 22,
-            IpRanges: [{ CidrIp: this.config.allowedSshCidr || '0.0.0.0/0' }]
+            IpRanges: [{ CidrIp: this.config.adminIpCidr || '0.0.0.0/0' }]
           }
         ]
       }).promise();
+      
+      // Script de inicialização para configurar o servidor web
+      const userData = Buffer.from(`#!/bin/bash
+# Atualizar sistema
+apt-get update
+apt-get upgrade -y
 
-      // Criar instância EC2
-      const instanceParams = {
-        ImageId: this.config.amiId || 'ami-0c55b159cbfafe1f0', // Ubuntu 20.04 LTS
+# Instalar servidor web e PHP
+apt-get install -y apache2 php libapache2-mod-php php-mysql php-curl php-gd php-mbstring php-xml php-xmlrpc php-zip
+
+# Configurar servidor web
+echo "<VirtualHost *:80>
+  ServerName ${siteConfig.domain}
+  ServerAlias www.${siteConfig.domain}
+  DocumentRoot /var/www/html/${siteConfig.name}
+  
+  <Directory /var/www/html/${siteConfig.name}>
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+  
+  ErrorLog \${APACHE_LOG_DIR}/error.log
+  CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>" > /etc/apache2/sites-available/${siteConfig.name}.conf
+
+# Criar diretório do site
+mkdir -p /var/www/html/${siteConfig.name}
+echo "<?php phpinfo(); ?>" > /var/www/html/${siteConfig.name}/index.php
+
+# Ativar configuração do site
+a2ensite ${siteConfig.name}.conf
+systemctl reload apache2
+`).toString('base64');
+      
+      // Criar a instância
+      const instanceResult = await this.ec2.runInstances({
+        ImageId: amiId,
         InstanceType: instanceType,
+        KeyName: keyName,
         MinCount: 1,
         MaxCount: 1,
-        UserData: userData,
         SecurityGroupIds: [securityGroupId],
+        UserData: userData,
         TagSpecifications: [
           {
             ResourceType: 'instance',
             Tags: [
-              {
-                Key: 'Name',
-                Value: `php-site-${siteConfig.name}`
-              },
-              {
-                Key: 'ManagedBy',
-                Value: 'php-universal-mcp-server'
-              },
-              {
-                Key: 'SiteId',
-                Value: siteConfig.name
-              }
+              { Key: 'Name', Value: `php-site-${siteConfig.name}` },
+              { Key: 'SiteId', Value: siteConfig.name },
+              { Key: 'Domain', Value: siteConfig.domain },
+              { Key: 'ManagedBy', Value: 'php-universal-mcp-server' }
             ]
           }
         ]
-      };
-
-      // Adicionar chave SSH se configurada
-      if (this.config.keyPairName) {
-        instanceParams.KeyName = this.config.keyPairName;
-      }
-
-      const instanceResult = await this.ec2.runInstances(instanceParams).promise();
+      }).promise();
+      
       const instanceId = instanceResult.Instances[0].InstanceId;
-
+      
       // Esperar a instância estar em execução
       await this.ec2.waitFor('instanceRunning', {
         InstanceIds: [instanceId]
       }).promise();
-
+      
       // Obter informações da instância
       const describeResult = await this.ec2.describeInstances({
         InstanceIds: [instanceId]
       }).promise();
-
+      
       const instance = describeResult.Reservations[0].Instances[0];
-
-      // Criar registro no banco de dados local (exemplo simplificado)
-      const siteInfo = {
-        id: siteConfig.name,
+      
+      return {
+        id: instance.InstanceId,
+        name: siteConfig.name,
         domain: siteConfig.domain,
-        instanceId: instanceId,
-        publicDnsName: instance.PublicDnsName,
         publicIp: instance.PublicIpAddress,
-        securityGroupId: securityGroupId,
-        phpVersion: phpVersion,
-        createdAt: new Date().toISOString(),
-        status: 'running'
+        privateIp: instance.PrivateIpAddress,
+        status: instance.State.Name,
+        type: instanceType,
+        securityGroupId,
+        createdAt: new Date().toISOString()
       };
-
-      return siteInfo;
     } catch (error) {
       console.error('Erro ao criar site PHP no EC2:', error);
       throw error;
@@ -306,13 +234,12 @@ systemctl start amazon-cloudwatch-agent
   }
 
   /**
-   * Lista todos os sites PHP hospedados no EC2
+   * Lista todos os sites PHP hospedados em instâncias EC2
    * @param {Object} filters - Filtros para a listagem
    * @returns {Promise<Array>} Lista de sites PHP
    */
   async listPhpSites(filters = {}) {
     try {
-      // Buscar instâncias com a tag ManagedBy=php-universal-mcp-server
       const instances = await this.ec2.describeInstances({
         Filters: [
           {
@@ -321,29 +248,32 @@ systemctl start amazon-cloudwatch-agent
           }
         ]
       }).promise();
-
-      // Formatar informações de cada site
+      
       const sites = [];
       
       instances.Reservations.forEach(reservation => {
         reservation.Instances.forEach(instance => {
-          // Encontrar tag do SiteId
-          const siteIdTag = instance.Tags.find(tag => tag.Key === 'SiteId');
+          // Extrair informações do site das tags
+          const tags = instance.Tags || [];
+          const siteIdTag = tags.find(tag => tag.Key === 'SiteId');
+          const domainTag = tags.find(tag => tag.Key === 'Domain');
           
-          if (siteIdTag) {
+          if (siteIdTag && domainTag) {
             sites.push({
-              id: siteIdTag.Value,
-              instanceId: instance.InstanceId,
-              publicDnsName: instance.PublicDnsName,
+              id: instance.InstanceId,
+              name: siteIdTag.Value,
+              domain: domainTag.Value,
               publicIp: instance.PublicIpAddress,
-              instanceType: instance.InstanceType,
-              state: instance.State.Name,
-              launchTime: instance.LaunchTime
+              privateIp: instance.PrivateIpAddress,
+              status: instance.State.Name,
+              type: instance.InstanceType,
+              securityGroupId: instance.SecurityGroups[0]?.GroupId,
+              createdAt: instance.LaunchTime.toISOString()
             });
           }
         });
       });
-
+      
       return sites;
     } catch (error) {
       console.error('Erro ao listar sites PHP no EC2:', error);
@@ -353,63 +283,64 @@ systemctl start amazon-cloudwatch-agent
 
   /**
    * Obtém detalhes de um site PHP específico no EC2
-   * @param {string} siteId - ID do site
+   * @param {string} siteId - ID do site (instância EC2)
    * @returns {Promise<Object>} Detalhes do site
    */
   async getPhpSite(siteId) {
     try {
-      // Buscar instância com a tag SiteId específica
-      const instances = await this.ec2.describeInstances({
-        Filters: [
-          {
-            Name: 'tag:SiteId',
-            Values: [siteId]
-          },
-          {
-            Name: 'tag:ManagedBy',
-            Values: ['php-universal-mcp-server']
-          }
-        ]
+      const result = await this.ec2.describeInstances({
+        InstanceIds: [siteId]
       }).promise();
-
-      if (!instances.Reservations || instances.Reservations.length === 0 || 
-          !instances.Reservations[0].Instances || instances.Reservations[0].Instances.length === 0) {
+      
+      if (!result.Reservations[0] || !result.Reservations[0].Instances[0]) {
         throw new Error(`Site PHP não encontrado: ${siteId}`);
       }
-
-      const instance = instances.Reservations[0].Instances[0];
-
-      // Obter métricas do site nos últimos 7 dias
+      
+      const instance = result.Reservations[0].Instances[0];
+      const tags = instance.Tags || [];
+      const siteIdTag = tags.find(tag => tag.Key === 'SiteId');
+      const domainTag = tags.find(tag => tag.Key === 'Domain');
+      
+      if (!siteIdTag || !domainTag) {
+        throw new Error(`Instância ${siteId} não é um site PHP gerenciado`);
+      }
+      
+      // Obter métricas de CPU da instância
       const endTime = new Date();
-      const startTime = new Date(endTime.getTime() - 7 * 24 * 60 * 60 * 1000);
-
+      const startTime = new Date();
+      startTime.setHours(startTime.getHours() - 24);
+      
       const cpuMetrics = await this.cloudWatchClient.getMetricStatistics({
         Namespace: 'AWS/EC2',
         MetricName: 'CPUUtilization',
         Dimensions: [
           {
             Name: 'InstanceId',
-            Value: instance.InstanceId
+            Value: siteId
           }
         ],
         StartTime: startTime,
         EndTime: endTime,
-        Period: 86400, // Agregação diária
+        Period: 3600,
         Statistics: ['Average', 'Maximum']
       }).promise();
-
-      // Formatar resposta
+      
       return {
-        id: siteId,
-        instanceId: instance.InstanceId,
-        publicDnsName: instance.PublicDnsName,
+        id: instance.InstanceId,
+        name: siteIdTag.Value,
+        domain: domainTag.Value,
         publicIp: instance.PublicIpAddress,
-        instanceType: instance.InstanceType,
-        state: instance.State.Name,
-        launchTime: instance.LaunchTime,
-        tags: instance.Tags,
+        privateIp: instance.PrivateIpAddress,
+        status: instance.State.Name,
+        type: instance.InstanceType,
+        securityGroupId: instance.SecurityGroups[0]?.GroupId,
+        createdAt: instance.LaunchTime.toISOString(),
         metrics: {
-          cpu: cpuMetrics.Datapoints
+          cpuUtilization: cpuMetrics.Datapoints.map(dp => ({
+            timestamp: dp.Timestamp,
+            average: dp.Average,
+            maximum: dp.Maximum
+          }))
         }
       };
     } catch (error) {
@@ -419,95 +350,65 @@ systemctl start amazon-cloudwatch-agent
   }
 
   /**
-   * Atualiza um site PHP no EC2
-   * @param {string} siteId - ID do site
+   * Atualiza um site PHP existente
+   * @param {string} siteId - ID do site (instância EC2)
    * @param {Object} updates - Atualizações a serem aplicadas
    * @returns {Promise<Object>} Detalhes do site atualizado
    */
   async updatePhpSite(siteId, updates) {
     try {
-      // Obter detalhes atuais do site
       const site = await this.getPhpSite(siteId);
       
-      // Preparar comandos para atualizar configurações do site
-      let commands = [];
-      
-      // Atualizar configuração de domínio se solicitado
-      if (updates.domain) {
-        commands.push(
-          `cat > /etc/apache2/sites-available/${siteId}.conf << EOF
-<VirtualHost *:80>
-    ServerName ${updates.domain}
-    DocumentRoot /var/www/html/${siteId}
-    
-    <Directory /var/www/html/${siteId}>
-        AllowOverride All
-        Require all granted
-    </Directory>
-    
-    ErrorLog \${APACHE_LOG_DIR}/${siteId}-error.log
-    CustomLog \${APACHE_LOG_DIR}/${siteId}-access.log combined
-</VirtualHost>
-EOF`,
-          'systemctl restart apache2',
-          // Atualizar certificado SSL para o novo domínio
-          `certbot --non-interactive --agree-tos -m webmaster@${updates.domain} --apache -d ${updates.domain}`
-        );
-      }
-      
-      // Atualizar versão do PHP se solicitado
-      if (updates.phpVersion) {
-        commands.push(
-          `apt-get update`,
-          `apt-get install -y php${updates.phpVersion} php${updates.phpVersion}-mysql php${updates.phpVersion}-curl php${updates.phpVersion}-gd php${updates.phpVersion}-mbstring php${updates.phpVersion}-xml php${updates.phpVersion}-zip`,
-          'systemctl restart apache2'
-        );
-      }
-      
-      // Se houver comandos para executar
-      if (commands.length > 0) {
-        // Executar comando na instância usando SSM Run Command
+      if (updates.domain && updates.domain !== site.domain) {
+        // Atualizar o domínio na configuração do servidor web
+        const command = `sudo sed -i 's/ServerName ${site.domain}/ServerName ${updates.domain}/g' /etc/apache2/sites-available/${site.name}.conf && sudo sed -i 's/ServerAlias www.${site.domain}/ServerAlias www.${updates.domain}/g' /etc/apache2/sites-available/${site.name}.conf && sudo systemctl reload apache2`;
+        
         await this.ssmClient.sendCommand({
+          InstanceIds: [siteId],
           DocumentName: 'AWS-RunShellScript',
-          InstanceIds: [site.instanceId],
           Parameters: {
-            commands: commands
+            commands: [command]
           }
+        }).promise();
+        
+        // Atualizar a tag de domínio
+        await this.ec2.createTags({
+          Resources: [siteId],
+          Tags: [
+            { Key: 'Domain', Value: updates.domain }
+          ]
         }).promise();
       }
       
-      // Atualizar tipo de instância se solicitado
-      if (updates.instanceType && updates.instanceType !== site.instanceType) {
-        // Parar a instância
+      if (updates.instanceType && updates.instanceType !== site.type) {
+        // Parar a instância antes de mudar o tipo
         await this.ec2.stopInstances({
-          InstanceIds: [site.instanceId]
+          InstanceIds: [siteId]
         }).promise();
         
-        // Esperar que a instância esteja parada
+        // Aguardar a instância parar
         await this.ec2.waitFor('instanceStopped', {
-          InstanceIds: [site.instanceId]
+          InstanceIds: [siteId]
         }).promise();
         
-        // Atualizar tipo de instância
+        // Mudar o tipo da instância
         await this.ec2.modifyInstanceAttribute({
-          InstanceId: site.instanceId,
-          InstanceType: {
-            Value: updates.instanceType
-          }
+          InstanceId: siteId,
+          InstanceType: { Value: updates.instanceType }
         }).promise();
         
         // Iniciar a instância novamente
         await this.ec2.startInstances({
-          InstanceIds: [site.instanceId]
+          InstanceIds: [siteId]
         }).promise();
         
-        // Esperar que a instância esteja em execução
+        // Aguardar a instância iniciar
         await this.ec2.waitFor('instanceRunning', {
-          InstanceIds: [site.instanceId]
+          InstanceIds: [siteId]
         }).promise();
       }
       
-      // Obter detalhes atualizados do site
+      // Obter informações atualizadas do site
       return await this.getPhpSite(siteId);
     } catch (error) {
       console.error(`Erro ao atualizar site PHP ${siteId} no EC2:`, error);
@@ -516,41 +417,28 @@ EOF`,
   }
 
   /**
-   * Exclui um site PHP no EC2
-   * @param {string} siteId - ID do site
+   * Exclui um site PHP
+   * @param {string} siteId - ID do site (instância EC2)
    * @returns {Promise<boolean>} True se o site foi excluído com sucesso
    */
   async deletePhpSite(siteId) {
     try {
-      // Obter detalhes do site
       const site = await this.getPhpSite(siteId);
-      
-      // Obter ID do grupo de segurança
-      const securityGroups = await this.ec2.describeSecurityGroups({
-        Filters: [
-          {
-            Name: 'group-name',
-            Values: [`php-site-${siteId}-sg`]
-          }
-        ]
-      }).promise();
       
       // Terminar a instância
       await this.ec2.terminateInstances({
-        InstanceIds: [site.instanceId]
+        InstanceIds: [siteId]
       }).promise();
       
-      // Esperar que a instância seja terminada
+      // Aguardar a instância terminar
       await this.ec2.waitFor('instanceTerminated', {
-        InstanceIds: [site.instanceId]
+        InstanceIds: [siteId]
       }).promise();
       
-      // Excluir grupo de segurança se encontrado
-      if (securityGroups.SecurityGroups.length > 0) {
-        const securityGroupId = securityGroups.SecurityGroups[0].GroupId;
-        
+      // Excluir o grupo de segurança
+      if (site.securityGroupId) {
         await this.ec2.deleteSecurityGroup({
-          GroupId: securityGroupId
+          GroupId: site.securityGroupId
         }).promise();
       }
       
@@ -562,58 +450,50 @@ EOF`,
   }
 
   /**
-   * Cria um backup de um site PHP no EC2
-   * @param {string} siteId - ID do site
+   * Cria um backup de um site PHP
+   * @param {string} siteId - ID do site (instância EC2)
    * @returns {Promise<Object>} Informações do backup criado
    */
   async backupPhpSite(siteId) {
     try {
-      // Obter detalhes do site
       const site = await this.getPhpSite(siteId);
       
-      // Criar uma AMI (imagem) da instância
-      const backupTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const imageName = `backup-${siteId}-${backupTimestamp}`;
+      // Criar snapshot do volume raiz
+      const describeResult = await this.ec2.describeInstances({
+        InstanceIds: [siteId]
+      }).promise();
       
-      const imageResult = await this.ec2.createImage({
-        InstanceId: site.instanceId,
-        Name: imageName,
-        Description: `Backup do site PHP ${siteId} criado em ${new Date().toISOString()}`,
+      const instance = describeResult.Reservations[0].Instances[0];
+      const rootVolumeId = instance.BlockDeviceMappings.find(
+        bdm => bdm.DeviceName === instance.RootDeviceName
+      ).Ebs.VolumeId;
+      
+      // Criar snapshot
+      const snapshotResult = await this.ec2.createSnapshot({
+        VolumeId: rootVolumeId,
+        Description: `Backup of PHP site ${site.name} (${site.domain})`,
         TagSpecifications: [
           {
-            ResourceType: 'image',
+            ResourceType: 'snapshot',
             Tags: [
-              {
-                Key: 'Name',
-                Value: imageName
-              },
-              {
-                Key: 'ManagedBy',
-                Value: 'php-universal-mcp-server'
-              },
-              {
-                Key: 'SiteId',
-                Value: siteId
-              },
-              {
-                Key: 'BackupType',
-                Value: 'site-backup'
-              }
+              { Key: 'Name', Value: `php-site-${site.name}-backup` },
+              { Key: 'SiteId', Value: site.name },
+              { Key: 'Domain', Value: site.domain },
+              { Key: 'ManagedBy', Value: 'php-universal-mcp-server' },
+              { Key: 'InstanceId', Value: siteId }
             ]
           }
         ]
       }).promise();
       
-      // Registrar backup (exemplo simplificado)
-      const backupInfo = {
-        id: imageResult.ImageId,
-        siteId: siteId,
-        name: imageName,
-        createdAt: new Date().toISOString(),
-        type: 'ami'
+      return {
+        id: snapshotResult.SnapshotId,
+        siteId,
+        siteName: site.name,
+        domain: site.domain,
+        createdAt: snapshotResult.StartTime.toISOString(),
+        status: snapshotResult.State
       };
-      
-      return backupInfo;
     } catch (error) {
       console.error(`Erro ao criar backup do site PHP ${siteId} no EC2:`, error);
       throw error;
@@ -621,149 +501,106 @@ EOF`,
   }
 
   /**
-   * Restaura um site PHP a partir de um backup no EC2
-   * @param {string} siteId - ID do site
-   * @param {string} backupId - ID do backup (AMI ID)
+   * Restaura um site PHP a partir de um backup
+   * @param {string} siteId - ID do site (instância EC2)
+   * @param {string} backupId - ID do backup (snapshot)
    * @returns {Promise<Object>} Informações do site restaurado
    */
   async restorePhpSite(siteId, backupId) {
     try {
-      // Obter detalhes do backup (AMI)
-      const images = await this.ec2.describeImages({
-        ImageIds: [backupId]
+      // Verificar se o snapshot existe
+      const snapshotResult = await this.ec2.describeSnapshots({
+        SnapshotIds: [backupId]
       }).promise();
       
-      if (!images.Images || images.Images.length === 0) {
+      if (!snapshotResult.Snapshots[0]) {
         throw new Error(`Backup não encontrado: ${backupId}`);
       }
       
-      // Obter detalhes do site existente
-      let existingSite;
-      try {
-        existingSite = await this.getPhpSite(siteId);
-      } catch (error) {
-        // Site não existe, continuamos com a restauração
-      }
-      
-      // Se o site existe, excluí-lo primeiro
-      if (existingSite) {
-        await this.deletePhpSite(siteId);
-      }
-      
-      // Criar grupo de segurança para o site restaurado
-      const sgParams = {
-        Description: `Security group for restored PHP site ${siteId}`,
-        GroupName: `php-site-${siteId}-sg`,
-        TagSpecifications: [
-          {
-            ResourceType: 'security-group',
-            Tags: [
-              {
-                Key: 'Name',
-                Value: `php-site-${siteId}-sg`
-              },
-              {
-                Key: 'ManagedBy',
-                Value: 'php-universal-mcp-server'
-              }
-            ]
-          }
-        ]
-      };
-      
-      const sgResult = await this.ec2.createSecurityGroup(sgParams).promise();
-      const securityGroupId = sgResult.GroupId;
-      
-      // Adicionar regras de entrada para HTTP e HTTPS
-      await this.ec2.authorizeSecurityGroupIngress({
-        GroupId: securityGroupId,
-        IpPermissions: [
-          {
-            IpProtocol: 'tcp',
-            FromPort: 80,
-            ToPort: 80,
-            IpRanges: [{ CidrIp: '0.0.0.0/0' }]
-          },
-          {
-            IpProtocol: 'tcp',
-            FromPort: 443,
-            ToPort: 443,
-            IpRanges: [{ CidrIp: '0.0.0.0/0' }]
-          },
-          {
-            IpProtocol: 'tcp',
-            FromPort: 22,
-            ToPort: 22,
-            IpRanges: [{ CidrIp: this.config.allowedSshCidr || '0.0.0.0/0' }]
-          }
-        ]
-      }).promise();
-      
-      // Lançar nova instância a partir da AMI
-      const instanceParams = {
-        ImageId: backupId,
-        InstanceType: this.config.instanceType || 't2.micro',
-        MinCount: 1,
-        MaxCount: 1,
-        SecurityGroupIds: [securityGroupId],
-        TagSpecifications: [
-          {
-            ResourceType: 'instance',
-            Tags: [
-              {
-                Key: 'Name',
-                Value: `php-site-${siteId}`
-              },
-              {
-                Key: 'ManagedBy',
-                Value: 'php-universal-mcp-server'
-              },
-              {
-                Key: 'SiteId',
-                Value: siteId
-              },
-              {
-                Key: 'RestoredFrom',
-                Value: backupId
-              }
-            ]
-          }
-        ]
-      };
-      
-      // Adicionar chave SSH se configurada
-      if (this.config.keyPairName) {
-        instanceParams.KeyName = this.config.keyPairName;
-      }
-      
-      const instanceResult = await this.ec2.runInstances(instanceParams).promise();
-      const instanceId = instanceResult.Instances[0].InstanceId;
-      
-      // Esperar a instância estar em execução
-      await this.ec2.waitFor('instanceRunning', {
-        InstanceIds: [instanceId]
-      }).promise();
-      
       // Obter informações da instância
+      const site = await this.getPhpSite(siteId);
+      
+      // Parar a instância
+      await this.ec2.stopInstances({
+        InstanceIds: [siteId]
+      }).promise();
+      
+      // Aguardar a instância parar
+      await this.ec2.waitFor('instanceStopped', {
+        InstanceIds: [siteId]
+      }).promise();
+      
+      // Obter o volume raiz
       const describeResult = await this.ec2.describeInstances({
-        InstanceIds: [instanceId]
+        InstanceIds: [siteId]
       }).promise();
       
       const instance = describeResult.Reservations[0].Instances[0];
+      const rootDeviceName = instance.RootDeviceName;
+      const rootVolumeId = instance.BlockDeviceMappings.find(
+        bdm => bdm.DeviceName === rootDeviceName
+      ).Ebs.VolumeId;
       
-      // Registrar site restaurado (exemplo simplificado)
-      const siteInfo = {
-        id: siteId,
-        instanceId: instanceId,
-        publicDnsName: instance.PublicDnsName,
-        publicIp: instance.PublicIpAddress,
-        securityGroupId: securityGroupId,
-        restoredFrom: backupId,
-        restoredAt: new Date().toISOString(),
-        status: 'running'
-      };
+      // Destacar o volume atual
+      await this.ec2.detachVolume({
+        VolumeId: rootVolumeId
+      }).promise();
       
-      return siteInfo;
+      // Aguardar o volume ser destacado
+      await this.ec2.waitFor('volumeAvailable', {
+        VolumeIds: [rootVolumeId]
+      }).promise();
+      
+      // Criar novo volume a partir do snapshot
+      const volumeResult = await this.ec2.createVolume({
+        SnapshotId: backupId,
+        AvailabilityZone: instance.Placement.AvailabilityZone,
+        TagSpecifications: [
+          {
+            ResourceType: 'volume',
+            Tags: [
+              { Key: 'Name', Value: `php-site-${site.name}-volume` },
+              { Key: 'SiteId', Value: site.name },
+              { Key: 'ManagedBy', Value: 'php-universal-mcp-server' }
+            ]
+          }
+        ]
+      }).promise();
+      
+      // Aguardar o novo volume ficar disponível
+      await this.ec2.waitFor('volumeAvailable', {
+        VolumeIds: [volumeResult.VolumeId]
+      }).promise();
+      
+      // Anexar o novo volume à instância
+      await this.ec2.attachVolume({
+        VolumeId: volumeResult.VolumeId,
+        InstanceId: siteId,
+        Device: rootDeviceName
+      }).promise();
+      
+      // Aguardar o volume ser anexado
+      await this.ec2.waitFor('volumeInUse', {
+        VolumeIds: [volumeResult.VolumeId]
+      }).promise();
+      
+      // Iniciar a instância
+      await this.ec2.startInstances({
+        InstanceIds: [siteId]
+      }).promise();
+      
+      // Aguardar a instância iniciar
+      await this.ec2.waitFor('instanceRunning', {
+        InstanceIds: [siteId]
+      }).promise();
+      
+      // Excluir o volume antigo
+      await this.ec2.deleteVolume({
+        VolumeId: rootVolumeId
+      }).promise();
+      
+      // Obter informações atualizadas do site
+      return await this.getPhpSite(siteId);
     } catch (error) {
       console.error(`Erro ao restaurar site PHP ${siteId} no EC2:`, error);
       throw error;

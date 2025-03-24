@@ -1,9 +1,9 @@
 # PHP Universal MCP Server
 
 [![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)](#)
-[![Versão](https://img.shields.io/badge/versão-1.9.0-blue)](#)
+[![Versão](https://img.shields.io/badge/versão-1.10.0--dev-blue)](#)
 [![Licença](https://img.shields.io/badge/licença-MIT-green)](#)
-[![Testes](https://img.shields.io/badge/testes-84%25-yellow)](#)
+[![Testes](https://img.shields.io/badge/testes-85%25-yellow)](#)
 
 ## Descrição
 
@@ -12,6 +12,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 ## Recursos
 
 - **Gerenciamento Universal**: Interface unificada para diversas plataformas (Hostinger, WooCommerce, Shopify)
+- **Provedores Cloud**: Suporte para AWS, GCP e mais provedores cloud
 - **Controle Completo**: Gerencie hospedagem, domínios, design, produtos e pedidos
 - **Visualização Avançada**: Dashboards e interfaces interativas via artifacts do Claude
 - **Templates**: Sistema completo de design com suporte a Bootstrap 5
@@ -22,7 +23,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **Extensibilidade**: Arquitetura modular para fácil adição de novos provedores
 - **Responsividade**: Temas adaptados para visualização em dispositivos móveis
 - **Caching**: Sistema otimizado de cache para melhor desempenho
-- **Sistema de Plugins**: Extensão dinâmica de funcionalidades via plugins
+- **Sistema de Plugins**: Extensão dinâmica de funcionalidades via plugins e marketplace
 - **Marketing Digital**: Sistema integrado de marketing e automação
 
 ## Componentes
@@ -43,6 +44,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **Hosting Manager**: Gerenciamento de recursos de hospedagem, domínios e SSL
 - **Export Manager**: Sistema de exportação de relatórios em múltiplos formatos
 - **Marketing Manager**: Sistema completo de marketing digital e automação
+- **Cloud Manager**: Gerenciamento unificado de recursos em provedores cloud
 
 ### Provedores
 
@@ -52,6 +54,8 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **Google**: Integração com Google Analytics 4 e Search Console
 - **Email Marketing**: Integrações com Mailchimp e SendinBlue
 - **Redes Sociais**: Integrações com Facebook, Instagram e Twitter
+- **AWS**: Gerenciamento de EC2, S3, e outros serviços AWS
+- **GCP**: Gerenciamento de App Engine, Cloud Storage e outros serviços GCP
 
 ### Integrações
 
@@ -146,6 +150,11 @@ marketing overview site-123
 marketing seo analisar site-123 /produto/456
 marketing social publicar site-123 facebook,instagram "Nova promoção!"
 marketing email criar-campanha site-123 "Newsletter Mensal" "Novidades de Março"
+
+# Cloud Management
+cloud aws ec2 listar
+cloud gcp app-engine status
+cloud storage criar-bucket <nome-bucket>
 ```
 
 ### Uso Programático
@@ -165,6 +174,11 @@ const server = new MCPServer({
       analytics: {
         propertyId: 'properties/123456789'
       }
+    },
+    aws: {
+      accessKeyId: 'sua-access-key',
+      secretAccessKey: 'sua-secret-key',
+      region: 'us-east-1'
     }
   },
   cache: {
@@ -177,8 +191,9 @@ const server = new MCPServer({
 server.start();
 
 // Utilizar os módulos diretamente
-const { hostingManager, marketingManager } = server.modules;
+const { hostingManager, marketingManager, cloudManager } = server.modules;
 const sites = await hostingManager.listSites();
+const instances = await cloudManager.aws.ec2.listInstances();
 
 // Utilizar o sistema de marketing
 const marketingOverview = await marketingManager.getOverview('site-123');
@@ -191,43 +206,68 @@ const dashboard = await marketingManager.generateMarketingDashboard({
 });
 ```
 
-## Sistema de Marketing Digital
+## Provedores Cloud
 
-Nossa nova funcionalidade principal na versão 1.9.0 é o sistema integrado de marketing digital, que oferece:
+Nossa nova funcionalidade principal na versão 1.10.0 é o suporte a provedores cloud, que oferece:
 
-- **SEO Avançado**: Análise e otimização de SEO, integração com Google Search Console
-- **Analytics Unificado**: Métricas completas via Google Analytics 4
-- **Email Marketing**: Integração com plataformas como Mailchimp e SendinBlue
-- **Redes Sociais**: Publicação e análise em Facebook, Instagram e Twitter
-- **Tracking e Conversões**: Monitoramento de objetivos e funis de conversão
-- **Automação**: Criação automática de conteúdo e campanhas a partir de produtos
+- **AWS**: Gerenciamento de EC2, S3, RDS, Lambda, CloudFront, Route53, IAM
+- **GCP**: App Engine, Cloud Storage, Cloud SQL, Cloud Functions e mais
+- **Interface Unificada**: API comum para todos os provedores cloud
+- **Visualizações via Claude**: Dashboards e métricas em tempo real
+- **Automação**: Provisionamento e gerenciamento via comandos simples
+- **Templates**: Modelos pré-configurados para ambientes comuns
 
-### Comandos de Marketing no Claude Desktop
+### Comandos Cloud no Claude Desktop
 
 ```
-# Visão geral de marketing
-marketing overview site-123
-marketing dashboard site-123 último-mês
+# AWS
+cloud aws ec2 listar
+cloud aws ec2 criar <nome> <tipo> <imagem>
+cloud aws s3 listar-buckets
+cloud aws s3 criar-bucket <nome>
 
-# SEO
-marketing seo analisar site-123 /página
-marketing seo keywords site-123 último-mês
+# GCP
+cloud gcp app-engine status
+cloud gcp app-engine deploy <arquivo>
+cloud gcp storage listar-buckets
+cloud gcp storage criar-bucket <nome>
 
-# Analytics
-marketing analytics relatório site-123 último-mês
-marketing analytics conversões site-123 objetivo-123
+# Geral
+cloud dashboard <provedor>
+cloud custos <provedor> último-mês
+cloud recursos listar
+```
 
-# Email
-marketing email criar-campanha site-123 "Nome" "Assunto" "lista-123"
-marketing email enviar-teste site-123 campanha-123 email@exemplo.com
+## Marketplace de Plugins
 
-# Redes Sociais
-marketing social publicar site-123 facebook,instagram "Mensagem" [mídia]
-marketing social publicar-produto site-123 produto-123 facebook,instagram
+O sistema de Marketplace de Plugins permite descobrir, instalar e gerenciar plugins de terceiros:
 
-# Tracking
-marketing tracking gerar-código site-123 google
-marketing tracking conversões site-123 por-fonte
+- **Descoberta**: Navegue por categorias ou busque plugins específicos
+- **Instalação Simplificada**: Instale plugins com um único comando
+- **Versionamento**: Atualizações controladas e automatizadas
+- **Validação**: Verificações de segurança e compatibilidade
+- **Comunidade**: Avaliações e comentários sobre plugins
+
+### Comandos do Marketplace no Claude Desktop
+
+```
+# Listar plugins disponíveis
+marketplace listar
+
+# Buscar plugins
+marketplace buscar <termo>
+
+# Ver detalhes de um plugin
+marketplace info <plugin-id>
+
+# Instalar um plugin
+marketplace instalar <plugin-id>
+
+# Atualizar um plugin
+marketplace atualizar <plugin-id>
+
+# Remover um plugin
+marketplace remover <plugin-id>
 ```
 
 ## Sistema de Gerenciamento de Pedidos
@@ -242,83 +282,16 @@ Nossa implementação completa do WooCommerce Provider (100%) inclui:
 - **Processamento de Reembolsos**: Gerencie reembolsos completos ou parciais
 - **Exportação de Dados**: Exporte dados de pedidos em múltiplos formatos
 
-### Comandos de Pedidos no Claude Desktop
+## Sistema de Marketing Digital
 
-```
-# Listar pedidos com filtros
-pedidos listar site-123 status=processing
+O sistema integrado de marketing digital oferece:
 
-# Visualizar detalhes do pedido
-pedidos visualizar site-123 456
-
-# Atualizar status do pedido
-pedidos atualizar site-123 456 concluído "Entrega confirmada pelo cliente"
-
-# Processar reembolso
-pedidos reembolsar site-123 456 parcial "Produto com defeito" 49.90
-
-# Ver dashboard de pedidos
-pedidos dashboard site-123 últimos-30-dias
-
-# Exportar dados de pedidos
-pedidos exportar site-123 csv status=completed período=último-mês
-```
-
-## Sistema de Plugins
-
-O sistema de plugins permite estender o servidor com funcionalidades personalizadas:
-
-- **Plugins Dinâmicos**: Adicione novas funcionalidades sem modificar o core
-- **Plugins Gerados pelo Claude**: O Claude pode criar plugins sob demanda via prompts
-- **API Completa**: Interface de programação simples para desenvolver plugins
-- **Gerenciamento Seguro**: Validação e sandbox para execução segura
-- **Hot Reload**: Ativação e desativação sem reiniciar o servidor
-
-### Comandos de Plugins no Claude Desktop
-
-```
-# Listar plugins instalados
-plugins listar
-
-# Instalar um plugin
-plugins instalar <nome-plugin>
-
-# Remover um plugin
-plugins remover <nome-plugin>
-
-# Ativar um plugin
-plugins ativar <nome-plugin>
-
-# Desativar um plugin
-plugins desativar <nome-plugin>
-
-# Obter informações de um plugin
-plugins info <nome-plugin>
-
-# Criar um novo plugin (requer descrição detalhada)
-criar plugin <nome-plugin> "descrição do que o plugin deve fazer"
-```
-
-## Sistema de Analytics via Claude Artifacts
-
-O sistema de analytics fornece visualizações ricas diretamente no Claude Desktop:
-
-- **Dashboards Interativos**: Componentes React renderizados como artifacts do Claude
-- **Relatórios de Vendas**: Visualização gráfica de receitas, pedidos e tendências
-- **Desempenho de Produtos**: Gráficos para análise de produtos mais vendidos
-- **Comportamento de Clientes**: Visualização de segmentação e padrões de compra
-- **Gestão de Estoque**: Representação visual de níveis de estoque e alertas
-- **Exportação Flexível**: Exportação de relatórios em CSV, PDF e JSON
-
-## Editor de Templates
-
-Nosso recurso de editor de templates permite personalização diretamente no Claude:
-
-- **Editor Visual**: Interface interativa para personalização de templates
-- **Componentes Drag & Drop**: Adicione e organize elementos com facilidade
-- **Visualização em Tempo Real**: Veja as mudanças instantaneamente
-- **Responsividade**: Teste como o site ficará em diferentes dispositivos
-- **Temas Pré-definidos**: Escolha entre diversos temas profissionais
+- **SEO Avançado**: Análise e otimização de SEO, integração com Google Search Console
+- **Analytics Unificado**: Métricas completas via Google Analytics 4
+- **Email Marketing**: Integração com plataformas como Mailchimp e SendinBlue
+- **Redes Sociais**: Publicação e análise em Facebook, Instagram e Twitter
+- **Tracking e Conversões**: Monitoramento de objetivos e funis de conversão
+- **Automação**: Criação automática de conteúdo e campanhas a partir de produtos
 
 ## Contribuição
 
@@ -339,9 +312,11 @@ A documentação completa está disponível em:
 - [Referência da API](./docs/api-reference.md)
 - [Sistema de Analytics](./docs/analytics/README.md)
 - [Provedores](./docs/providers/README.md)
+- [Provedores Cloud](./docs/cloud/README.md)
 - [Templates e Componentes](./docs/design/README.md)
 - [Otimização de Performance](./docs/performance/README.md)
 - [Sistema de Plugins](./docs/plugins/README.md)
+- [Marketplace](./docs/marketplace/README.md)
 - [Marketing Digital](./docs/marketing/README.md)
 
 ## Roadmap
@@ -358,8 +333,10 @@ A documentação completa está disponível em:
 - [x] Finalização do provedor WooCommerce (100% implementado)
 - [x] Sistema de plugins de terceiros
 - [x] Integração com ferramentas de marketing digital
-- [ ] Suporte a mais provedores de hospedagem
+- [x] Início da implementação de Cloud Providers (AWS, GCP)
+- [ ] Finalização dos Cloud Providers (AWS, GCP, Azure)
 - [ ] Marketplace de plugins e templates
+- [ ] Sistema de automação avançada
 
 ## Licença
 

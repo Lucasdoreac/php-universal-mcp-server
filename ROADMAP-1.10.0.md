@@ -1,165 +1,104 @@
-# Roadmap PHP Universal MCP Server v1.10.0
+# Roadmap da Versão 1.10.0
 
-## Estado Atual do Projeto
+## Visão Geral
 
-O PHP Universal MCP Server se encontra atualmente na versão 1.9.0, conforme indicado no `package.json`. O sistema implementou com sucesso as seguintes funcionalidades principais:
+A versão 1.10.0 do PHP Universal MCP Server tem como foco primário a finalização da integração do criador de websites Bootstrap com as capacidades do Claude Desktop via MCP, além de expandir o suporte a provedores cloud (AWS e GCP) e implementar um Marketplace de Plugins.
 
-1. **Sistema de Marketing Digital**:
-   - Integração com Google Analytics, SEO, Email Marketing e Redes Sociais
-   - Módulos completos para cada área de marketing
-   - Visualizações via artifacts do Claude
+## Prioridades de Desenvolvimento
 
-2. **Providers completos para E-commerce**:
-   - Hostinger (100%)
-   - Shopify (100%)
-   - WooCommerce (100%)
+### 1. Criador de Websites com Bootstrap (ALTA PRIORIDADE)
 
-3. **Funcionalidades Core**:
-   - Sistema de plugins extensível
-   - Protocolo MCP otimizado
-   - Design responsivo com Bootstrap 5
-   - Sistema de caching e exportação de relatórios
+- [x] Implementação do sistema base de templates Bootstrap
+- [x] Desenvolvimento dos componentes básicos (modal, accordion, gallery, editor)
+- [x] Integração com o sistema de designs do MCP
+- [ ] **Finalização dos testes de integração com Claude Desktop**
+- [ ] **Aprimoramento dos comandos naturais para criação de websites**
+- [ ] **Desenvolvimento das visualizações interativas via artifacts do Claude**
+- [ ] Documentação de uso completa para não-desenvolvedores
 
-## Integração com Cloud Providers (Já Iniciada)
+### 2. Integração MCP com Claude (ALTA PRIORIDADE)
 
-Foi identificado que a integração com provedores cloud já foi iniciada, com implementações significativas:
+- [x] Implementação do protocolo MCP
+- [x] Sistema de comandos na linguagem natural
+- [ ] **Refinamento da detecção de intenção do usuário**
+- [ ] **Aumento da cobertura de casos de uso**
+- [ ] **Melhorias no sistema de validação de entradas**
+- [ ] Implementação de feedback visual para comandos de longa duração
 
-- **AWS Provider**:
-  - Estrutura básica implementada no diretório `providers/cloud/aws`
-  - Implementação completa para EC2 (`ec2.js`)
-  - Código base para S3, RDS, Lambda, CloudFront, Route53 e IAM (referenciados mas não implementados)
+### 3. Provedores Cloud AWS (MÉDIA PRIORIDADE)
 
-## Plano para v1.10.0
+- [x] Implementação do AWS Provider (núcleo)
+- [x] Implementação do EC2 Manager
+- [x] Implementação do S3 Manager
+- [x] Implementação do RDS Manager
+- [ ] Implementação do Lambda Manager
+- [ ] Implementação do CloudFront Manager
+- [ ] Implementação do Route53 Manager
+- [ ] Implementação do IAM Manager
 
-Com base no `CONTINUITY-PROMPT.md` e nas implementações já existentes, a versão 1.10.0 deve focar nos seguintes pontos:
+### 4. Provedores Cloud GCP (MÉDIA PRIORIDADE)
 
-### 1. Finalização dos Cloud Providers
+- [x] Implementação do GCP Provider (núcleo)
+- [x] Implementação do App Engine Manager
+- [x] Implementação do Cloud Storage Manager
+- [ ] Implementação do Cloud SQL Manager
+- [ ] Implementação do Cloud Functions Manager
 
-#### AWS (Expansão da implementação existente)
-- Completar a implementação dos serviços referenciados:
-  - **S3**: Implementação completa para armazenamento de objetos
-  - **RDS**: Gerenciamento de bancos de dados MySQL/PostgreSQL
-  - **Lambda**: Execução de funções PHP serverless
-  - **CloudFront**: CDN para distribuição de conteúdo
-  - **Route53**: Gerenciamento de DNS
-  - **IAM**: Gerenciamento de credenciais e permissões
+### 5. Marketplace de Plugins (MÉDIA PRIORIDADE)
 
-#### Novos Cloud Providers
-- **Google Cloud Platform**:
-  - App Engine para hospedagem PHP
-  - Cloud Storage para arquivos
-  - Cloud SQL para bancos de dados
-  - Cloud Functions para funções serverless
+- [x] Implementação do sistema de repositório
+- [x] Implementação do instalador de plugins
+- [ ] Desenvolvimento da interface de usuário
+- [ ] Implementação do sistema de validação de segurança
 
-- **Microsoft Azure**:
-  - App Service para hospedagem PHP
-  - Blob Storage para arquivos
-  - Azure Database para bancos de dados
-  - Functions para serverless
+## Cronograma
 
-- **DigitalOcean**:
-  - Droplets para VPS
-  - Spaces para armazenamento de objetos
-  - Managed Databases para MySQL/PostgreSQL
+### Fase 1: Finalização do Criador de Websites Bootstrap e integração MCP
+- **Em andamento - Conclusão prevista: Abril 2025**
+- Prioridade máxima para o desenvolvimento do criador de websites via MCP
+- Foco nos testes de integração com Claude Desktop
+- Desenvolvimento das visualizações interativas
 
-### 2. Marketplace de Plugins e Templates
+### Fase 2: Conclusão dos Provedores Cloud
+- **Início: Abril 2025 - Conclusão prevista: Maio 2025**
+- Finalização dos gerenciadores AWS restantes
+- Finalização dos gerenciadores GCP restantes
+- Testes de integração para todos os provedores
 
-#### Sistema de Repositório
-- Implementação de repositório central para plugins
-- API para busca, download e atualização de plugins
-- Sistema de versionamento semântico
-- Verificação de compatibilidade entre versões
+### Fase 3: Marketplace e Finalização
+- **Início: Maio 2025 - Conclusão prevista: Junho 2025**
+- Desenvolvimento da UI do Marketplace
+- Implementação do sistema de validação
+- Documentação completa do sistema
+- Testes de integração finais
 
-#### Gestão de Plugins
-- Interface para descoberta e instalação
-- Avaliações e comentários sobre plugins
-- Estatísticas de uso e desempenho
-- Gerenciamento de atualizações automáticas
+## Marcos Importantes
 
-#### Monetização
-- Suporte a plugins gratuitos e pagos
-- Sistema de licenciamento
-- Integrações com gateways de pagamento
-- Relatórios para desenvolvedores
+1. **Meados de Abril 2025**: Release da versão beta do Criador de Websites Bootstrap
+2. **Final de Abril 2025**: Release do plugin MCP para Claude Desktop
+3. **Meados de Maio 2025**: Release da integração completa AWS/GCP
+4. **Junho 2025**: Lançamento oficial da versão 1.10.0
 
-#### Segurança
-- Verificação automática de segurança
-- Sandboxing para isolamento de plugins
-- Política de permissões granulares
-- Assinatura digital e verificação de integridade
+## Considerações Técnicas
 
-### 3. Sistema de Automação Avançada
+1. **Desenvolvimento via GitHub**
+   - O desenvolvimento está ocorrendo diretamente no GitHub
+   - Os testes de integração serão conduzidos antes da implantação local
+   - A implantação via npm ocorrerá após a conclusão dos componentes fundamentais
 
-- Workflows configuráveis com interface visual
-- Regras condicionais baseadas em eventos
-- Gatilhos automatizados para ações
-- Integração com serviços de terceiros via webhooks
-- Sistema de agendamento com retry e fallback
-- Editor visual de fluxos no Claude Desktop
+2. **Compatibilidade MCP**
+   - Garantir compatibilidade com as versões mais recentes do Claude Desktop
+   - Desenvolver mecanismos de fallback para funcionalidades não suportadas
+   - Implementar sistema de detecção automática de recursos disponíveis
 
-### 4. Melhorias de Segurança e Performance
+3. **Testes e Qualidade**
+   - Priorizar testes de integração para o Criador de Websites
+   - Implementar testes automatizados para validação de comandos
+   - Desenvolver mecanismos de logging e diagnóstico
 
-- Autenticação multi-fator
-- Sistema de permissões por função
-- Sandbox para plugins de terceiros
-- Auditoria e logs avançados
-- Verificação de vulnerabilidades
-- Sistema de backup seguro
-- Cache distribuído
-- Otimização de consultas
-- Sistema de filas assíncronas
+## Próximos Passos Imediatos
 
-## Resolução de Conflitos entre Implementações
-
-### Conflito: Cloud Providers
-
-**Situação Atual**:
-- Já existe uma implementação parcial de AWS no diretório `providers/cloud/aws`
-- O CONTINUITY-PROMPT.md sugere implementar AWS e outros provedores cloud para v1.10.0
-
-**Resolução**:
-1. Manter e expandir a implementação AWS existente
-2. Seguir a mesma estrutura para os novos provedores (GCP, Azure, DigitalOcean)
-3. Criar uma camada de abstração comum para unificar a API entre diferentes provedores
-4. Implementar sistema de métricas e alertas unificado
-
-### Conflito: Marketplace de Plugins
-
-**Situação Atual**:
-- Já existe um sistema de plugins básico
-- Um esqueleto para marketplace foi iniciado recentemente
-
-**Resolução**:
-1. Integrar o esqueleto existente do marketplace com o sistema de plugins atual
-2. Expandir as funcionalidades conforme o roadmap
-3. Garantir compatibilidade com plugins existentes
-4. Implementar sistema de descoberta e distribuição
-
-## Cronograma Sugerido
-
-### Fase 1 (Semanas 1-3)
-- Completar implementações para AWS (S3, RDS, Lambda)
-- Estrutura base para GCP e Azure
-- Protótipo inicial do marketplace
-
-### Fase 2 (Semanas 4-6)
-- Completar CloudFront, Route53 e IAM para AWS
-- Implementar principais serviços para GCP e Azure
-- Desenvolver sistema de repositório e versionamento para o marketplace
-
-### Fase 3 (Semanas 7-9)
-- Implementar DigitalOcean
-- Desenvolver sistema de automação visual
-- Implementar sistema de monetização para o marketplace
-
-### Fase 4 (Semanas 10-12)
-- Testes de integração entre todos os provedores
-- Melhorias de segurança e performance
-- Documentação completa
-- Finalização e preparação para lançamento
-
-## Conclusão
-
-A versão 1.10.0 do PHP Universal MCP Server representará um avanço significativo, expandindo o suporte para provedores cloud e estabelecendo um ecossistema completo de plugins e templates. Esta versão fortalecerá o posicionamento do sistema como uma solução completa para gestão de sites e e-commerce através do Claude Desktop.
-
-As implementações já iniciadas, como o provider AWS, serão aproveitadas e expandidas, garantindo coesão e evitando duplicação de esforços. O marketplace de plugins permitirá a extensibilidade do sistema sem modificar o core, facilitando a contribuição da comunidade e a adaptação a diferentes casos de uso.
+1. Finalizar testes de integração para o Bootstrap Website Builder
+2. Aprimorar a integração dos comandos naturais com o Claude MCP
+3. Desenvolver visualizações avançadas para o criador de websites
+4. Completar documentação de uso para o criador de websites

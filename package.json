@@ -1,6 +1,6 @@
 {
   "name": "php-universal-mcp-server",
-  "version": "1.7.2",
+  "version": "1.8.0",
   "description": "Um servidor MCP universal para desenvolvimento PHP em qualquer provedor de hospedagem ou nuvem",
   "main": "server-part2.js",
   "scripts": {
@@ -20,7 +20,8 @@
     "shopify",
     "woocommerce",
     "artifacts",
-    "responsive"
+    "responsive",
+    "plugins"
   ],
   "author": "Lucas Dórea",
   "license": "MIT",
@@ -46,6 +47,9 @@
   },
   "files": [
     "modules/",
+    "core/",
+    "plugins/",
+    "templates/",
     "server-part1.js",
     "server-part2.js",
     "start.js",

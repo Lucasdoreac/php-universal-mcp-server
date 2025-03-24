@@ -1,105 +1,179 @@
 # Changelog
 
-Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
+Todas as alterações notáveis no projeto PHP Universal MCP Server serão documentadas neste arquivo.
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
-e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/spec/v2.0.0.html).
+O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.0] - 2025-03-23
-
-### Adicionado
-- Sistema de Analytics e Relatórios:
-  - Dashboard interativo com métricas de desempenho
-  - Visualização HTML com gráficos usando Chart.js
-  - Relatórios detalhados de vendas, produtos, clientes e estoque
-  - Suporte a múltiplos formatos de saída (HTML, JSON, chart data)
-  - Utilitários de formatação para valores monetários, datas e números
-  - Métricas em tempo real para monitoramento de desempenho
-  - Exemplo completo de uso do sistema de analytics
-
-### Melhorado
-- Documentação atualizada para incluir o sistema de analytics
-- Otimização do sistema de cache para relatórios
-- Interface do E-commerce Manager para incluir acesso ao dashboard
-- README do projeto atualizado com as novas funcionalidades
-
-## [1.4.0] - 2025-03-23
+## [1.10.0-dev] - Em Desenvolvimento
 
 ### Adicionado
-- Implementação completa do Shopify Provider:
-  - Autenticação OAuth com renovação automática de tokens
-  - Gerenciamento completo de produtos e suas variantes
-  - Processamento de pedidos e atualizações de status
-  - Personalização de temas e aplicativos
-  - Gerenciamento de clientes e segmentação
-  - Testes automatizados e exemplos detalhados de uso
-  - Documentação completa de todas as funcionalidades
-  - Integração com sistema de relatórios e analytics
+- Implementação do núcleo do AWS Provider
+- Implementação do EC2 Manager para AWS
+- Interfaces iniciais para AWS S3, RDS, Lambda e CloudFront
+- Implementação inicial do GCP Provider
+- Implementação do App Engine Manager para GCP
+- Implementação do Cloud Storage Manager para GCP
+- Implementação do sistema de repositório para o Marketplace de Plugins
+- Implementação do Installer para Marketplace de Plugins
+- Estrutura base para testes de integração
+- Testes de integração para AWS e GCP Providers
+- Testes de integração para o Marketplace Repository e Installer
 
-### Melhorado
-- Sistema de provedores agora mais robusto para lidar com falhas de API
-- Melhor tratamento de erros e logging nas integrações de terceiros
-- Otimização de desempenho para operações em lote
-- Documentação atualizada com exemplos práticos de uso
+### Modificado
+- Atualização da documentação para refletir novas funcionalidades
+- Expansão do sistema de plugins para suportar o Marketplace
+- Melhoria no sistema de logging para Cloud Providers
+- Otimização do sistema de cache para recursos cloud
 
-## [1.3.0] - 2025-03-23
+### Correções
+- Resolução de conflitos entre diferentes versões de plugins
+- Correção na detecção de credenciais para provedores cloud
+- Melhoria na validação de erros para operações AWS e GCP
+- Correção de problemas de temporizações em operações assíncronas
 
-### Adicionado
-- Componentes Bootstrap adicionais:
-  - Modal para visualização rápida de produtos (`bs-product-modal`)
-  - Accordion para FAQs e categorias (`bs-accordion`)
-  - Galeria para visualização de múltiplas imagens (`bs-gallery`)
-- Novos templates Bootstrap:
-  - Template para Blog (`bs-blog`) com múltiplos layouts e opções
-  - Template para Landing Page (`bs-landing`) altamente configurável
-- Helpers JavaScript para template de blog
-- Dados de exemplo para demonstração de blogs
-- Documentação atualizada para todos os novos componentes
-
-### Melhorado
-- Suporte ao Bootstrap 5 agora é mais completo, com opções avançadas de personalização
-- Melhor integração com o sistema de templates existente
-- Otimização de desempenho para carregamento de componentes
-
-## [1.2.0] - 2025-03-23
+## [1.9.0] - 2025-03-15
 
 ### Adicionado
-- Implementação completa do E-commerce Manager Core
-- Modelos para Produtos, Pedidos, Clientes, Categorias e Cupons
-- Controladores e serviços para operações CRUD
-- Sistema avançado de relatórios e analytics
-- Exemplos de uso para produtos e relatórios
-- Documentação detalhada do componente de e-commerce
-- Sistema de cache para otimização de desempenho
+- Sistema completo de Marketing Digital
+- Integração com Google Analytics 4 e Search Console
+- Suporte para email marketing (Mailchimp, SendinBlue)
+- Integração com redes sociais (Facebook, Instagram, Twitter)
+- Sistema de SEO automatizado
+- Tracking de conversões e campanhas
+- Visualização avançada via artifacts do Claude
+- Plugins específicos para marketing digital
+- Ferramentas de automação para content marketing
 
-## [1.1.0] - 2025-03-23
+### Finalizado
+- Implementação completa do Provider WooCommerce (100%)
+- Gerenciamento completo de pedidos WooCommerce
+- Gerenciamento completo de produtos e categorias WooCommerce
+- Gerenciamento completo de clientes WooCommerce
+- Gerenciamento completo de configurações WooCommerce
+- Sistema completo de plugins de terceiros
+
+### Modificado
+- Melhoria significativa no sistema de cache
+- Otimização de performance para operações frequentes
+- Atualização da interface de gerenciamento de produtos
+- Expansão do sistema de visualização de relatórios
+
+### Correções
+- Correção de problemas na autenticação OAuth
+- Resolução de conflitos em operações concorrentes
+- Melhorias na sincronização de dados entre sistemas
+- Correção de problemas de memória em operações grandes
+
+## [1.8.0] - 2025-02-25
 
 ### Adicionado
-- Implementação do PHP Runtime Engine
-- Ambiente seguro para execução de código PHP
-- Sistema de limitação de recursos (tempo, memória, execuções)
-- Captura estruturada de saídas e erros
-- Gerenciamento de bibliotecas para e-commerce e web
+- Operações CRUD completas para produtos WooCommerce
+- Gerenciamento de categorias de produtos em WooCommerce
+- Dashboard interativo para analytics de produtos
+- Exportação de relatórios em formatos CSV, PDF e JSON
+- Sistema de filtros avançados para produtos
+- Gerenciamento básico de pedidos WooCommerce
+- Visualizações avançadas para métricas de vendas
 
-## [1.0.1] - 2025-03-23
+### Modificado
+- Melhoria no sistema de autenticação OAuth
+- Otimização do carregamento de dados para produtos
+- Atualização da API de Shopify para versão mais recente
+- Melhoria nas visualizações de dashboards com gráficos interativos
 
-### Corrigido
-- Adicionada importação do módulo crypto no arquivo MCPServer.js que estava faltando
-- Corrigido problema de retorno no método _handleStream que não incluía o objeto stream
+### Correções
+- Correção de problemas na sincronização de produtos com múltiplas variações
+- Resolução de conflitos em APIs de terceiros
+- Melhoria na gestão de erros para operações de e-commerce
+- Correção de problemas de paginação em listagens grandes
+
+## [1.7.0] - 2025-01-20
 
 ### Adicionado
-- Implementação completa do MCP Protocol Layer
-- Integração com Claude Desktop via MCP
-- Suporte para detecção automática de provedores de hospedagem
+- Editor visual de templates
+- Sistema de temas responsivos
+- Suporte completo ao Bootstrap 5
+- Componentes reutilizáveis para design de sites
+- Preview em tempo real de alterações de design
+- Templates pré-configurados para diferentes tipos de sites
+- Sistema de exportação de templates
 
-## [1.0.0] - 2025-03-22
+### Modificado
+- Melhoria significativa na interface de gerenciamento de sites
+- Atualização do sistema de caching para melhor desempenho
+- Expansão da API de hospedagem
+- Otimização de queries para melhor performance
+
+### Correções
+- Correção de problemas em layouts responsivos
+- Resolução de conflitos entre diferentes componentes de UI
+- Melhoria na compatibilidade com diferentes navegadores
+- Correção de problemas de renderização em dispositivos móveis
+
+## [1.6.0] - 2024-12-15
+
+### Adicionado
+- Implementação completa do Provider Shopify
+- Gerenciamento de produtos Shopify
+- Gerenciamento de coleções Shopify
+- Gerenciamento de pedidos Shopify
+- Personalização de temas e apps Shopify
+- Gerenciamento de clientes Shopify
+- Visualizações via artifacts do Claude para Shopify
+
+### Modificado
+- Melhoria na abstração de APIs para diferentes provedores
+- Otimização de performance para operações com grande volume de dados
+- Expansão do sistema de logging para operações críticas
+- Atualização da documentação para incluir exemplos de Shopify
+
+### Correções
+- Resolução de problemas de autenticação com Shopify API
+- Correção de bugs em operações assíncronas
+- Melhoria na validação de dados para diferentes provedores
+- Ajustes na formatação de dados para relatórios
+
+## [1.5.0] - 2024-11-10
+
+### Adicionado
+- Implementação completa do Provider Hostinger
+- Criação e gerenciamento de sites
+- Configuração de domínios e DNS
+- Gerenciamento de bancos de dados MySQL
+- Upload de arquivos via FTP/SFTP
+- Configuração automatizada de SSL
+- Monitoramento de desempenho e uso de recursos
+- Sistema de backup e restauração
+
+### Modificado
+- Melhoria no sistema de autenticação
+- Otimização do sistema de cache
+- Melhoria na interface de comandos via chat
+- Expansão dos comandos disponíveis no CLI
+
+### Correções
+- Resolução de problemas de permissões em uploads
+- Correção de bugs na configuração de domínios
+- Melhoria na gestão de erros para operações de hospedagem
+- Ajustes na validação de configurações de DNS
+
+## [1.0.0] - 2024-10-05
 
 ### Adicionado
 - Lançamento inicial do PHP Universal MCP Server
-- Implementação do núcleo do servidor MCP
-- Suporte para execução de código PHP via linha de comando
-- Interface de linha de comando (CLI) para operações do servidor
-- Documentação básica de uso e configuração
-- Provedores para diferentes plataformas (AWS, Azure, GCP, cPanel, Plesk, Hostinger)
-- Implementação do protocolo Model Context Protocol (MCP)
-- Servidor HTTP para atender requisições MCP
+- Implementação completa do protocolo MCP sobre JSON-RPC 2.0
+- Ambiente seguro para execução de código PHP
+- Estrutura modular para extensibilidade
+- Sistema básico de cache
+- Interface de comandos via chat
+- Configuração inicial de provedores
+- Sistema básico de logs e diagnóstico
+
+[1.10.0-dev]: https://github.com/Lucasdoreac/php-universal-mcp-server/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/Lucasdoreac/php-universal-mcp-server/compare/v1.8.0...v1.9.0
+[1.8.0]: https://github.com/Lucasdoreac/php-universal-mcp-server/compare/v1.7.0...v1.8.0
+[1.7.0]: https://github.com/Lucasdoreac/php-universal-mcp-server/compare/v1.6.0...v1.7.0
+[1.6.0]: https://github.com/Lucasdoreac/php-universal-mcp-server/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/Lucasdoreac/php-universal-mcp-server/compare/v1.0.0...v1.5.0
+[1.0.0]: https://github.com/Lucasdoreac/php-universal-mcp-server/releases/tag/v1.0.0

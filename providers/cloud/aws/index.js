@@ -9,6 +9,7 @@
 
 const EC2Manager = require('./ec2');
 const S3Manager = require('./s3');
+const RDSManager = require('./rds');
 const Logger = require('../../../core/utils/logger');
 const Config = require('../../../core/utils/config');
 const { renderTemplate } = require('../../../core/utils/templates');
@@ -110,9 +111,10 @@ class AWSProvider {
    */
   get rds() {
     if (!this._services.rds) {
-      // RDSManager ainda não implementado
-      this.logger.warn('RDS Manager ainda não implementado');
-      this._services.rds = null;
+      this._services.rds = new RDSManager(this.awsConfig, {
+        useCache: true,
+        eventEmitter: this.eventEmitter
+      });
     }
     return this._services.rds;
   }
@@ -443,11 +445,161 @@ class AWSProvider {
    * @returns {Promise<Object>} Resultado do comando
    */
   async processRDSCommand(action, params, context) {
-    // RDS ainda não implementado
-    return {
-      error: true,
-      message: 'Serviço RDS ainda não implementado'
-    };
+    // Verificar se o serviço RDS está implementado
+    if (!this.rds) {
+      return {
+        error: true,
+        message: 'Serviço RDS não implementado'
+      };
+    }
+    
+    switch (action) {
+      case 'listarInstancias':
+        const instances = await this.rds.listDBInstances(params.filters || {});
+        return {
+          success: true,
+          data: instances,
+          visualization: await this.generateRDSInstancesVisualization(instances, context)
+        };
+        
+      case 'criarInstancia':
+        const newInstance = await this.rds.createDBInstance(params, params.options || {});
+        return {
+          success: true,
+          message: `Instância RDS criada com sucesso: ${params.dbInstanceIdentifier}`,
+          data: newInstance
+        };
+        
+      case 'obterInstancia':
+        const instance = await this.rds.getDBInstance(params.dbInstanceIdentifier);
+        return {
+          success: true,
+          data: instance
+        };
+        
+      case 'modificarInstancia':
+        const modifiedInstance = await this.rds.modifyDBInstance(
+          params.dbInstanceIdentifier,
+          params.updates || {},
+          params.applyImmediately
+        );
+        return {
+          success: true,
+          message: `Instância RDS ${params.dbInstanceIdentifier} modificada com sucesso`,
+          data: modifiedInstance
+        };
+        
+      case 'excluirInstancia':
+        await this.rds.deleteDBInstance(
+          params.dbInstanceIdentifier,
+          params.skipFinalSnapshot,
+          params.finalSnapshotIdentifier
+        );
+        return {
+          success: true,
+          message: `Instância RDS ${params.dbInstanceIdentifier} excluída com sucesso`
+        };
+        
+      case 'iniciarInstancia':
+        await this.rds.startDBInstance(params.dbInstanceIdentifier);
+        return {
+          success: true,
+          message: `Instância RDS ${params.dbInstanceIdentifier} iniciada com sucesso`
+        };
+        
+      case 'pararInstancia':
+        await this.rds.stopDBInstance(params.dbInstanceIdentifier);
+        return {
+          success: true,
+          message: `Instância RDS ${params.dbInstanceIdentifier} parada com sucesso`
+        };
+        
+      case 'reiniciarInstancia':
+        await this.rds.rebootDBInstance(params.dbInstanceIdentifier, params.forceFailover);
+        return {
+          success: true,
+          message: `Instância RDS ${params.dbInstanceIdentifier} reiniciada com sucesso`
+        };
+        
+      case 'criarSnapshot':
+        const snapshot = await this.rds.createDBSnapshot(
+          params.dbInstanceIdentifier,
+          params.snapshotIdentifier,
+          params.tags
+        );
+        return {
+          success: true,
+          message: `Snapshot criado com sucesso: ${params.snapshotIdentifier}`,
+          data: snapshot
+        };
+        
+      case 'listarSnapshots':
+        const snapshots = await this.rds.listDBSnapshots(params.filters || {});
+        return {
+          success: true,
+          data: snapshots
+        };
+        
+      case 'restaurarDeSnapshot':
+        const restoredInstance = await this.rds.restoreDBInstanceFromSnapshot(
+          params.snapshotIdentifier,
+          params.dbInstanceIdentifier,
+          params.options || {}
+        );
+        return {
+          success: true,
+          message: `Instância RDS restaurada com sucesso: ${params.dbInstanceIdentifier}`,
+          data: restoredInstance
+        };
+        
+      case 'listarParameterGroups':
+        const parameterGroups = await this.rds.listDBParameterGroups(params.filters || {});
+        return {
+          success: true,
+          data: parameterGroups
+        };
+        
+      case 'listarParametros':
+        const parameters = await this.rds.listDBParameters(
+          params.dbParameterGroupName,
+          params.filters || {}
+        );
+        return {
+          success: true,
+          data: parameters
+        };
+        
+      case 'listarEngines':
+        const engines = await this.rds.listDBEngines(params.filters || {});
+        return {
+          success: true,
+          data: engines
+        };
+        
+      case 'listarEventos':
+        const events = await this.rds.listEvents(params.filters || {}, params.maxResults);
+        return {
+          success: true,
+          data: events
+        };
+        
+      case 'obterMetricas':
+        const metrics = await this.rds.getDBMetrics(
+          params.dbInstanceIdentifier,
+          params.startTime,
+          params.endTime
+        );
+        return {
+          success: true,
+          data: metrics
+        };
+        
+      default:
+        return {
+          error: true,
+          message: `Ação RDS desconhecida: ${action}`
+        };
+    }
   }
   
   /**
@@ -546,6 +698,13 @@ class AWSProvider {
         
         if (this._services.s3) {
           this._services.s3 = new S3Manager(this.awsConfig, {
+            useCache: true,
+            eventEmitter: this.eventEmitter
+          });
+        }
+        
+        if (this._services.rds) {
+          this._services.rds = new RDSManager(this.awsConfig, {
             useCache: true,
             eventEmitter: this.eventEmitter
           });
@@ -660,6 +819,26 @@ class AWSProvider {
       });
     } catch (error) {
       this.logger.error('Erro ao gerar visualização S3 Bucket Info', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Gera visualização para instâncias RDS
+   * 
+   * @param {Array} instances Lista de instâncias RDS
+   * @param {Object} context Contexto da execução
+   * @returns {Promise<string>} HTML para visualização
+   */
+  async generateRDSInstancesVisualization(instances, context) {
+    try {
+      // Usar template para renderizar visualização
+      return await renderTemplate('aws/rds-instances', {
+        instances,
+        region: this.awsConfig.region
+      });
+    } catch (error) {
+      this.logger.error('Erro ao gerar visualização RDS Instances', error);
       return null;
     }
   }

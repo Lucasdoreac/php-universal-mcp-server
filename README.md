@@ -1,7 +1,7 @@
 # PHP Universal MCP Server
 
 [![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)](#)
-[![Versão](https://img.shields.io/badge/versão-1.7.2-blue)](#)
+[![Versão](https://img.shields.io/badge/versão-1.8.0-blue)](#)
 [![Licença](https://img.shields.io/badge/licença-MIT-green)](#)
 [![Testes](https://img.shields.io/badge/testes-82%25-yellow)](#)
 
@@ -22,6 +22,7 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **Extensibilidade**: Arquitetura modular para fácil adição de novos provedores
 - **Responsividade**: Temas adaptados para visualização em dispositivos móveis
 - **Caching**: Sistema otimizado de cache para melhor desempenho
+- **Gerenciamento de Pedidos**: Interface completa para visualização e administração de pedidos
 
 ## Componentes
 
@@ -39,12 +40,13 @@ O PHP Universal MCP Server é uma poderosa ferramenta que permite gerenciar múl
 - **Design System**: Motor de templates com suporte ao Bootstrap 5 e adaptação responsiva
 - **Hosting Manager**: Gerenciamento de recursos de hospedagem, domínios e SSL
 - **Export Manager**: Sistema de exportação de relatórios em múltiplos formatos
+- **Order Manager**: Sistema de gerenciamento e acompanhamento de pedidos
 
 ### Provedores
 
 - **Hostinger**: Gerenciamento completo de hospedagem web e domínios
 - **Shopify**: Gerenciamento completo de lojas Shopify
-- **WooCommerce**: Gerenciamento de lojas WooCommerce (70% implementado)
+- **WooCommerce**: Gerenciamento de lojas WooCommerce (100% implementado)
 
 ### Integrações
 
@@ -122,6 +124,18 @@ exportar relatório vendas site-123 pdf últimos-30-dias
 
 # Editar template
 editar template site-123
+
+# Gerenciar pedidos (NOVO)
+pedidos listar site-123
+
+# Visualizar pedido específico (NOVO)
+pedidos visualizar site-123 456
+
+# Atualizar status de pedido (NOVO)
+pedidos atualizar site-123 456 concluído "Pedido entregue e confirmado pelo cliente"
+
+# Dashboard de pedidos (NOVO)
+pedidos dashboard site-123
 ```
 
 ### Uso Programático
@@ -161,6 +175,10 @@ const dashboard = await analytics.generateDashboard({
   },
   format: 'artifact' // Ou 'json', 'csv', 'pdf'
 });
+
+// Gerenciar pedidos (NOVO)
+const { woocommerceProvider } = server.providers;
+const orders = await woocommerceProvider.orders.getOrders({ status: 'processing' });
 ```
 
 ## Sistema de Analytics via Claude Artifacts
@@ -174,9 +192,21 @@ O sistema de analytics fornece visualizações ricas diretamente no Claude Deskt
 - **Gestão de Estoque**: Representação visual de níveis de estoque e alertas
 - **Exportação Flexível**: Exportação de relatórios em CSV, PDF e JSON
 
+## Sistema de Gerenciamento de Pedidos
+
+Nossa mais recente adição permite gerenciar pedidos diretamente no Claude Desktop:
+
+- **Dashboard Completo**: Visualização interativa de todos os pedidos
+- **Filtros Avançados**: Filtre por status, data, cliente e mais
+- **Análise de Desempenho**: Gráficos de receita e distribuição de status
+- **Detalhamento de Pedidos**: Acesse todas as informações de cada pedido
+- **Atualização de Status**: Gerencie o ciclo de vida dos pedidos
+- **Processamento de Reembolsos**: Gerencie reembolsos completos ou parciais
+- **Exportação de Dados**: Exporte dados de pedidos em múltiplos formatos
+
 ## Editor de Templates
 
-Nosso mais recente recurso permite editar templates diretamente no Claude:
+Nosso recurso de edição permite personalizar templates diretamente no Claude:
 
 - **Editor Visual**: Interface interativa para personalização de templates
 - **Componentes Drag & Drop**: Adicione e organize elementos com facilidade
@@ -225,6 +255,7 @@ A documentação completa está disponível em:
 - [Provedores](./docs/providers/README.md)
 - [Templates e Componentes](./docs/design/README.md)
 - [Otimização de Performance](./docs/performance/README.md)
+- [Gerenciamento de Pedidos](./docs/orders/README.md)
 
 ## Roadmap
 
@@ -237,7 +268,7 @@ A documentação completa está disponível em:
 - [x] Sistema de caching para otimização
 - [x] Exportação de relatórios em múltiplos formatos
 - [x] Editor visual de templates
-- [ ] Finalização do provedor WooCommerce (70% concluído)
+- [x] Finalização do provedor WooCommerce (100% concluído)
 - [ ] Sistema de plugins de terceiros
 - [ ] Integração com ferramentas de marketing digital
 - [ ] Suporte a mais provedores de hospedagem

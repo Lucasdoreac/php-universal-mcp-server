@@ -2,13 +2,22 @@
 
 ## Estado Atual (24/03/2025)
 
-O PHP Universal MCP Server está evoluindo para a versão 1.10.0, com foco na implementação de provedores cloud (AWS e GCP) e no desenvolvimento do Marketplace de Plugins. Os avanços mais recentes incluem:
+O PHP Universal MCP Server está evoluindo para a versão 1.10.0, com **prioridade na finalização dos testes de integração do criador de websites com Bootstrap e a integração completa com Claude via MCP**. Em paralelo, prosseguimos com a expansão para provedores cloud (AWS e GCP) e o desenvolvimento do Marketplace de Plugins.
 
-- **Implementação do AWS RDS Manager**: Sistema completo para gerenciamento de bancos de dados AWS, incluindo operações CRUD para instâncias, snapshots, monitoramento e métricas de performance.
-- **Templates de Visualização para RDS**: Interface amigável para visualização e gerenciamento de instâncias RDS via Claude Desktop.
+### ⭐ PRIORIDADE: Criador de Websites Bootstrap + Claude MCP
+
+O foco atual é garantir a perfeita integração entre o criador de websites Bootstrap e as capacidades do Claude via MCP. Estamos trabalhando para finalizar:
+
+- **Testes de integração** para todas as funcionalidades do criador de websites
+- **Sistema de comandos naturais** para criação e edição de sites
+- **Visualizações interativas** via artifacts do Claude
+- **Integração completa com o Claude Desktop** para experiência fluida
+
+### Outros Avanços Recentes
+
+- **Implementação do AWS RDS Manager**: Sistema completo para gerenciamento de bancos de dados AWS, incluindo operações CRUD para instâncias, snapshots, monitoramento e métricas.
+- **Templates de Visualização para RDS**: Interface para visualização e gerenciamento de instâncias RDS via Claude.
 - **AWS S3 Manager**: Sistema de gerenciamento de storage com controle completo sobre buckets e objetos.
-- **Templates de Visualização para S3**: Interfaces para visualização de buckets e objetos S3.
-- **Testes de Integração**: Implementação de testes para componentes AWS e GCP, além do Marketplace.
 
 ### Componentes Concluídos
 
@@ -31,40 +40,56 @@ O PHP Universal MCP Server está evoluindo para a versão 1.10.0, com foco na im
 
 ### Em Progresso
 
+- [ ] **Testes de integração para Bootstrap Website Builder** (ALTA PRIORIDADE)
+- [ ] **Integração completa com Claude MCP** (ALTA PRIORIDADE)
+- [ ] **Sistema de comandos naturais para criação de websites** (ALTA PRIORIDADE)
+- [ ] **Visualização avançada via artifacts do Claude** (ALTA PRIORIDADE)
 - [ ] AWS Lambda Manager
 - [ ] AWS CloudFront Manager
 - [ ] GCP Cloud SQL Manager
 - [ ] GCP Cloud Functions Manager
 - [ ] Marketplace UI
 - [ ] Marketplace Security Validator
-- [ ] Testes de integração para novos componentes
 
 ### Pendentes
 
 - [ ] AWS Route53 Manager
 - [ ] AWS IAM Manager
 - [ ] Azure Provider
-- [ ] Sistema de automação avançada
+- [ ] Documentation System
+- [ ] Installation Manager
 
 ## Próximos Passos
 
-1. Completar implementação do AWS Lambda Manager
-2. Desenvolver o AWS CloudFront Manager
-3. Iniciar o desenvolvimento do GCP Cloud SQL Manager
-4. Finalizar os testes de integração para os componentes recentes
-5. Desenvolver interface de usuário para o Marketplace de Plugins
-6. Implementar sistema de validação para plugins de terceiros
+1. **Finalizar testes de integração para o Bootstrap Website Builder** (ALTA PRIORIDADE)
+2. **Aprimorar a integração dos comandos naturais com o Claude MCP** (ALTA PRIORIDADE)
+3. **Desenvolver visualizações avançadas para o criador de websites** (ALTA PRIORIDADE)
+4. **Completar documentação de uso para o criador de websites** (ALTA PRIORIDADE)
+5. Implementar testes automatizados para validação de comandos
+6. Preparar pacote npm para distribuição
 
 ## Estatísticas do Projeto
 
 - **Componentes Concluídos**: 40 de 54 (74%)
 - **Linhas de Código**: ~85.000
 - **Arquivos**: ~320
-- **Commits**: ~170
+- **Commits**: ~175
 - **Plugins Disponíveis**: 12
 - **Provedores Integrados**: 5
 
 ## Detalhes Técnicos Recentes
+
+### Criador de Websites com Bootstrap (PRIORIDADE)
+
+O sistema de criação de websites com Bootstrap está sendo aprimorado para garantir integração perfeita com o Claude via MCP:
+
+- **Comandos em linguagem natural**: Permitir que o usuário descreva naturalmente o site que deseja criar
+- **Componentes pré-configurados**: Sistema de componentes prontos para uso sem conhecimento técnico
+- **Templates personalizáveis**: Conjunto de templates profissionais facilmente customizáveis
+- **Visualização em tempo real**: Interface para acompanhar o desenvolvimento do site em tempo real
+- **Exportação simplificada**: Facilidade para exportar e publicar sites completos
+
+O desenvolvimento está ocorrendo diretamente no GitHub, com planejamento para implantação e testes locais após a conclusão dos componentes fundamentais.
 
 ### AWS RDS Manager (Concluído)
 
@@ -75,49 +100,26 @@ O gerenciador de bancos de dados RDS da AWS foi implementado com sucesso, oferec
 - Criação e gerenciamento de snapshots
 - Restauração a partir de snapshots
 - Monitoramento de métricas de performance
-- Listagem de parameter groups e engines disponíveis
 
-A interface de visualização foi implementada usando Handlebars para templates reativos, com estilização avançada para exibição de status, métricas e detalhes das instâncias. O sistema inclui validação completa de entradas e tratamento robusto de erros.
-
-### AWS S3 Manager (Concluído)
-
-O gerenciador de storage S3 foi implementado com recursos para:
-
-- Criação, listagem e exclusão de buckets
-- Upload, download e exclusão de objetos
-- Configuração de políticas de acesso e CORS
-- Gerenciamento de versionamento e ciclo de vida
-- Geração de URLs pré-assinadas
-
-Os templates de visualização oferecem navegação intuitiva por buckets e objetos, com opções de visualização em lista e grade, além de recursos de upload e download simplificados.
-
-### Marketplace de Plugins (Em Progresso)
-
-O sistema de Marketplace para extensão do PHP Universal MCP Server está em desenvolvimento, com:
-
-- Repositório para descoberta e distribuição de plugins (concluído)
-- Sistema de instalação e gerenciamento de plugins (concluído)
-- Interface de usuário para navegação e instalação (em progresso)
-- Sistema de validação de segurança para plugins de terceiros (em progresso)
+A interface de visualização foi implementada usando Handlebars para templates reativos, com estilização avançada para exibição de status, métricas e detalhes das instâncias.
 
 ## Desafios e Soluções
 
 ### Desafios Recentes
 
-1. **Integração de Múltiplos Provedores Cloud**: O desafio de criar uma interface unificada para diferentes provedores de nuvem com APIs distintas foi superado com a criação de adaptadores específicos e uma camada de abstração comum.
+1. **Integração com Claude MCP**: Estamos trabalhando para garantir que a comunicação entre o criador de websites e o Claude via MCP seja fluida e intuitiva, com comandos naturais e fácil compreensão para usuários não técnicos.
 
-2. **Performance em Operações de Banco de Dados**: A otimização de performance para operações com grandes volumes de dados foi alcançada com a implementação de um sistema de cache avançado com compressão e lazy loading.
+2. **Testagem sem Implantação Local**: Como o desenvolvimento está ocorrendo diretamente no GitHub, estamos criando um sistema robusto de testes e simulações para garantir a funcionalidade antes da implantação local.
 
-3. **Testes de Integração**: A criação de testes consistentes para APIs de terceiros foi solucionada com o uso de mocks e fixtures padronizados.
+3. **Equilíbrio entre Múltiplos Focos**: Manter o progresso em todas as frentes (criador de websites, provedores cloud, marketplace) enquanto priorizamos a integração MCP.
 
 ## Plano para v1.10.0 (Final)
 
 A versão 1.10.0 será finalizada com:
 
-- Implementação completa de todos os gerenciadores AWS (EC2, S3, RDS, Lambda, CloudFront)
-- Implementação dos gerenciadores GCP principais (App Engine, Cloud Storage, Cloud SQL, Cloud Functions)
+- **Criador de Websites Bootstrap** totalmente integrado com Claude MCP
+- Implementação completa de todos os gerenciadores AWS e GCP principais
 - Sistema completo de Marketplace com UI e validação de segurança
-- Cobertura de testes abrangente para todos os componentes
-- Documentação completa para desenvolvedores e usuários finais
+- Documentação abrangente para desenvolvedores e usuários finais
 
-**Previsão de lançamento**: Maio/2025
+**Previsão de lançamento**: Junho/2025

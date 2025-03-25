@@ -1,1200 +1,903 @@
 /**
- * Streaming Renderer para PHP Universal MCP Server
+ * Streaming Renderer para o PHP Universal MCP Server
  * 
- * Renderizador especializado para templates extremamente grandes
- * que utiliza técnicas de streaming e chunking para otimizar
- * uso de memória e tempo de renderização.
+ * Renderizador especializado para templates extremamente grandes,
+ * implementando técnicas de streaming avançadas e feedback visual
+ * em tempo real para o usuário.
  * 
  * @author PHP Universal MCP Server Team
  * @version 1.0.0
- * @license MIT
  */
 
-const EventEmitter = require('events');
 const { JSDOM } = require('jsdom');
-const handlebars = require('handlebars');
+const EventEmitter = require('events');
 const MemoryOptimizer = require('./memory-optimizer');
-const EnhancedProgressiveRenderer = require('./enhanced-progressive-renderer');
+const logger = require('../../../utils/logger');
 
 /**
- * Renderizador que implementa técnicas de streaming para templates extremamente grandes
+ * Renderizador de streaming para templates extremamente grandes
  */
-class StreamingRenderer extends EventEmitter {
+class StreamingRenderer {
   /**
-   * Construtor do renderizador streaming
+   * Construtor
    * @param {Object} options - Opções de configuração
    */
   constructor(options = {}) {
-    super();
-    
     this.options = {
-      // Tamanho máximo de cada chunk para processamento (em KB)
-      chunkSize: 500,
-      
-      // Número máximo de workers simultâneos para processamento paralelo
-      maxWorkers: 2,
-      
-      // Limite absoluto de uso de memória em MB (após o qual as otimizações agressivas são acionadas)
-      memoryLimit: 300,
-      
-      // Intervalo (ms) para verificação de uso de memória
-      memoryCheckInterval: 1000,
-      
-      // Habilitar debug detalhado
+      // Tamanho máximo de chunk (em KB)
+      chunkSize: 100,
+      // Intervalo (em ms) entre chunks
+      chunkInterval: 50,
+      // Timeout para renderização (ms)
+      renderTimeout: 60000,
+      // Número máximo de elementos por chunk
+      maxElementsPerChunk: 200,
+      // Feedback visual para o usuário
+      visualFeedback: true,
+      // Tamanho de buffer para elementos HTML (em KB)
+      bufferSize: 512,
+      // Log detalhado
       debug: false,
-      
-      // Estratégia de divisão ('dom', 'node', 'section', 'custom')
-      chunkStrategy: 'section',
-      
-      // Tamanho do buffer para streaming (em KB)
-      bufferSize: 100,
-      
-      // Habilitar análise de prioridade para carregamento progressivo
-      priorityAnalysis: true,
-      
-      // Habilitar otimização agressiva para templates extremamente grandes (>5MB)
-      aggressiveOptimization: true,
-      
-      // Habilitar processamento paralelo quando possível
-      parallelProcessing: true,
-      
-      // Função customizada para validar a divisão de chunks
-      validateChunk: null,
-      
+      // Monitoramento de memória
+      memoryMonitoring: true,
+      // Limite de memória antes de forçar GC (MB)
+      memoryLimit: 500,
+      // Priorização inteligente
+      prioritization: true,
+      // CSS de estilo para skeleton loading
+      skeletonCSS: true,
       ...options
     };
-    
-    // Inicializar renderizador avançado para processar chunks
-    this.renderer = new EnhancedProgressiveRenderer({
-      memoryOptimization: true,
-      memoryOptimizationThreshold: this.options.chunkSize / 2,
-      memoryLimit: this.options.memoryLimit / 2,
-      renderMode: 'incremental',
-      parallelRendering: this.options.parallelProcessing,
-      maxParallelWorkers: this.options.maxWorkers,
-      debug: this.options.debug
-    });
-    
-    // Inicializar otimizador de memória para divisão e gestão de chunks
+
+    // Inicializar otimizador de memória
     this.memoryOptimizer = new MemoryOptimizer({
       chunkSize: this.options.chunkSize,
       memoryThreshold: this.options.memoryLimit,
       debug: this.options.debug
     });
-    
+
+    // Sistema de eventos
+    this.events = new EventEmitter();
+
+    // Métricas
+    this.metrics = {
+      totalChunks: 0,
+      renderedChunks: 0,
+      totalElements: 0,
+      elementsPerChunk: [],
+      chunkSizes: [],
+      renderTimes: [],
+      memoryUsage: [],
+      streamingTime: 0,
+      errors: []
+    };
+
+    // Estado interno
+    this._streamingInProgress = false;
+    this._abortController = null;
+    this._buffer = '';
+    this._bufferSize = 0;
+
     // Sistema de logging
     this.logger = {
       debug: (...args) => this.options.debug && console.log('[StreamingRenderer:DEBUG]', ...args),
       info: (...args) => console.log('[StreamingRenderer:INFO]', ...args),
       warn: (...args) => console.warn('[StreamingRenderer:WARN]', ...args),
-      error: (...args) => console.error('[StreamingRenderer:ERROR]', ...args),
-      metric: (...args) => console.log('[StreamingRenderer:METRIC]', ...args)
+      error: (...args) => console.error('[StreamingRenderer:ERROR]', ...args)
     };
-    
-    // Estatísticas de renderização
-    this.stats = {
-      totalChunks: 0,
-      processedChunks: 0,
-      renderTime: 0,
-      memoryPeak: 0,
-      memoryAvg: 0,
-      templateSize: 0,
-      compressionRatio: 0,
-      chunkSizes: []
-    };
-    
-    // Buffer de streaming
-    this.buffer = {
-      chunks: [],
-      size: 0,
-      flushed: 0
-    };
-    
-    // Registrar helpers Handlebars customizados
-    this._registerHandlebarsHelpers();
-    
-    // Iniciar monitoramento de memória
-    this._startMemoryMonitoring();
-    
+
     this.logger.info('StreamingRenderer inicializado com sucesso');
   }
 
   /**
-   * Registra helpers Handlebars customizados
-   * @private
-   */
-  _registerHandlebarsHelpers() {
-    // Helper para identificar chunk boundaries
-    handlebars.registerHelper('chunk-boundary', (options) => {
-      return new handlebars.SafeString(`<!-- chunk-boundary ${Date.now()} -->`);
-    });
-    
-    // Helper para marcar chunking automático
-    handlebars.registerHelper('auto-chunk', (options) => {
-      const content = options.fn(this);
-      return new handlebars.SafeString(`<!-- chunk-start -->${content}<!-- chunk-end -->`);
-    });
-    
-    // Helper para prioridade dentro de chunks
-    handlebars.registerHelper('chunk-priority', (level, options) => {
-      const content = options.fn(this);
-      return new handlebars.SafeString(`<!-- priority:${level} -->${content}<!-- /priority:${level} -->`);
-    });
-    
-    this.logger.debug('Helpers Handlebars registrados para chunking');
-  }
-
-  /**
-   * Inicia monitoramento de uso de memória
-   * @private
-   */
-  _startMemoryMonitoring() {
-    if (!this.options.debug) return;
-    
-    this.memoryMonitorInterval = setInterval(() => {
-      const memoryUsage = process.memoryUsage();
-      const heapUsedMB = memoryUsage.heapUsed / 1024 / 1024;
-      
-      // Atualizar estatísticas
-      this.stats.memoryPeak = Math.max(this.stats.memoryPeak, heapUsedMB);
-      
-      // Calcular média de uso de memória
-      if (!this.stats.memoryReadings) {
-        this.stats.memoryReadings = [];
-      }
-      
-      this.stats.memoryReadings.push(heapUsedMB);
-      this.stats.memoryAvg = this.stats.memoryReadings.reduce((a, b) => a + b, 0) / this.stats.memoryReadings.length;
-      
-      // Verificar se é necessário otimização agressiva
-      if (heapUsedMB > this.options.memoryLimit * 0.8) {
-        this.logger.warn(`Uso de memória alto: ${heapUsedMB.toFixed(2)}MB - Ativando otimizações agressivas`);
-        this._triggerAggressiveMemoryOptimization();
-      }
-      
-      this.logger.debug(`Uso de memória: ${heapUsedMB.toFixed(2)}MB`);
-    }, this.options.memoryCheckInterval);
-  }
-
-  /**
-   * Para o monitoramento de memória
-   * @private
-   */
-  _stopMemoryMonitoring() {
-    if (this.memoryMonitorInterval) {
-      clearInterval(this.memoryMonitorInterval);
-    }
-  }
-
-  /**
-   * Ativa otimizações agressivas de memória
-   * @private
-   */
-  _triggerAggressiveMemoryOptimization() {
-    // Reduzir tamanho dos chunks
-    this.options.chunkSize = Math.max(50, this.options.chunkSize / 2);
-    
-    // Reduzir tamanho do buffer
-    this.options.bufferSize = Math.max(20, this.options.bufferSize / 2);
-    
-    // Forçar liberação de memória
-    if (typeof global.gc === 'function') {
-      this.logger.debug('Executando garbage collection forçado');
-      global.gc();
-    }
-    
-    // Limpar cachés
-    this._clearCaches();
-    
-    // Emitir evento de otimização de memória
-    this.emit('memory-optimization', {
-      newChunkSize: this.options.chunkSize,
-      newBufferSize: this.options.bufferSize,
-      currentMemoryUsage: process.memoryUsage().heapUsed / 1024 / 1024
-    });
-  }
-
-  /**
-   * Limpa cachés para liberar memória
-   * @private
-   */
-  _clearCaches() {
-    // Limpar cache de templates do Handlebars
-    handlebars.templates = {};
-    
-    // Limpar buffer se ficar muito grande
-    if (this.buffer.size > this.options.bufferSize * 2) {
-      this.logger.debug(`Limpando buffer (${this.buffer.size}KB)`);
-      this._flushBuffer(true);
-    }
-  }
-
-  /**
-   * Renderiza o template usando streaming para otimizar memória e performance
-   * @param {string} templateContent - Conteúdo do template a ser renderizado
+   * Renderiza um template HTML usando streaming progressivo
+   * @param {string} template - Template HTML a renderizar
    * @param {Object} data - Dados para renderização
-   * @param {Object} options - Opções específicas para esta renderização
-   * @returns {Promise<string>} HTML renderizado
+   * @param {Function} chunkCallback - Callback para cada chunk renderizado
+   * @returns {Promise<void>} Promise que resolve quando completo
    */
-  async render(templateContent, data = {}, options = {}) {
+  async renderStreaming(template, data = {}, chunkCallback) {
+    if (!chunkCallback || typeof chunkCallback !== 'function') {
+      throw new Error('É necessário fornecer um callback para receber os chunks renderizados');
+    }
+
+    if (this._streamingInProgress) {
+      throw new Error('Uma renderização streaming já está em andamento');
+    }
+
+    this._streamingInProgress = true;
+    this._abortController = new AbortController();
+    const signal = this._abortController.signal;
+
     const startTime = Date.now();
-    const mergedOptions = { ...this.options, ...options };
-    
-    // Resetar estatísticas
-    this.stats = {
-      totalChunks: 0,
-      processedChunks: 0,
-      renderTime: 0,
-      memoryPeak: 0,
-      templateSize: templateContent.length / 1024, // KB
-      compressionRatio: 0,
-      chunkSizes: []
-    };
-    
+    this.metrics.streamingTime = 0;
+    this.metrics.renderedChunks = 0;
+
     try {
-      this.logger.info(`Iniciando renderização streaming para template de ${(templateContent.length / 1024).toFixed(2)}KB`);
-      
-      // Determinar se é um template extremamente grande que precisa de otimizações agressivas
-      const isExtremelyLarge = templateContent.length > 5 * 1024 * 1024; // > 5MB
-      
-      if (isExtremelyLarge && mergedOptions.aggressiveOptimization) {
-        this.logger.info('Template extremamente grande detectado - usando otimizações agressivas');
-        
-        // Ajustar opções para templates enormes
-        mergedOptions.chunkSize = Math.min(mergedOptions.chunkSize, 200);
-        mergedOptions.bufferSize = Math.min(mergedOptions.bufferSize, 50);
-      }
-      
-      // Dividir o template em chunks usando a estratégia apropriada
-      const chunks = await this._chunkifyTemplate(templateContent, mergedOptions);
-      
-      this.stats.totalChunks = chunks.length;
-      
-      // Registrar tamanhos dos chunks para análise
-      this.stats.chunkSizes = chunks.map(chunk => chunk.length / 1024); // KB
-      
-      // Armazenar resultado final
-      let result = '';
-      
-      // Inicializar o HTML base se o modo de streaming for ativado
-      if (mergedOptions.chunkedOutput) {
-        result = this._generateHtmlBase(templateContent);
-      }
-      
-      // Função para processar a saída de cada chunk
-      const processChunkOutput = (html, chunkInfo) => {
-        if (mergedOptions.chunkedOutput) {
-          // Adicionar ao buffer
-          this._addToBuffer(html, chunkInfo);
-          return result;
-        } else {
-          // Concatenar no resultado final
-          result += html;
-          return result;
+      this.logger.info(`Iniciando renderização streaming para template de ${(template.length / 1024).toFixed(2)} KB`);
+
+      // Preparar ambiente de streaming
+      await this._prepareStreaming(template, data);
+
+      // Dividir template em chunks gerenciáveis
+      const chunks = await this._splitTemplateIntoChunks(template, data);
+      this.metrics.totalChunks = chunks.length;
+
+      // Enviar informações iniciais
+      await this._sendInitialChunk(chunkCallback);
+
+      // Processar e enviar cada chunk
+      for (let i = 0; i < chunks.length; i++) {
+        // Verificar se o streaming foi abortado
+        if (signal.aborted) {
+          this.logger.warn('Renderização streaming abortada');
+          break;
         }
-      };
-      
-      // Processar chunks
-      const processingOptions = {
-        isExtremelyLarge,
-        totalChunks: chunks.length,
-        initialContent: templateContent
-      };
-      
-      // Decidir entre processamento sequencial ou paralelo
-      if (mergedOptions.parallelProcessing && chunks.length > 2) {
-        // Processar chunks em paralelo com limitação de concorrência
-        result = await this._processChunksInParallel(
-          chunks, 
-          data, 
-          processChunkOutput, 
-          processingOptions
-        );
-      } else {
-        // Processar chunks sequencialmente
-        result = await this._processChunksSequentially(
-          chunks, 
-          data, 
-          processChunkOutput, 
-          processingOptions
-        );
+
+        // Processar o chunk
+        const chunkStartTime = performance.now();
+        const processedChunk = await this._processChunk(chunks[i], i, chunks.length);
+        const chunkEndTime = performance.now();
+        const chunkRenderTime = chunkEndTime - chunkStartTime;
+
+        // Registrar métricas
+        this.metrics.renderTimes.push(chunkRenderTime);
+        this.metrics.chunkSizes.push(processedChunk.length);
+        this.metrics.renderedChunks++;
+
+        // Adicionar ao buffer
+        await this._addToBuffer(processedChunk);
+
+        // Calcular progresso
+        const progress = {
+          chunk: i + 1,
+          totalChunks: chunks.length,
+          percent: Math.round(((i + 1) / chunks.length) * 100),
+          renderTime: chunkRenderTime,
+          size: processedChunk.length
+        };
+
+        // Enviar callback
+        chunkCallback(this._buffer, {
+          ...progress,
+          isFirstChunk: i === 0,
+          isLastChunk: i === chunks.length - 1,
+          isPartial: i < chunks.length - 1
+        });
+
+        // Emitir evento de progresso
+        this.events.emit('progress', progress);
+
+        // Aguardar um momento antes do próximo chunk
+        await this._chunkDelay();
+
+        // Verificar memória e otimizar se necessário
+        await this._checkMemory();
+
+        // Limpar buffer após alguns chunks
+        if (i > 0 && i % 5 === 0) {
+          this._buffer = '';
+          this._bufferSize = 0;
+        }
       }
-      
-      // Se houver conteúdo no buffer, garantir que seja incorporado ao resultado
-      if (this.buffer.chunks.length > 0) {
-        result = this._flushBuffer(false);
-      }
-      
-      // Se estiver no modo chunked output, finalizar o HTML
-      if (mergedOptions.chunkedOutput) {
-        result = this._finalizeChunkedOutput(result);
-      }
-      
-      // Registrar estatísticas finais
-      this.stats.renderTime = Date.now() - startTime;
-      
-      this.logger.info(`Renderização concluída em ${this.stats.renderTime}ms (${chunks.length} chunks)`);
-      this.logger.metric(`Pico de memória: ${this.stats.memoryPeak.toFixed(2)}MB`);
-      
-      // Emitir evento de conclusão
-      this.emit('render-complete', {
-        templateSize: templateContent.length,
-        chunks: chunks.length,
-        renderTime: this.stats.renderTime,
-        memoryPeak: this.stats.memoryPeak
-      });
-      
-      return result;
+
+      // Enviar chunk final
+      await this._sendFinalChunk(chunkCallback);
+
+      // Calcular tempo total
+      this.metrics.streamingTime = Date.now() - startTime;
+
+      this.logger.info(`Renderização streaming concluída em ${this.metrics.streamingTime}ms`);
+      this.events.emit('complete', { ...this.metrics });
     } catch (error) {
       this.logger.error(`Erro na renderização streaming: ${error.message}`);
-      this.logger.error(error.stack);
-      
-      // Emitir evento de erro
-      this.emit('render-error', {
-        message: error.message,
-        stack: error.stack
-      });
-      
+      this.metrics.errors.push(error.message);
+      this.events.emit('error', { message: error.message, stack: error.stack });
       throw error;
     } finally {
-      // Parar monitoramento de memória
-      this._stopMemoryMonitoring();
-      
-      // Limpar recursos
-      this._clearResources();
+      this._streamingInProgress = false;
+      this._abortController = null;
     }
   }
 
   /**
-   * Renderiza de forma incremental com callback para cada chunk renderizado
-   * @param {string} templateContent - Conteúdo do template
+   * Prepara o ambiente para streaming
+   * @param {string} template - Template HTML
    * @param {Object} data - Dados para renderização
-   * @param {Function} chunkCallback - Callback para cada chunk renderizado (html, chunkInfo) => void
-   * @param {Object} options - Opções adicionais
    * @returns {Promise<void>}
+   * @private
    */
-  async renderIncremental(templateContent, data = {}, chunkCallback, options = {}) {
-    if (!chunkCallback || typeof chunkCallback !== 'function') {
-      throw new Error('É necessário fornecer um callback para processar chunks incrementais');
-    }
-    
-    const startTime = Date.now();
-    const mergedOptions = { ...this.options, ...options };
-    
+  async _prepareStreaming(template, data) {
+    this.logger.debug('Preparando ambiente para streaming');
+
+    // Resetar buffer
+    this._buffer = '';
+    this._bufferSize = 0;
+
+    // Inicializar métricas
+    this.metrics.totalElements = 0;
+    this.metrics.elementsPerChunk = [];
+    this.metrics.chunkSizes = [];
+    this.metrics.renderTimes = [];
+    this.metrics.memoryUsage = [];
+    this.metrics.errors = [];
+
+    // Analisar o template para obter informações
     try {
-      this.logger.info(`Iniciando renderização incremental para template de ${(templateContent.length / 1024).toFixed(2)}KB`);
-      
-      // Dividir o template em chunks
-      const chunks = await this._chunkifyTemplate(templateContent, mergedOptions);
-      
-      this.stats.totalChunks = chunks.length;
-      this.logger.info(`Template dividido em ${chunks.length} chunks`);
-      
-      // Inicializar contexto de renderização
-      const renderContext = {
-        templateSize: templateContent.length,
-        totalChunks: chunks.length,
-        processedChunks: 0,
-        startTime
-      };
-      
-      // Processar cada chunk sequencialmente
-      for (let i = 0; i < chunks.length; i++) {
-        const chunkStartTime = Date.now();
-        const chunk = chunks[i];
-        
-        this.logger.debug(`Processando chunk ${i + 1}/${chunks.length} (${(chunk.length / 1024).toFixed(2)}KB)`);
-        
-        try {
-          // Renderizar o chunk
-          const chunkHTML = await this.renderer.render(chunk, {
-            ...data,
-            _chunkContext: {
-              chunkIndex: i,
-              totalChunks: chunks.length,
-              isFirstChunk: i === 0,
-              isLastChunk: i === chunks.length - 1
-            }
-          });
-          
-          // Calcular tempo de renderização
-          const chunkRenderTime = Date.now() - chunkStartTime;
-          
-          // Informações sobre o chunk para o callback
-          const chunkInfo = {
-            index: i,
-            total: chunks.length,
-            isFirst: i === 0,
-            isLast: i === chunks.length - 1,
-            progress: Math.round(((i + 1) / chunks.length) * 100),
-            renderTime: chunkRenderTime,
-            size: chunk.length
-          };
-          
-          // Chamar o callback com o HTML renderizado e informações do chunk
-          chunkCallback(chunkHTML, chunkInfo);
-          
-          // Atualizar estatísticas
-          this.stats.processedChunks++;
-          renderContext.processedChunks++;
-          
-          // Emitir evento de progresso
-          this.emit('render-progress', {
-            chunk: i + 1,
-            total: chunks.length,
-            percent: Math.round(((i + 1) / chunks.length) * 100),
-            renderTime: chunkRenderTime
-          });
-          
-          // Forçar garbage collection após cada chunk se disponível
-          if (typeof global.gc === 'function' && (i % 5 === 0 || chunk.length > 1000000)) {
-            global.gc();
-          }
-        } catch (error) {
-          this.logger.error(`Erro ao renderizar chunk ${i + 1}: ${error.message}`);
-          
-          // Emitir evento de erro de chunk
-          this.emit('chunk-error', {
-            chunk: i + 1,
-            total: chunks.length,
-            error: error.message
-          });
-          
-          // Continuar com próximo chunk, fornecendo um placeholder para o callback
-          chunkCallback(`<!-- Erro na renderização do chunk ${i + 1} -->`, {
-            index: i,
-            total: chunks.length,
-            isFirst: i === 0,
-            isLast: i === chunks.length - 1,
-            progress: Math.round(((i + 1) / chunks.length) * 100),
-            error: true,
-            errorMessage: error.message
-          });
-        }
-      }
-      
-      // Finalizar renderização
-      const totalTime = Date.now() - startTime;
-      this.stats.renderTime = totalTime;
-      
-      this.logger.info(`Renderização incremental concluída em ${totalTime}ms (${chunks.length} chunks)`);
-      
-      // Emitir evento de conclusão
-      this.emit('render-complete', {
-        templateSize: templateContent.length,
-        chunks: chunks.length,
-        renderTime: totalTime,
-        memoryPeak: this.stats.memoryPeak
-      });
+      const dom = new JSDOM(template);
+      const document = dom.window.document;
+
+      // Contar elementos para métricas
+      this.metrics.totalElements = document.querySelectorAll('*').length;
+
+      this.logger.debug(`Template contém ${this.metrics.totalElements} elementos`);
     } catch (error) {
-      this.logger.error(`Erro na renderização incremental: ${error.message}`);
-      
-      // Emitir evento de erro
-      this.emit('render-error', {
-        message: error.message,
-        stack: error.stack
-      });
-      
-      throw error;
-    } finally {
-      // Parar monitoramento de memória
-      this._stopMemoryMonitoring();
-      
-      // Limpar recursos
-      this._clearResources();
+      this.logger.warn(`Erro ao analisar template para métricas: ${error.message}`);
     }
   }
 
   /**
-   * Divide um template em chunks usando a estratégia selecionada
-   * @param {string} templateContent - Conteúdo do template
-   * @param {Object} options - Opções de chunking
-   * @returns {Promise<Array<string>>} Array de chunks
+   * Divide o template em chunks gerenciáveis
+   * @param {string} template - Template HTML
+   * @param {Object} data - Dados para renderização
+   * @returns {Promise<Array<Object>>} Array de chunks
    * @private
    */
-  async _chunkifyTemplate(templateContent, options) {
-    // Se for um template pequeno, retornar como um único chunk
-    if (templateContent.length < options.chunkSize * 1024) {
-      return [templateContent];
-    }
-    
-    this.logger.debug(`Dividindo template usando estratégia '${options.chunkStrategy}'`);
-    
-    switch (options.chunkStrategy) {
-      case 'dom':
-        return this._chunkifyByDOM(templateContent, options);
-      case 'section':
-        return this._chunkifyBySections(templateContent, options);
-      case 'node':
-        return this._chunkifyByNodes(templateContent, options);
-      case 'custom':
-        if (typeof options.customChunker === 'function') {
-          return options.customChunker(templateContent, options);
-        }
-        this.logger.warn('Estratégia custom selecionada, mas função customChunker não fornecida');
-        // Fallback para chunking por tamanho
-      default:
-        return this._chunkifyBySize(templateContent, options);
-    }
-  }
+  async _splitTemplateIntoChunks(template, data) {
+    this.logger.debug('Dividindo template em chunks');
 
-  /**
-   * Divide o template em chunks por análise DOM
-   * @param {string} templateContent - Conteúdo do template
-   * @param {Object} options - Opções de chunking
-   * @returns {Promise<Array<string>>} Array de chunks
-   * @private
-   */
-  async _chunkifyByDOM(templateContent, options) {
-    try {
-      return await this.memoryOptimizer.optimizedDOMProcessing(async () => {
-        const { JSDOM } = require('jsdom');
-        const dom = new JSDOM(templateContent);
-        const { document } = dom.window;
-        
-        // Identificar pontos naturais de quebra (seções, divs, headers, etc)
-        const breakpoints = [
-          ...document.querySelectorAll('body > *, main > *, .container > *')
-        ].filter(el => {
-          // Filtrar elementos que são pontos naturais de quebra
-          const tagName = el.tagName.toLowerCase();
-          return ['div', 'section', 'article', 'header', 'footer', 'nav', 'aside', 'main'].includes(tagName);
-        });
-        
-        if (breakpoints.length < 2) {
-          this.logger.debug('Poucos breakpoints naturais encontrados, usando divisão por tamanho');
-          return this._chunkifyBySize(templateContent, options);
-        }
-        
-        // Coletar chunks
-        const chunks = [];
-        let currentChunk = document.createDocumentFragment();
-        let currentSize = 0;
-        const targetSize = options.chunkSize * 1024;
-        const fullHTML = document.documentElement.outerHTML;
-        
-        // Capturar o DOCTYPE e o HTML inicial
-        const doctype = templateContent.includes('<!DOCTYPE') 
-          ? templateContent.substring(0, templateContent.indexOf('>') + 1) 
-          : '';
-        
-        const headContent = document.head ? document.head.outerHTML : '';
-        const bodyStart = '<body' + (document.body.getAttribute('class') ? ` class="${document.body.getAttribute('class')}"` : '') + '>';
-        const bodyEnd = '</body>';
-        
-        // Adicionar preâmbulo ao primeiro chunk
-        let preambulo = `${doctype}<html><head>${headContent}</head>${bodyStart}`;
-        let isFirstChunk = true;
-        
-        // Processar cada ponto de quebra
-        for (const el of breakpoints) {
-          const elSize = el.outerHTML.length;
-          
-          // Se adicionar este elemento exceder o tamanho alvo, finalizar o chunk atual
-          if (currentSize + elSize > targetSize && currentSize > 0) {
-            // Finalizar chunk atual
-            const chunkHTML = isFirstChunk 
-              ? preambulo + Array.from(currentChunk.childNodes).map(n => n.outerHTML || '').join('') 
-              : Array.from(currentChunk.childNodes).map(n => n.outerHTML || '').join('');
-            
-            chunks.push(chunkHTML);
-            
-            // Iniciar novo chunk
-            currentChunk = document.createDocumentFragment();
-            currentSize = 0;
-            isFirstChunk = false;
-          }
-          
-          // Adicionar elemento ao chunk atual
-          currentChunk.appendChild(el.cloneNode(true));
-          currentSize += elSize;
-        }
-        
-        // Finalizar último chunk
-        if (currentSize > 0) {
-          const chunkHTML = isFirstChunk 
-            ? preambulo + Array.from(currentChunk.childNodes).map(n => n.outerHTML || '').join('') + bodyEnd + '</html>'
-            : Array.from(currentChunk.childNodes).map(n => n.outerHTML || '').join('') + bodyEnd + '</html>';
-          
-          chunks.push(chunkHTML);
-        }
-        
-        // Verificar se temos pelo menos um chunk
-        if (chunks.length === 0) {
-          this.logger.warn('Falha ao dividir por DOM, usando divisão por tamanho');
-          return this._chunkifyBySize(templateContent, options);
-        }
-        
-        // Ajustar chunks para garantir que todos (exceto o primeiro) tenham o fechamento apropriado
-        for (let i = 1; i < chunks.length - 1; i++) {
-          chunks[i] = preambulo + chunks[i];
-        }
-        
-        this.logger.debug(`Template dividido em ${chunks.length} chunks usando DOM`);
-        
-        return chunks;
-      });
-    } catch (error) {
-      this.logger.error(`Erro ao dividir por DOM: ${error.message}`);
-      this.logger.debug('Falling back para divisão por tamanho');
-      return this._chunkifyBySize(templateContent, options);
-    }
-  }
-
-  /**
-   * Divide o template em chunks por seções
-   * @param {string} templateContent - Conteúdo do template
-   * @param {Object} options - Opções de chunking
-   * @returns {Promise<Array<string>>} Array de chunks
-   * @private
-   */
-  async _chunkifyBySections(templateContent, options) {
-    try {
-      // Expressão regular para identificar seções (elementos de nível superior)
-      // Procura por tags HTML principais como section, article, div, header, footer, etc.
-      const sectionRegex = /<(section|article|div|header|footer|nav|aside|main)([^>]*)>/gi;
-      
-      // Identificar início do body
-      const bodyStartIndex = templateContent.indexOf('<body');
-      if (bodyStartIndex === -1) {
-        throw new Error('Tag body não encontrada no template');
-      }
-      
-      const bodyEndIndex = templateContent.lastIndexOf('</body>');
-      if (bodyEndIndex === -1) {
-        throw new Error('Tag de fechamento body não encontrada no template');
-      }
-      
-      // Extrair cabeçalho (tudo antes de body)
-      const header = templateContent.substring(0, bodyStartIndex + templateContent.substring(bodyStartIndex).indexOf('>') + 1);
-      
-      // Extrair corpo (conteúdo dentro de body)
-      const bodyContent = templateContent.substring(
-        bodyStartIndex + templateContent.substring(bodyStartIndex).indexOf('>') + 1,
-        bodyEndIndex
-      );
-      
-      // Extrair rodapé (tudo depois de body)
-      const footer = templateContent.substring(bodyEndIndex);
-      
-      // Encontrar todas as correspondências da expressão regular
-      const matches = [...bodyContent.matchAll(sectionRegex)];
-      
-      if (matches.length === 0) {
-        this.logger.debug('Nenhuma seção encontrada, usando divisão por tamanho');
-        return this._chunkifyBySize(templateContent, options);
-      }
-      
-      // Preparar índices de seções
-      const sectionIndices = matches.map(match => match.index);
-      
-      // Adicionar o início e fim como pontos de corte
-      sectionIndices.unshift(0);
-      sectionIndices.push(bodyContent.length);
-      
-      // Criar chunks baseados no tamanho alvo
-      const chunks = [];
-      let currentChunk = header;
-      let currentSize = 0;
-      const targetSize = options.chunkSize * 1024;
-      
-      for (let i = 1; i < sectionIndices.length; i++) {
-        const sectionStart = sectionIndices[i - 1];
-        const sectionEnd = sectionIndices[i];
-        const section = bodyContent.substring(sectionStart, sectionEnd);
-        const sectionSize = section.length;
-        
-        // Se adicionar esta seção exceder o tamanho alvo, finalizar o chunk atual
-        if (currentSize + sectionSize > targetSize && currentSize > 0) {
-          // Finalizar chunk atual
-          chunks.push(currentChunk + '</body></html>');
-          
-          // Iniciar novo chunk
-          currentChunk = header;
-          currentSize = 0;
-        }
-        
-        // Adicionar seção ao chunk atual
-        currentChunk += section;
-        currentSize += sectionSize;
-      }
-      
-      // Finalizar último chunk
-      if (currentSize > 0) {
-        chunks.push(currentChunk + footer);
-      }
-      
-      this.logger.debug(`Template dividido em ${chunks.length} chunks usando seções`);
-      
-      return chunks;
-    } catch (error) {
-      this.logger.error(`Erro ao dividir por seções: ${error.message}`);
-      return this._chunkifyBySize(templateContent, options);
-    }
-  }
-
-  /**
-   * Divide o template em chunks por tamanho fixo
-   * @param {string} templateContent - Conteúdo do template
-   * @param {Object} options - Opções de chunking
-   * @returns {Promise<Array<string>>} Array de chunks
-   * @private
-   */
-  async _chunkifyBySize(templateContent, options) {
     try {
       // Usar o otimizador de memória para dividir o template
-      const chunkSizeBytes = options.chunkSize * 1024;
-      
-      // Encontrar o início e fim do body
-      const bodyStartIndex = templateContent.indexOf('<body');
-      const bodyEndIndex = templateContent.lastIndexOf('</body>');
-      
-      if (bodyStartIndex === -1 || bodyEndIndex === -1) {
-        // Template não tem estrutura HTML válida, dividir diretamente
-        return this.memoryOptimizer.chunkifyString(templateContent, chunkSizeBytes);
-      }
-      
-      // Extrair cabeçalho (tudo antes de body)
-      const bodyTagEndIndex = templateContent.indexOf('>', bodyStartIndex) + 1;
-      const header = templateContent.substring(0, bodyTagEndIndex);
-      
-      // Extrair conteúdo do body
-      const bodyContent = templateContent.substring(bodyTagEndIndex, bodyEndIndex);
-      
-      // Extrair rodapé (body tag final e todo o resto)
-      const footer = templateContent.substring(bodyEndIndex);
-      
-      // Dividir o conteúdo do body em chunks
-      const bodyChunks = this.memoryOptimizer.chunkifyString(bodyContent, chunkSizeBytes);
-      
-      // Adicionar cabeçalho e rodapé aos chunks
-      const finalChunks = bodyChunks.map((chunk, index) => {
-        if (index === 0 && index === bodyChunks.length - 1) {
-          // Se for o único chunk, incluir cabeçalho e rodapé
-          return header + chunk + footer;
-        } else if (index === 0) {
-          // Se for o primeiro chunk, incluir cabeçalho
-          return header + chunk + '</body></html>';
-        } else if (index === bodyChunks.length - 1) {
-          // Se for o último chunk, incluir rodapé
-          return header + chunk + footer;
-        } else {
-          // Chunks intermediários
-          return header + chunk + '</body></html>';
+      const rawChunks = this.memoryOptimizer.chunkifyTemplate(template);
+
+      // Adicionar metadados a cada chunk
+      const chunks = rawChunks.map((content, index) => {
+        // Analisar cada chunk para obter estatísticas
+        let elementCount = 0;
+        try {
+          const dom = new JSDOM(content);
+          elementCount = dom.window.document.querySelectorAll('*').length;
+        } catch (e) {
+          // Ignorar erros na análise
         }
+
+        return {
+          id: `chunk-${index}`,
+          content,
+          size: content.length,
+          elements: elementCount,
+          index
+        };
       });
-      
-      this.logger.debug(`Template dividido em ${finalChunks.length} chunks por tamanho`);
-      
-      return finalChunks;
-    } catch (error) {
-      this.logger.error(`Erro ao dividir por tamanho: ${error.message}`);
-      
-      // Último recurso: dividir em um número fixo de partes
-      const numChunks = Math.ceil(templateContent.length / (options.chunkSize * 1024));
-      const chunkSize = Math.ceil(templateContent.length / numChunks);
-      
-      const chunks = [];
-      for (let i = 0; i < numChunks; i++) {
-        const start = i * chunkSize;
-        const end = Math.min(start + chunkSize, templateContent.length);
-        chunks.push(templateContent.substring(start, end));
-      }
-      
-      this.logger.debug(`Template dividido em ${chunks.length} chunks (método de fallback)`);
-      
+
+      this.logger.info(`Template dividido em ${chunks.length} chunks`);
       return chunks;
+    } catch (error) {
+      this.logger.error(`Erro ao dividir template: ${error.message}`);
+      throw error;
     }
   }
 
   /**
-   * Divide o template em chunks por análise de nodos
-   * @param {string} templateContent - Conteúdo do template
-   * @param {Object} options - Opções de chunking
-   * @returns {Promise<Array<string>>} Array de chunks
+   * Envia o chunk inicial com estrutura base e feedback visual
+   * @param {Function} chunkCallback - Callback para enviar o chunk
+   * @returns {Promise<void>}
    * @private
    */
-  async _chunkifyByNodes(templateContent, options) {
-    // Este método é mais complexo e requer análise profunda do DOM
-    // Para implementação inicial, vamos delegar ao DOM chunking
-    return this._chunkifyByDOM(templateContent, options);
+  async _sendInitialChunk(chunkCallback) {
+    this.logger.debug('Enviando chunk inicial');
+
+    // Criar estrutura HTML inicial com feedback visual
+    const initialHTML = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="renderer" content="php-universal-mcp-streaming">
+  <title>Renderização em Streaming</title>
+  ${this._generateStreamingCSS()}
+</head>
+<body>
+  <div id="streaming-content"></div>
+  
+  ${this.options.visualFeedback ? `
+  <div class="streaming-progress">
+    <div class="streaming-progress-bar" id="streamingProgressBar"></div>
+    <div id="streamingProgressText">Carregando (0/${this.metrics.totalChunks || '?'})...</div>
+  </div>
+  ` : ''}
+  
+  ${this._generateStreamingScript()}
+</body>
+</html>`;
+
+    // Definir buffer inicial
+    this._buffer = initialHTML;
+    this._bufferSize = initialHTML.length;
+
+    // Enviar chunk inicial
+    chunkCallback(initialHTML, {
+      chunk: 0,
+      totalChunks: this.metrics.totalChunks,
+      percent: 0,
+      isFirstChunk: true,
+      isLastChunk: false,
+      isPartial: true
+    });
+
+    // Emitir evento
+    this.events.emit('start', { 
+      totalChunks: this.metrics.totalChunks,
+      totalElements: this.metrics.totalElements
+    });
   }
 
   /**
-   * Processa chunks em paralelo com limitação de concorrência
-   * @param {Array<string>} chunks - Array de chunks a processar
-   * @param {Object} data - Dados para renderização
-   * @param {Function} outputProcessor - Função para processar saída
-   * @param {Object} options - Opções de processamento
-   * @returns {Promise<string>} Resultado final do processamento
+   * Processa um chunk individual
+   * @param {Object} chunk - Chunk a processar
+   * @param {number} index - Índice do chunk
+   * @param {number} total - Total de chunks
+   * @returns {Promise<string>} HTML processado
    * @private
    */
-  async _processChunksInParallel(chunks, data, outputProcessor, options) {
-    this.logger.debug(`Processando ${chunks.length} chunks em paralelo (máx: ${this.options.maxWorkers} workers)`);
-    
-    // Função para processar um único chunk
-    const processChunk = async (chunk, index) => {
-      try {
-        const chunkStartTime = Date.now();
-        
-        // Renderizar o chunk
-        const renderedChunk = await this.renderer.render(chunk, {
-          ...data,
-          _chunkContext: {
-            chunkIndex: index,
-            totalChunks: chunks.length,
-            isFirstChunk: index === 0,
-            isLastChunk: index === chunks.length - 1
-          }
-        });
-        
-        const chunkRenderTime = Date.now() - chunkStartTime;
-        
-        // Atualizar estatísticas
-        this.stats.processedChunks++;
-        
-        // Emitir evento de progresso
-        this.emit('render-progress', {
-          chunk: index + 1,
-          total: chunks.length,
-          percent: Math.round(((index + 1) / chunks.length) * 100),
-          renderTime: chunkRenderTime
-        });
-        
-        // Processar saída do chunk
-        return outputProcessor(renderedChunk, {
-          index,
-          total: chunks.length,
-          isFirst: index === 0,
-          isLast: index === chunks.length - 1,
-          renderTime: chunkRenderTime
-        });
-      } catch (error) {
-        this.logger.error(`Erro ao processar chunk ${index + 1}: ${error.message}`);
-        
-        // Emitir evento de erro
-        this.emit('chunk-error', {
-          chunk: index + 1,
-          total: chunks.length,
-          error: error.message
-        });
-        
-        // Retornar um placeholder em caso de erro
-        return outputProcessor(`<!-- Erro na renderização do chunk ${index + 1} -->`, {
-          index,
-          total: chunks.length,
-          isFirst: index === 0,
-          isLast: index === chunks.length - 1,
-          error: true
-        });
-      }
-    };
-    
-    // Processar chunks com limitação de concorrência
-    const CONCURRENT_CHUNKS = Math.min(this.options.maxWorkers, chunks.length);
-    let activePromises = 0;
-    let nextChunkIndex = 0;
-    let result = '';
-    
-    const processNext = async () => {
-      if (nextChunkIndex >= chunks.length) return;
-      
-      const currentIndex = nextChunkIndex++;
-      activePromises++;
-      
-      try {
-        result = await processChunk(chunks[currentIndex], currentIndex);
-      } finally {
-        activePromises--;
-        // Processar próximo chunk
-        if (nextChunkIndex < chunks.length) {
-          await processNext();
-        }
-      }
-    };
-    
-    // Iniciar processamento paralelo inicial
-    const initialPromises = [];
-    for (let i = 0; i < CONCURRENT_CHUNKS; i++) {
-      initialPromises.push(processNext());
+  async _processChunk(chunk, index, total) {
+    this.logger.debug(`Processando chunk ${index + 1}/${total} (${(chunk.size / 1024).toFixed(2)} KB)`);
+
+    try {
+      // Adicionar wrapper para o chunk
+      const chunkContent = chunk.content;
+      const priority = this._calculateChunkPriority(chunk, index, total);
+
+      // Wrapper com metadados
+      const processedChunk = `
+<div class="streaming-chunk" data-chunk-id="${chunk.id}" data-chunk-index="${index}" data-priority="${priority}">
+  ${chunkContent}
+</div>
+<script>
+  // Notificar que o chunk foi carregado
+  if (window.streamingRenderer) {
+    window.streamingRenderer.chunkLoaded(${index}, ${total}, ${priority});
+  }
+</script>
+`;
+
+      // Registrar número de elementos
+      this.metrics.elementsPerChunk.push(chunk.elements);
+
+      return processedChunk;
+    } catch (error) {
+      this.logger.error(`Erro ao processar chunk ${index + 1}: ${error.message}`);
+      this.metrics.errors.push(`Chunk ${index + 1}: ${error.message}`);
+
+      // Retornar mensagem de erro visível
+      return `
+<div class="streaming-chunk streaming-error" data-chunk-id="${chunk.id}" data-chunk-index="${index}">
+  <div class="error-message">
+    <h3>Erro ao renderizar esta seção</h3>
+    <p>${error.message}</p>
+  </div>
+</div>
+`;
     }
-    
-    // Aguardar conclusão de todos os chunks
-    await Promise.all(initialPromises);
-    
-    // Retornar resultado final
-    return result;
   }
 
   /**
-   * Processa chunks sequencialmente
-   * @param {Array<string>} chunks - Array de chunks a processar
-   * @param {Object} data - Dados para renderização
-   * @param {Function} outputProcessor - Função para processar saída
-   * @param {Object} options - Opções de processamento
-   * @returns {Promise<string>} Resultado final do processamento
+   * Calcula a prioridade de um chunk para renderização
+   * @param {Object} chunk - Chunk a avaliar
+   * @param {number} index - Índice do chunk
+   * @param {number} total - Total de chunks
+   * @returns {number} Prioridade (1-5, menor = mais alta)
    * @private
    */
-  async _processChunksSequentially(chunks, data, outputProcessor, options) {
-    this.logger.debug(`Processando ${chunks.length} chunks sequencialmente`);
-    
-    let result = '';
-    
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-      const chunkStartTime = Date.now();
+  _calculateChunkPriority(chunk, index, total) {
+    // Se a priorização estiver desativada, usar ordem linear
+    if (!this.options.prioritization) {
+      return index < total / 3 ? 1 : index < total * 2 / 3 ? 3 : 5;
+    }
+
+    // Primeiro chunk sempre tem prioridade máxima
+    if (index === 0) return 1;
+
+    // Último chunk tem prioridade baixa
+    if (index === total - 1) return 5;
+
+    // Priorizar com base na posição e número de elementos
+    // Chunks no início do documento têm maior prioridade
+    const positionFactor = index / total;
+    let priority;
+
+    if (positionFactor < 0.2) {
+      // Primeiros 20% dos chunks - prioridade alta
+      priority = 1;
+    } else if (positionFactor < 0.5) {
+      // Próximos 30% - prioridade média-alta
+      priority = 2;
+    } else if (positionFactor < 0.8) {
+      // Próximos 30% - prioridade média
+      priority = 3;
+    } else {
+      // Últimos 20% - prioridade baixa
+      priority = 4;
+    }
+
+    // Ajustar com base no número de elementos (chunks mais densos = maior prioridade)
+    if (chunk.elements > this.options.maxElementsPerChunk / 2) {
+      priority = Math.max(1, priority - 1);
+    }
+
+    return priority;
+  }
+
+  /**
+   * Adiciona HTML ao buffer de streaming
+   * @param {string} html - HTML a adicionar
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _addToBuffer(html) {
+    // Adicionar ao buffer
+    this._buffer += html;
+    this._bufferSize += html.length;
+
+    // Verificar se excedeu o tamanho máximo
+    if (this._bufferSize > this.options.bufferSize * 1024) {
+      this.logger.debug(`Buffer excedeu tamanho máximo (${this.options.bufferSize} KB), limpando`);
+      this._buffer = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="renderer" content="php-universal-mcp-streaming">
+  <title>Renderização em Streaming (Continuação)</title>
+  ${this._generateStreamingCSS()}
+</head>
+<body>
+  <div id="streaming-content">
+    <!-- Continuação do conteúdo anterior -->
+    ${html}
+  </div>
+  
+  ${this.options.visualFeedback ? `
+  <div class="streaming-progress">
+    <div class="streaming-progress-bar" id="streamingProgressBar"></div>
+    <div id="streamingProgressText">Carregando (${this.metrics.renderedChunks}/${this.metrics.totalChunks})...</div>
+  </div>
+  ` : ''}
+  
+  ${this._generateStreamingScript()}
+</body>
+</html>`;
+      this._bufferSize = this._buffer.length;
+    }
+  }
+
+  /**
+   * Envia o chunk final com scripts de finalização
+   * @param {Function} chunkCallback - Callback para enviar o chunk
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _sendFinalChunk(chunkCallback) {
+    this.logger.debug('Enviando chunk final');
+
+    // Script de finalização
+    const finalScript = `
+<script>
+  // Streaming concluído
+  if (window.streamingRenderer) {
+    window.streamingRenderer.complete();
+  }
+  
+  // Registrar métricas de renderização
+  console.log('Streaming concluído em ${this.metrics.streamingTime}ms');
+  console.log('Total de chunks: ${this.metrics.renderedChunks}/${this.metrics.totalChunks}');
+</script>
+`;
+
+    // Adicionar ao buffer
+    this._buffer += finalScript;
+    this._bufferSize += finalScript.length;
+
+    // Enviar chunk final
+    chunkCallback(this._buffer, {
+      chunk: this.metrics.totalChunks,
+      totalChunks: this.metrics.totalChunks,
+      percent: 100,
+      isFirstChunk: false,
+      isLastChunk: true,
+      isPartial: false
+    });
+  }
+
+  /**
+   * Aguarda um intervalo entre chunks
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _chunkDelay() {
+    return new Promise(resolve => {
+      setTimeout(resolve, this.options.chunkInterval);
+    });
+  }
+
+  /**
+   * Verifica uso de memória e otimiza se necessário
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _checkMemory() {
+    if (!this.options.memoryMonitoring) return;
+
+    try {
+      const memoryUsage = process.memoryUsage();
+      const heapUsedMB = memoryUsage.heapUsed / (1024 * 1024);
       
-      try {
-        // Renderizar o chunk
-        const renderedChunk = await this.renderer.render(chunk, {
-          ...data,
-          _chunkContext: {
-            chunkIndex: i,
-            totalChunks: chunks.length,
-            isFirstChunk: i === 0,
-            isLastChunk: i === chunks.length - 1
-          }
-        });
+      // Registrar uso de memória
+      this.metrics.memoryUsage.push(heapUsedMB);
+
+      // Verificar se ultrapassou o limite
+      if (heapUsedMB > this.options.memoryLimit) {
+        this.logger.warn(`Uso de memória alto: ${heapUsedMB.toFixed(2)}MB, forçando otimização`);
         
-        const chunkRenderTime = Date.now() - chunkStartTime;
-        
-        // Atualizar estatísticas
-        this.stats.processedChunks++;
-        
-        // Emitir evento de progresso
-        this.emit('render-progress', {
-          chunk: i + 1,
-          total: chunks.length,
-          percent: Math.round(((i + 1) / chunks.length) * 100),
-          renderTime: chunkRenderTime
-        });
-        
-        // Processar saída do chunk
-        result = outputProcessor(renderedChunk, {
-          index: i,
-          total: chunks.length,
-          isFirst: i === 0,
-          isLast: i === chunks.length - 1,
-          renderTime: chunkRenderTime
-        });
-        
-        // Forçar garbage collection a cada 5 chunks ou para chunks grandes
-        if (typeof global.gc === 'function' && (i % 5 === 0 || chunk.length > 1000000)) {
+        // Forçar coleta de lixo se disponível
+        if (typeof global.gc === 'function') {
+          this.logger.debug('Executando coleta de lixo explícita');
           global.gc();
         }
-      } catch (error) {
-        this.logger.error(`Erro ao processar chunk ${i + 1}: ${error.message}`);
-        
-        // Emitir evento de erro
-        this.emit('chunk-error', {
-          chunk: i + 1,
-          total: chunks.length,
-          error: error.message
-        });
-        
-        // Processar um erro para este chunk
-        result = outputProcessor(`<!-- Erro na renderização do chunk ${i + 1} -->`, {
-          index: i,
-          total: chunks.length,
-          isFirst: i === 0,
-          isLast: i === chunks.length - 1,
-          error: true
-        });
+
+        // Emitir evento de alerta de memória
+        this.events.emit('memory-warning', { used: heapUsedMB, limit: this.options.memoryLimit });
       }
-    }
-    
-    return result;
-  }
-
-  /**
-   * Adiciona um chunk ao buffer de streaming
-   * @param {string} html - HTML do chunk
-   * @param {Object} chunkInfo - Informações do chunk
-   * @private
-   */
-  _addToBuffer(html, chunkInfo) {
-    this.buffer.chunks.push({
-      html,
-      info: chunkInfo
-    });
-    
-    this.buffer.size += html.length / 1024; // KB
-    
-    // Verificar se o buffer deve ser esvaziado
-    if (this.buffer.size > this.options.bufferSize) {
-      this._flushBuffer(false);
+    } catch (error) {
+      // Ignorar erros no monitoramento de memória
+      this.logger.debug(`Erro ao verificar memória: ${error.message}`);
     }
   }
 
   /**
-   * Esvazia o buffer de streaming
-   * @param {boolean} clearAll - Se deve limpar o buffer completamente
-   * @returns {string} HTML atual
-   * @private
+   * Aborta a renderização em andamento
+   * @returns {boolean} true se foi abortado, false se não havia streaming em progresso
    */
-  _flushBuffer(clearAll) {
-    const html = this.buffer.chunks.map(chunk => chunk.html).join('');
-    
-    // Emitir evento de buffer
-    this.emit('buffer-flush', {
-      size: this.buffer.size,
-      chunks: this.buffer.chunks.length
-    });
-    
-    // Limpar buffer
-    this.buffer.chunks = [];
-    this.buffer.size = 0;
-    this.buffer.flushed++;
-    
-    return html;
-  }
-
-  /**
-   * Gera a base HTML para o modo de saída em chunks
-   * @param {string} template - Template original
-   * @returns {string} HTML base
-   * @private
-   */
-  _generateHtmlBase(template) {
-    // Extrair DOCTYPE, html, head e início do body
-    const doctype = template.includes('<!DOCTYPE') 
-      ? template.substring(0, template.indexOf('>') + 1) 
-      : '<!DOCTYPE html>';
-    
-    // Extrair ou criar head
-    let head = '';
-    const headStart = template.indexOf('<head');
-    const headEnd = template.indexOf('</head>');
-    
-    if (headStart !== -1 && headEnd !== -1) {
-      head = template.substring(headStart, headEnd + 7);
-    } else {
-      head = '<head><title>Documento Renderizado</title></head>';
-    }
-    
-    // Extrair atributos do body
-    let bodyAttrs = '';
-    const bodyStart = template.indexOf('<body');
-    
-    if (bodyStart !== -1) {
-      const bodyTagEnd = template.indexOf('>', bodyStart);
-      const bodyTag = template.substring(bodyStart, bodyTagEnd + 1);
-      const attrsMatch = bodyTag.match(/<body([^>]*)>/);
-      
-      if (attrsMatch && attrsMatch[1]) {
-        bodyAttrs = attrsMatch[1];
-      }
-    }
-    
-    // Criar HTML base com script para processamento progressivo
-    return `${doctype}
-<html>
-  ${head}
-  <body${bodyAttrs}>
-    <div id="streaming-content"></div>
-    <script>
-      // Script para processamento progressivo de chunks
-      (function() {
-        window.streamingRenderer = {
-          chunks: [],
-          processedChunks: 0,
-          totalChunks: 0,
-          
-          // Função para processar um novo chunk
-          processChunk: function(html, chunkInfo) {
-            const contentDiv = document.getElementById('streaming-content');
-            
-            // Atualizar informações de progresso
-            this.processedChunks = chunkInfo.index + 1;
-            this.totalChunks = chunkInfo.total;
-            
-            // Atualizar conteúdo
-            if (contentDiv) {
-              contentDiv.innerHTML += html;
-            }
-            
-            // Emitir evento de chunk processado
-            const event = new CustomEvent('chunk-processed', { detail: chunkInfo });
-            document.dispatchEvent(event);
-            
-            // Se for o último chunk, emitir evento de conclusão
-            if (chunkInfo.isLast) {
-              const completeEvent = new CustomEvent('rendering-complete');
-              document.dispatchEvent(completeEvent);
-            }
-          }
-        };
-      })();
-    </script>
-`;
-  }
-
-  /**
-   * Finaliza a saída HTML no modo de chunks
-   * @param {string} html - HTML atual
-   * @returns {string} HTML finalizado
-   * @private
-   */
-  _finalizeChunkedOutput(html) {
-    return html + `
-    <script>
-      // Emitir evento final quando o documento estiver completamente carregado
-      document.addEventListener('DOMContentLoaded', function() {
-        const completeEvent = new CustomEvent('rendering-complete');
-        document.dispatchEvent(completeEvent);
-      });
-    </script>
-  </body>
-</html>`;
-  }
-
-  /**
-   * Limpa recursos utilizados durante a renderização
-   * @private
-   */
-  _clearResources() {
-    // Limpar buffer
-    this.buffer.chunks = [];
-    this.buffer.size = 0;
-    
-    // Forçar garbage collection se disponível
-    if (typeof global.gc === 'function') {
-      global.gc();
-    }
-  }
-
-  /**
-   * Verifica se o template é adequado para streaming
-   * @param {string} templateContent - Conteúdo do template
-   * @returns {boolean} Template é adequado para streaming
-   */
-  isStreamable(templateContent) {
-    // Verificar tamanho do template
-    if (templateContent.length < this.options.chunkSize * 1024) {
+  abort() {
+    if (!this._streamingInProgress || !this._abortController) {
       return false;
     }
-    
-    // Verificar se tem estrutura HTML válida
-    const hasHtmlStructure = templateContent.includes('<html') && 
-                            templateContent.includes('</html>') &&
-                            templateContent.includes('<body') && 
-                            templateContent.includes('</body>');
-    
-    // Templates maiores que 5MB são sempre considerados para streaming
-    if (templateContent.length > 5 * 1024 * 1024) {
-      return true;
-    }
-    
-    // Para templates médios, verificar se têm estrutura HTML apropriada
-    return hasHtmlStructure;
+
+    this.logger.warn('Abortando renderização streaming');
+    this._abortController.abort();
+    return true;
   }
 
   /**
-   * Retorna estatísticas de renderização
-   * @returns {Object} Estatísticas
+   * Gera CSS para feedback visual de streaming
+   * @returns {string} Tag style com CSS
+   * @private
    */
-  getStats() {
-    return { ...this.stats };
+  _generateStreamingCSS() {
+    return `<style>
+  /* Estilos para streaming renderer */
+  .streaming-progress {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 9999;
+    transition: opacity 0.5s;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  
+  .streaming-progress-bar {
+    height: 4px;
+    background: #4caf50;
+    margin-bottom: 6px;
+    width: 0%;
+    transition: width 0.3s;
+    border-radius: 2px;
+  }
+  
+  /* Estilo para chunks */
+  .streaming-chunk {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    will-change: opacity;
+  }
+  
+  .streaming-chunk.visible {
+    opacity: 1;
+  }
+  
+  /* Estilo para erros */
+  .streaming-error {
+    opacity: 1;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+    color: #333;
+  }
+  
+  .error-message {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .error-message h3 {
+    margin-top: 0;
+    color: #d32f2f;
+  }
+  
+  /* Animação de carregamento */
+  @keyframes skeleton-pulse {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: calc(200px + 100%) 0;
+    }
+  }
+  
+  /* Placeholders */
+  ${this.options.skeletonCSS ? `
+  .skeleton-placeholder {
+    display: block;
+    background: #f0f0f0;
+    background-image: linear-gradient(90deg, #f0f0f0, #f8f8f8, #f0f0f0);
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    animation: skeleton-pulse 1.5s infinite;
+    border-radius: 4px;
+    height: 1em;
+    margin: 0.5em 0;
+  }
+  
+  .skeleton-image {
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  }
+  
+  .skeleton-title {
+    height: 1.5em;
+    width: 85%;
+  }
+  
+  .skeleton-text {
+    height: 1em;
+  }
+  
+  .skeleton-text.short {
+    width: 60%;
+  }
+  
+  .skeleton-button {
+    height: 2em;
+    width: 120px;
+    border-radius: 4px;
+  }
+  ` : ''}
+</style>`;
+  }
+
+  /**
+   * Gera o script para gerenciar o streaming no cliente
+   * @returns {string} Tag script com o código
+   * @private
+   */
+  _generateStreamingScript() {
+    return `<script>
+  // Streaming Renderer Client-Side
+  (function() {
+    const streamingRenderer = {
+      // Estado
+      state: {
+        loadedChunks: 0,
+        totalChunks: ${this.metrics.totalChunks || 0},
+        chunksById: {},
+        pendingPriority: {
+          1: [], 2: [], 3: [], 4: [], 5: []
+        },
+        startTime: Date.now(),
+        complete: false
+      },
+      
+      // Inicialização
+      init: function() {
+        // Preparar elementos progress
+        this.progressBar = document.getElementById('streamingProgressBar');
+        this.progressText = document.getElementById('streamingProgressText');
+        
+        // Configurar observer para lazy loading
+        if ('IntersectionObserver' in window) {
+          this.setupIntersectionObserver();
+        }
+        
+        // Expor globalmente
+        window.streamingRenderer = this;
+        
+        console.log('Streaming Renderer inicializado');
+      },
+      
+      // Configura observer para lazy loading
+      setupIntersectionObserver: function() {
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const chunk = entry.target;
+              const priority = parseInt(chunk.dataset.priority || 3, 10);
+              
+              // Prioridade fixa
+              this.showChunk(chunk);
+              
+              // Deixar de observar
+              this.observer.unobserve(chunk);
+            }
+          });
+        }, {
+          rootMargin: '200px',
+          threshold: 0.1
+        });
+      },
+      
+      // Notificação de chunk carregado
+      chunkLoaded: function(index, total, priority) {
+        const chunks = document.querySelectorAll('.streaming-chunk');
+        const chunk = chunks[chunks.length - 1];
+        
+        if (!chunk) return;
+        
+        // Registrar o chunk
+        this.state.chunksById[chunk.dataset.chunkId] = chunk;
+        this.state.loadedChunks++;
+        
+        // Atualizar total se necessário
+        if (this.state.totalChunks === 0 || this.state.totalChunks < total) {
+          this.state.totalChunks = total;
+        }
+        
+        // Adicionar à fila de prioridade
+        this.state.pendingPriority[priority].push(chunk);
+        
+        // Atualizar progresso
+        this.updateProgress();
+        
+        // Processar chunks de alta prioridade imediatamente
+        if (priority <= 2) {
+          this.processHighPriorityChunks();
+        } else if (this.state.loadedChunks % 3 === 0) {
+          // A cada 3 chunks, processar alguns pendentes
+          this.processPendingChunks();
+        }
+        
+        // Observar para lazy loading (prioridades baixas)
+        if (priority >= 4 && this.observer) {
+          this.observer.observe(chunk);
+        }
+      },
+      
+      // Processa chunks de alta prioridade
+      processHighPriorityChunks: function() {
+        // Processar todos os chunks de prioridade 1
+        this.state.pendingPriority[1].forEach(chunk => {
+          this.showChunk(chunk);
+        });
+        this.state.pendingPriority[1] = [];
+        
+        // Processar alguns chunks de prioridade 2
+        const priority2Count = Math.min(this.state.pendingPriority[2].length, 3);
+        for (let i = 0; i < priority2Count; i++) {
+          const chunk = this.state.pendingPriority[2].shift();
+          this.showChunk(chunk);
+        }
+      },
+      
+      // Processa chunks pendentes
+      processPendingChunks: function() {
+        // Processar um chunk de cada prioridade, começando pela mais alta
+        for (let priority = 2; priority <= 5; priority++) {
+          if (this.state.pendingPriority[priority].length > 0) {
+            const chunk = this.state.pendingPriority[priority].shift();
+            this.showChunk(chunk);
+            
+            // Limitar a um chunk por ciclo para prioridades baixas
+            if (priority >= 4) break;
+          }
+        }
+      },
+      
+      // Atualiza barra de progresso
+      updateProgress: function() {
+        if (!this.progressBar || !this.progressText) return;
+        
+        const percent = Math.min(100, Math.round((this.state.loadedChunks / this.state.totalChunks) * 100));
+        this.progressBar.style.width = percent + '%';
+        this.progressText.textContent = \`Carregando (\${this.state.loadedChunks}/\${this.state.totalChunks})...\`;
+        
+        // Esconder progress bar no final
+        if (this.state.complete || percent >= 100) {
+          setTimeout(() => {
+            const progress = document.querySelector('.streaming-progress');
+            if (progress) {
+              progress.style.opacity = '0';
+              setTimeout(() => {
+                progress.style.display = 'none';
+              }, 500);
+            }
+          }, 1000);
+        }
+      },
+      
+      // Exibe um chunk
+      showChunk: function(chunk) {
+        if (!chunk) return;
+        
+        // Adicionar classe para transição visual
+        chunk.classList.add('visible');
+        
+        // Remover das pendências
+        const priority = parseInt(chunk.dataset.priority || 3, 10);
+        const index = this.state.pendingPriority[priority].indexOf(chunk);
+        if (index !== -1) {
+          this.state.pendingPriority[priority].splice(index, 1);
+        }
+      },
+      
+      // Finalização do streaming
+      complete: function() {
+        this.state.complete = true;
+        
+        // Processar todos os chunks pendentes
+        for (let priority = 1; priority <= 5; priority++) {
+          this.state.pendingPriority[priority].forEach(chunk => {
+            this.showChunk(chunk);
+          });
+          this.state.pendingPriority[priority] = [];
+        }
+        
+        // Atualizar progresso
+        this.updateProgress();
+        
+        const totalTime = Date.now() - this.state.startTime;
+        console.log(\`Streaming renderizado em \${totalTime}ms\`);
+      }
+    };
+    
+    // Inicializar após o carregamento do DOM
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => streamingRenderer.init());
+    } else {
+      streamingRenderer.init();
+    }
+  })();
+</script>`;
+  }
+
+  /**
+   * Registra função de callback para evento
+   * @param {string} event - Nome do evento (progress, complete, error, memory-warning)
+   * @param {Function} callback - Função a ser chamada
+   */
+  on(event, callback) {
+    this.events.on(event, callback);
+  }
+
+  /**
+   * Remove função de callback de evento
+   * @param {string} event - Nome do evento
+   * @param {Function} callback - Função a remover
+   */
+  off(event, callback) {
+    this.events.off(event, callback);
+  }
+
+  /**
+   * Retorna as métricas atuais
+   * @returns {Object} Métricas
+   */
+  getMetrics() {
+    return { ...this.metrics };
   }
 }
 

@@ -1,0 +1,59 @@
+name: NPM Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.12.0)'
+        required: true
+      release_notes:
+        description: 'Path to release notes in docs/release-notes/ (e.g., 1.12.0.md)'
+        required: true
+        default: '1.12.0.md'
+
+jobs:
+  test-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org/'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run all tests
+        run: |
+          npm run test
+          npm run test:integration
+          npm run test:rendering
+      
+      - name: Generate documentation
+        run: npm run docs
+      
+      - name: Update version
+        run: |
+          # Remove -dev from version
+          VERSION="${{ github.event.inputs.version }}"
+          npm version $VERSION --no-git-tag-version
+          
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: PHP Universal MCP Server v${{ github.event.inputs.version }}
+          body_path: docs/release-notes/${{ github.event.inputs.release_notes }}
+          draft: false
+          prerelease: false
+      
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

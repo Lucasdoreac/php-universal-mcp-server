@@ -1,0 +1,56 @@
+name: Run Complete Test Suite
+
+on:
+  workflow_dispatch:  # Permite execução manual
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run unit tests
+        run: npm run test
+      
+      - name: Run integration tests
+        run: npm run test:integration
+      
+      - name: Run rendering tests
+        run: npm run test:rendering
+      
+      - name: Generate test visualization
+        run: npm run test:visualization
+      
+      - name: Generate documentation
+        run: npm run docs
+      
+      - name: Upload test reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: tests/output/reports/
+      
+      - name: Upload visualization artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: claude-artifacts
+          path: tests/output/claude-artifacts/
+      
+      - name: Upload documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          path: docs/html/

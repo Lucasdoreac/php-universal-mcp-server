@@ -1,0 +1,117 @@
+{
+  "testConfig": {
+    "templateDir": "./generated-templates",
+    "resultsDir": "./test-results",
+    "defaultIterations": 5,
+    "timeout": 60000,
+    "templates": {
+      "extreme-large": {
+        "description": "Template de ~500 componentes para testes básicos",
+        "componentCount": 500,
+        "recommendedIterations": 5
+      },
+      "ultra-large": {
+        "description": "Template de ~1000 componentes para testes médios",
+        "componentCount": 1000,
+        "recommendedIterations": 3
+      },
+      "monster-large": {
+        "description": "Template de ~2000 componentes para testes extremos",
+        "componentCount": 2000,
+        "recommendedIterations": 2
+      },
+      "edge-cases": {
+        "description": "Template com padrões desafiadores para testes de casos extremos",
+        "componentCount": 500,
+        "recommendedIterations": 3,
+        "hasEdgeCases": true
+      }
+    },
+    "renderModes": [
+      {
+        "name": "basic",
+        "description": "Renderização básica sem otimizações",
+        "className": "ProgressiveRenderer"
+      },
+      {
+        "name": "progressive",
+        "description": "Renderização progressiva com priorização de componentes",
+        "className": "EnhancedProgressiveRenderer"
+      },
+      {
+        "name": "chunked",
+        "description": "Renderização em chunks para otimização de memória",
+        "className": "ChunkedRenderer"
+      },
+      {
+        "name": "streaming",
+        "description": "Renderização em streaming para templates extremamente grandes",
+        "className": "StreamingRenderer"
+      }
+    ]
+  },
+  "analyzerConfig": {
+    "thresholds": {
+      "time": {
+        "excellent": 1000,
+        "good": 2000,
+        "fair": 5000,
+        "poor": 10000
+      },
+      "memory": {
+        "excellent": 100,
+        "good": 200,
+        "fair": 500,
+        "poor": 1000
+      },
+      "timeDiff": 20,
+      "memoryDiff": 30,
+      "outlierThreshold": 2.5
+    },
+    "visualization": {
+      "maxDataPoints": 20,
+      "colors": {
+        "progressive": "#3b82f6",
+        "basic": "#ef4444",
+        "chunked": "#f59e0b",
+        "streaming": "#10b981"
+      }
+    }
+  },
+  "artifactConfig": {
+    "types": {
+      "summary": {
+        "title": "Resumo de Performance",
+        "description": "Visão geral das métricas de desempenho e recomendações principais"
+      },
+      "comparison": {
+        "title": "Comparação entre Estratégias",
+        "description": "Comparativo entre diferentes estratégias de renderização"
+      },
+      "templates": {
+        "title": "Desempenho por Template",
+        "description": "Análise detalhada de cada template testado"
+      },
+      "time": {
+        "title": "Análise de Tempo",
+        "description": "Análise focada no tempo de renderização"
+      },
+      "memory": {
+        "title": "Análise de Memória",
+        "description": "Análise focada no consumo de memória"
+      }
+    },
+    "defaultType": "summary"
+  },
+  "cliConfig": {
+    "modes": ["standard", "extreme", "analyze"],
+    "defaultMode": "standard",
+    "defaultIterations": 3,
+    "defaultConcurrency": 2,
+    "logLevels": ["info", "debug", "error", "success", "warn", "metric"]
+  },
+  "dependencies": {
+    "required": ["mathjs", "commander", "jsdom"],
+    "optional": ["chart.js", "d3"]
+  }
+}

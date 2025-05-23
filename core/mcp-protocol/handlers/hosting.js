@@ -1,15 +1,31 @@
 /**
  * Handlers para gerenciamento de hospedagem
+ * Integra com HostingManager para manter responsabilidades claras
  */
 
 const { EventEmitter } = require('events');
-const providers = require('../../../providers');
+const HostingManager = require('../../../modules/hosting');
 
 class HostingHandler extends EventEmitter {
-  constructor(server) {
+  constructor(server, config = {}) {
     super();
     this.server = server;
-    this.providerInstances = {};
+    
+    // Use HostingManager as abstraction layer
+    this.hostingManager = new HostingManager(config);
+    
+    // Forward events from HostingManager
+    this.hostingManager.on('error', (error) => this.emit('error', error));
+    this.hostingManager.on('site-created', (data) => this.emit('site-created', data));
+    this.hostingManager.on('site-updated', (data) => this.emit('site-updated', data));
+    this.hostingManager.on('site-deleted', (data) => this.emit('site-deleted', data));
+  }
+
+  /**
+   * Initialize the hosting handler
+   */
+  async initialize() {
+    return await this.hostingManager.initialize();
   }
 
   /**
@@ -21,38 +37,12 @@ class HostingHandler extends EventEmitter {
   async initProvider(params) {
     try {
       const { provider, config } = params;
-      
-      if (!providers[provider]) {
-        throw new Error(`Provedor ${provider} não suportado`);
-      }
-      
-      const providerInstance = new providers[provider](config);
-      const initialized = await providerInstance.initialize();
-      
-      if (initialized) {
-        this.providerInstances[provider] = providerInstance;
-        return { success: true, provider };
-      } else {
-        throw new Error(`Falha ao inicializar provedor ${provider}`);
-      }
+      await this.hostingManager.initializeProvider(provider, config);
+      return { success: true, provider };
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
-  }
-
-  /**
-   * Obtém instância do provedor
-   * @param {string} provider Nome do provedor
-   * @returns {Object} Instância do provedor
-   * @private
-   */
-  getProviderInstance(provider) {
-    const instance = this.providerInstances[provider];
-    if (!instance) {
-      throw new Error(`Provedor ${provider} não inicializado`);
-    }
-    return instance;
   }
 
   /**
@@ -64,8 +54,7 @@ class HostingHandler extends EventEmitter {
   async listSites(params) {
     try {
       const { provider, filter } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.listSites(filter);
+      return await this.hostingManager.listSites(provider, filter);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -81,8 +70,7 @@ class HostingHandler extends EventEmitter {
   async getSite(params) {
     try {
       const { provider, siteId } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.getSite(siteId);
+      return await this.hostingManager.getSite(siteId, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -98,8 +86,7 @@ class HostingHandler extends EventEmitter {
   async createSite(params) {
     try {
       const { provider, options } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.createSite(options);
+      return await this.hostingManager.createSite(options, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -116,8 +103,7 @@ class HostingHandler extends EventEmitter {
   async updateSite(params) {
     try {
       const { provider, siteId, updates } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.updateSite(siteId, updates);
+      return await this.hostingManager.updateSite(siteId, updates, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -133,8 +119,7 @@ class HostingHandler extends EventEmitter {
   async deleteSite(params) {
     try {
       const { provider, siteId } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.deleteSite(siteId);
+      return await this.hostingManager.deleteSite(siteId, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -150,8 +135,7 @@ class HostingHandler extends EventEmitter {
   async createBackup(params) {
     try {
       const { provider, siteId } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.createBackup(siteId);
+      return await this.hostingManager.createBackup(siteId, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -168,8 +152,7 @@ class HostingHandler extends EventEmitter {
   async restoreBackup(params) {
     try {
       const { provider, siteId, backupId } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.restoreBackup(siteId, backupId);
+      return await this.hostingManager.restoreBackup(siteId, backupId, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -186,8 +169,7 @@ class HostingHandler extends EventEmitter {
   async configureDomain(params) {
     try {
       const { provider, siteId, domainSettings } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.configureDomain(siteId, domainSettings);
+      return await this.hostingManager.configureDomain(siteId, domainSettings, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -203,8 +185,7 @@ class HostingHandler extends EventEmitter {
   async setupSSL(params) {
     try {
       const { provider, siteId } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.setupSSL(siteId);
+      return await this.hostingManager.setupSSL(siteId, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -220,20 +201,7 @@ class HostingHandler extends EventEmitter {
   async getResources(params) {
     try {
       const { provider, siteId } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      // Dependendo do provedor, esta implementação pode variar
-      if (typeof providerInstance.getResources === 'function') {
-        return await providerInstance.getResources(siteId);
-      } else {
-        // Fallback para provedores que não implementam getResources diretamente
-        const siteDetails = await providerInstance.getSite(siteId);
-        return {
-          disk: siteDetails.resources?.disk,
-          bandwidth: siteDetails.resources?.bandwidth,
-          cpu: siteDetails.resources?.cpu,
-          memory: siteDetails.resources?.memory
-        };
-      }
+      return await this.hostingManager.getResources(siteId, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -250,14 +218,7 @@ class HostingHandler extends EventEmitter {
   async upgradePlan(params) {
     try {
       const { provider, siteId, plan } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      // Esta implementação pode variar entre provedores
-      if (typeof providerInstance.upgradePlan === 'function') {
-        return await providerInstance.upgradePlan(siteId, plan);
-      } else {
-        // Fallback usando updateSite
-        return await providerInstance.updateSite(siteId, { plan });
-      }
+      return await this.hostingManager.upgradePlan(siteId, plan, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -274,8 +235,7 @@ class HostingHandler extends EventEmitter {
   async getMetrics(params) {
     try {
       const { provider, siteId, timeframe } = params;
-      const providerInstance = this.getProviderInstance(provider);
-      return await providerInstance.getMetrics(siteId, timeframe);
+      return await this.hostingManager.getMetrics(siteId, timeframe, provider);
     } catch (error) {
       this.emit('error', error);
       throw error;

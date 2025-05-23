@@ -10,6 +10,15 @@ const fs = require('fs');
 const path = require('path');
 const { EventEmitter } = require('events');
 
+// JWT functionality (preparatory implementation)
+let jwt;
+try {
+  jwt = require('jsonwebtoken');
+} catch (error) {
+  // JWT is optional for now
+  console.warn('jsonwebtoken not available, JWT features disabled');
+}
+
 class AuthManager extends EventEmitter {
   /**
    * Construtor do gerenciador de autenticação
@@ -23,11 +32,133 @@ class AuthManager extends EventEmitter {
     this.encryptionKey = config.encryptionKey || this.generateEncryptionKey();
     this.storageDir = config.storageDir || path.join(process.cwd(), '.credentials');
     
+    // JWT configuration
+    this.jwtSecret = config.jwtSecret || this.generateJwtSecret();
+    this.jwtOptions = {
+      expiresIn: config.jwtExpiresIn || '24h',
+      issuer: config.jwtIssuer || 'php-universal-mcp-server',
+      audience: config.jwtAudience || 'mcp-client'
+    };
+    
     // Garante que o diretório de armazenamento existe
     this.ensureStorageDir();
     
     // Carrega credenciais existentes
     this.loadCredentials();
+  }
+
+  /**
+   * Generates a JWT secret if not provided
+   * @private
+   * @returns {string} JWT secret
+   */
+  generateJwtSecret() {
+    const envSecret = process.env.MCP_JWT_SECRET;
+    if (envSecret) {
+      return envSecret;
+    }
+    
+    // Generate based on system characteristics for consistency
+    const os = require('os');
+    const baseSecret = `${os.hostname()}:${this.encryptionKey}:jwt-secret`;
+    return crypto.createHash('sha256').update(baseSecret).digest('hex');
+  }
+
+  /**
+   * Generates a JWT token for authentication
+   * @param {Object} payload - Data to include in token
+   * @param {Object} options - JWT options (optional)
+   * @returns {string|null} JWT token or null if JWT not available
+   */
+  generateToken(payload, options = {}) {
+    if (!jwt) {
+      console.warn('JWT not available, cannot generate token');
+      return null;
+    }
+
+    try {
+      const tokenOptions = { ...this.jwtOptions, ...options };
+      return jwt.sign(payload, this.jwtSecret, tokenOptions);
+    } catch (error) {
+      console.error('Error generating JWT token:', error.message);
+      this.emit('error', {
+        message: 'Failed to generate JWT token',
+        error: error.message
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Verifies and decodes a JWT token
+   * @param {string} token - JWT token to verify
+   * @param {Object} options - Verification options (optional)
+   * @returns {Object|null} Decoded payload or null if invalid
+   */
+  verifyToken(token, options = {}) {
+    if (!jwt) {
+      console.warn('JWT not available, cannot verify token');
+      return null;
+    }
+
+    try {
+      const verifyOptions = {
+        issuer: this.jwtOptions.issuer,
+        audience: this.jwtOptions.audience,
+        ...options
+      };
+      
+      return jwt.verify(token, this.jwtSecret, verifyOptions);
+    } catch (error) {
+      console.error('Error verifying JWT token:', error.message);
+      this.emit('error', {
+        message: 'Failed to verify JWT token',
+        error: error.message
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Creates an authentication token for a provider
+   * @param {string} provider - Provider name
+   * @param {Object} additionalClaims - Additional claims to include
+   * @returns {string|null} Authentication token
+   */
+  createProviderToken(provider, additionalClaims = {}) {
+    const credentials = this.getCredentials(provider);
+    if (!credentials || Object.keys(credentials).length === 0) {
+      throw new Error(`No credentials found for provider ${provider}`);
+    }
+
+    const payload = {
+      provider,
+      timestamp: Date.now(),
+      ...additionalClaims
+    };
+
+    return this.generateToken(payload);
+  }
+
+  /**
+   * Validates a provider token
+   * @param {string} token - Token to validate
+   * @param {string} expectedProvider - Expected provider name
+   * @returns {Object|null} Token payload if valid
+   */
+  validateProviderToken(token, expectedProvider) {
+    const payload = this.verifyToken(token);
+    
+    if (!payload) {
+      return null;
+    }
+
+    if (payload.provider !== expectedProvider) {
+      console.warn(`Token provider mismatch: expected ${expectedProvider}, got ${payload.provider}`);
+      return null;
+    }
+
+    return payload;
   }
 
   /**
